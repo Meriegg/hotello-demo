@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Neutral */
+    --neutral-50: hsl(40, 23, 97);
+    --neutral-100: hsl(43, 13, 90);
+    --neutral-200: hsl(40, 15, 80);
+    --neutral-700: hsl(37, 11, 28);
+    --neutral-900: hsl(42, 15, 13);
+
+    /* Red */
+    --red-400: hsl(0, 64, 55);
+
+    /* Yellow */
+    --yellow-500: hsl(42, 87, 55);
+  }
+}
