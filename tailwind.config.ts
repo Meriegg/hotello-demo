@@ -7,22 +7,23 @@ export default {
     extend: {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        serif: ["var(--font-serif)", ...fontFamily.serif],
       },
       colors: {
-        "neutral": {
-          '50': 'var(--neutral-50)',
-          '100': 'var(--neutral-100)',
-          '200': 'var(--neutral-200)',
-          '700': 'var(--neutral-700)',
-          '900': 'var(--neutral-900)',
+        neutral: {
+          "50": "hsl(var(--neutral-50))",
+          "100": "hsl(var(--neutral-100))",
+          "200": "hsl(var(--neutral-200))",
+          "700": "hsl(var(--neutral-700))",
+          "900": "hsl(var(--neutral-900))",
         },
-        "red": {
-          '400': 'var(--red-400)'
+        red: {
+          "400": "hsl(var(--red-400))",
         },
-        "yellow": {
-          '500': 'var(--yellow-500)'
-        }
-      }
+        yellow: {
+          "500": "hsl(var(--yellow-500))",
+        },
+      },
     },
   },
   plugins: [],

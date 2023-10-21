@@ -1,13 +1,14 @@
 import "~/styles/globals.css";
 
-import { Inter } from "next/font/google";
+import { Merriweather } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
-const inter = Inter({
+const merriweather = Merriweather({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-serif",
+  weight: ["700", "900", "400", "300"],
 });
 
 export const metadata = {
@@ -23,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable}`}>
+      <body className={`font-serif ${merriweather.variable}`}>
         <TRPCReactProvider headers={headers()}>{children}</TRPCReactProvider>
       </body>
     </html>
