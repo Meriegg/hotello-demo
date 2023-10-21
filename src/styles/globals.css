@@ -16,3 +16,11 @@
   /* Yellow */
   --yellow-500: 42deg, 87%, 55%;
 }
+
+@layout base {
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+  }
+}
