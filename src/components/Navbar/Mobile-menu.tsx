@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
+import { WEBSITE_LINK } from "@mariodev14/socials";
 import { cn } from "~/lib/utils";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { Portal } from "../Portal";
 import type { NavbarTheme, NavLink } from "./Navbar-content";
-import Link from "next/link";
 
 interface Props {
   theme: NavbarTheme;
@@ -56,7 +57,7 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
               ? "translate-x-0 scale-x-100 opacity-100"
               : "-translate-x-full scale-x-50 opacity-0",
             {
-              "bg-black/90 text-neutral-200": theme === "dark",
+              "bg-black/90 text-neutral-200 backdrop-blur-sm": theme === "dark",
               "bg-neutral-50 text-neutral-700": theme === "light",
             },
           )}
@@ -84,7 +85,7 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
           <p className="text-sm font-light text-wide absolute bottom-4 left-4">
             &copy; 2023 - 2024{" "}
             <a
-              href="https://mariodev.vercel.app"
+              href={WEBSITE_LINK}
               referrerPolicy="no-referrer"
               className="underline font-bold"
             >
