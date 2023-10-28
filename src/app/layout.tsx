@@ -4,7 +4,7 @@ import { Merriweather } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { Navbar } from "~/components/Navbar/Navbar";
+import { Navbar } from "~/components/navbar/navbar";
 
 const merriweather = Merriweather({
   subsets: ["latin"],

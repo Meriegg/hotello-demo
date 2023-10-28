@@ -18,17 +18,20 @@ interface Props {
 export const Footer = ({ theme, className }: Props) => {
   return (
     <footer
-      className={cn("w-full py-6", {
-        "text-white bg-gradient-to-t from-black/60 to-black/0":
-          theme === "dark",
-        "text-neutral-900": theme === "light",
-      }, className)}
+      className={cn(
+        "w-full py-6",
+        {
+          "bg-gradient-to-t from-black/60 to-black/0 text-white":
+            theme === "dark",
+          "border-t-[1px] border-neutral-100 text-neutral-900":
+            theme === "light",
+        },
+        className,
+      )}
     >
       <TooltipProvider>
-        <MaxWidthContainer className="flex flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between px-4">
-          <div
-            className={cn("text-xs flex flex-col gap-2")}
-          >
+        <MaxWidthContainer className="flex flex-col justify-between gap-4 px-4 md:flex-row md:items-center md:gap-0">
+          <div className={cn("flex flex-col gap-2 text-xs")}>
             <div className="flex items-center gap-2">
               <p>
                 &copy; 2023 - 2024{" "}
@@ -53,40 +56,39 @@ export const Footer = ({ theme, className }: Props) => {
                 Legal
               </Link>
             </div>
-            <div className="flex flex-col items-start md:flex-row md:items-center gap-2">
+            <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
               <a
                 href="tel:+1 472-268-0630"
-                className="flex items-center hover:underline gap-1"
+                className="flex items-center gap-1 hover:underline"
               >
                 <PhoneIcon className="h-4 w-4" />
                 +1 472-268-0630
-
                 <Tooltip>
                   <TooltipTrigger>
                     <HelpCircleIcon className="h-4 w-4" />
                   </TooltipTrigger>
-                  <TooltipContent>
-                    This is a fake, dummy phone number.
-                  </TooltipContent>
+                  <TooltipContent>This is a dummy phone number.</TooltipContent>
                 </Tooltip>
               </a>
-              <p className="text-neutral-200 hidden md:initial">•</p>
+              <p className="md:initial hidden text-neutral-200">•</p>
               <a
                 href={EMAIL_LINK}
-                className="flex items-center hover:underline gap-1"
+                className="flex items-center gap-1 hover:underline"
               >
                 mario.developer.contact@gmail.com
               </a>
             </div>
           </div>
-          <div className="flex flex-col gap-2 items-start">
+          <div className="flex flex-col items-start gap-2">
             <img
-              src={theme === "light"
-                ? "/trustpilot_mini_light.svg"
-                : "/trustpilot_mini_dark.svg"}
+              src={
+                theme === "light"
+                  ? "/trustpilot_mini_light.svg"
+                  : "/trustpilot_mini_dark.svg"
+              }
             />
             <p
-              className={cn("text-xs font-bold flex items-center gap-1", {
+              className={cn("flex items-center gap-1 text-xs font-bold", {
                 "text-neutral-200": theme === "dark",
                 "text-neutral-700": theme === "light",
               })}

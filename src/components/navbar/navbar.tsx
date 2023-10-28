@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { NavbarContent } from "./Navbar-content";
+import { NavbarContent } from "./navbar-content";
 
 // This is just a client wrapper user for getting the current path
 export const Navbar = () => {
