@@ -1,22 +1,23 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-const RangeValidator = z.tuple([z.number(), z.number()])
+const RangeValidator = z.tuple([z.number(), z.number()]);
 
 const PriceRangeValidator = z.object({
   slug: z.string(),
-  range: RangeValidator
+  range: RangeValidator,
 });
-
 
 export const FilterDataValidator = z.object({
   priceRanges: PriceRangeValidator.array(),
-  categories: z.string().array()
-})
+  categories: z.string().array(),
+});
 
 export const FilterValidator = z.object({
   selectedPrices: RangeValidator.array(),
   priceRange: RangeValidator.nullish(),
-  categories: z.string().array()
-})
+  categories: z.string().array(),
+  checkInDate: z.date().nullish(),
+  checkOutDate: z.date().nullish(),
+});
 
-export type TFilterValidator = z.infer<typeof FilterValidator>
+export type TFilterValidator = z.infer<typeof FilterValidator>;

@@ -7,7 +7,7 @@ import { CheckInOutDatePicker } from "~/components/ui/checkinout-date-picker";
 import { Loader } from "~/components/ui/loader";
 
 export const RoomsFilter = () => {
-  const { selectedPrices, setPriceRange, setCategories, categories } =
+  const { selectedPrices, setPriceRange, setCategories, categories, setDates } =
     useRoomsFilter();
   const { isLoading, isError, data } = api.rooms.getFilterData.useQuery();
 
@@ -20,7 +20,14 @@ export const RoomsFilter = () => {
           <p className="text-sm text-neutral-900">
             By Date
           </p>
-          <CheckInOutDatePicker className="flex-col gap-4" />
+          <CheckInOutDatePicker
+            onComplete={(checkIn, checkOut) => {
+              console.log(checkIn);
+              console.log(checkOut);
+              setDates(checkIn, checkOut);
+            }}
+            className="flex-col gap-4"
+          />
           <p className="text-sm text-neutral-900">
             By price{" "}
             <span className="text-xs font-bold text-neutral-700">/night</span>

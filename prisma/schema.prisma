@@ -8,6 +8,42 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum CheckoutStep {
+  PERSONAL_DETAILS // step 1
+  BILLING_DETAILS // step 2
+  BOOKING_DETAILS // step 3
+  REVIEW_INFORMATION // step 4
+  FINAL_PAYMENT // step 5
+}
+
+model CheckoutSession {
+  id   String       @id @default(cuid())
+  step CheckoutStep @default(PERSONAL_DETAILS)
+
+  // this is the cookie that contains the cart data
+  cartDataCookie String
+
+  personaldetails_firstName String?
+  personaldetails_lastName  String?
+  personaldetails_phoneNum  String?
+  personaldetails_age       Int?
+
+  billingdetails_countryOrRegion String?
+  billingdetails_address         String?
+  billingdetails_cityOrTown      String?
+  billingdetails_postalCode      String?
+
+  bookingdetails_checkIn  DateTime?
+  bookingdetails_checkOut DateTime?
+
+  // The guest details will be entered in the database
+  // and connected to the booking once the customer completes the booking
+  // until then they will be stored here 
+  bookingdetails_guestInformation Json?
+
+  // TODO: Any other stripe information for the final step 
+}
+
 enum UserRole {
   USER
   ADMIN
@@ -97,11 +133,14 @@ model RoomCategory {
 }
 
 model Room {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  price     Float
-  createdOn DateTime  @default(now())
-  updatedOn DateTime?
+  id                 String    @id @default(cuid())
+  name               String    @unique
+  price              Float
+  images             String[]
+  discountPercentage Float?
+  discountedPrice    Float?
+  createdOn          DateTime  @default(now())
+  updatedOn          DateTime?
 
   hasSpecialNeeds Boolean
   accommodates    Int

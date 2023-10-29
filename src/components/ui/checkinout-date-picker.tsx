@@ -52,7 +52,7 @@ export const CheckInOutDatePicker = (
     if (onChange) {
       onChange(checkInDate, checkOutDate);
     }
-  }, [checkInDate, checkOutDate, onComplete, onChange]);
+  }, [checkInDate, checkOutDate]);
 
   return (
     <div className={cn("flex flex-wrap w-full", className)}>

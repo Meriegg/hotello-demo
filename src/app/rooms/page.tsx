@@ -3,7 +3,6 @@
 import { api } from "~/trpc/react";
 import { Footer } from "~/components/Footer";
 import { MaxWidthContainer } from "~/components/MaxWidthContainer";
-import { RoomsFilter } from "./components/filter";
 import { useRoomsFilter } from "~/lib/zustand/useRoomsFilter";
 import { RoomCard } from "./components/room-card";
 import { Loader } from "~/components/ui/loader";
@@ -21,6 +20,8 @@ const Page = () => {
         categories: filterOptions.categories,
         priceRange: filterOptions.priceRange,
         selectedPrices: filterOptions.selectedPrices,
+        checkOutDate: filterOptions.checkOutDate,
+        checkInDate: filterOptions.checkInDate,
       },
     },
     {
@@ -43,7 +44,7 @@ const Page = () => {
       </div>
       <MaxWidthContainer
         ref={parent}
-        className="flex flex-col md:flex-row min-h-screen items-start gap-4 border-l-[1px] border-neutral-100"
+        className="flex flex-col md:flex-row min-h-screen items-start gap-8 border-l-[1px] border-neutral-100"
       >
         <DesktopFilter />
         <MobileFilter />

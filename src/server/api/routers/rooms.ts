@@ -7,65 +7,129 @@ import type { Room, RoomCategory } from "@prisma/client";
 export const roomsRouter = createTRPCRouter({
   getRooms: publicProcedure.input(z.object({
     filters: FilterValidator,
-  })).query(async ({ ctx: { db }, input }) => {
-    let whereFilter: any = {};
-
-    if (input?.filters?.priceRange?.length ?? 0 > 0) {
-      whereFilter = {
-        OR: [
-          {
-            price: {
-              equals: input.filters.priceRange?.at(0),
-            },
-          },
-          {
-            price: {
-              gt: input.filters.priceRange?.at(0),
-              lt: input.filters.priceRange?.at(1),
-            },
-          },
-        ],
-      };
-    }
-
-    if (input.filters.categories.length > 0) {
-      whereFilter = {
-        ...whereFilter,
-        category: {
-          name: {
-            in: input.filters.categories,
-          },
-        },
-      };
-    }
-
-    const rooms = await db.room.findMany({
-      include: { category: true },
-      where: {
-        ...whereFilter,
+  })).query(
+    async (
+      {
+        ctx: { db },
+        input,
       },
-    });
+    ) => {
+      const checkInDate = input.filters.checkInDate;
+      const checkOutDate = input.filters.checkOutDate;
 
-    type RoomWithCategory = Room & {
-      category: RoomCategory;
-    };
+      let whereFilter: Record<any, any> = {};
 
-    const roomsByCategory: Record<string, RoomWithCategory[]> = {};
-
-    rooms.forEach((room) => {
-      if (!roomsByCategory[room.category.name]) {
-        roomsByCategory[room.category.name] = [];
+      if (input?.filters?.priceRange?.length ?? 0 > 0) {
+        whereFilter = {
+          OR: [
+            {
+              price: {
+                equals: input.filters.priceRange?.at(0),
+              },
+            },
+            {
+              price: {
+                gt: input.filters.priceRange?.at(0),
+                lt: input.filters.priceRange?.at(1),
+              },
+            },
+          ],
+        };
       }
 
-      roomsByCategory[room.category.name]?.push(room);
-    });
+      if (input.filters.categories.length > 0) {
+        whereFilter = {
+          ...whereFilter,
+          category: {
+            name: {
+              in: input.filters.categories,
+            },
+          },
+        };
+      }
 
-    return {
-      rooms,
-      roomsByCategory,
-      roomsCategories: Object.keys(roomsByCategory),
-    };
-  }),
+      if (checkInDate && checkOutDate) {
+        whereFilter = {
+          ...whereFilter,
+          NOT: {
+            bookings: {
+              some: {
+                booking: {
+                  OR: [
+                    {
+                      bookedCheckIn: {
+                        lte: checkOutDate,
+                      },
+                      bookedCheckOut: {
+                        gte: checkOutDate,
+                      },
+                    },
+                    {
+                      bookedCheckIn: {
+                        lte: checkInDate,
+                      },
+                      bookedCheckOut: {
+                        gte: checkInDate,
+                      },
+                    },
+                    {
+                      bookedCheckIn: {
+                        gte: checkInDate,
+                        lte: checkOutDate,
+                      },
+                    },
+                  ],
+                },
+              }
+            },
+          },
+        };
+      }
+
+      const rooms = await db.room.findMany({
+        include: {
+          category: {
+            select: {
+              name: true
+            }
+          },
+          bookings: {
+            include: {
+              booking: {
+                select: {
+                  bookedCheckIn: true,
+                  bookedCheckOut: true,
+                }
+              },
+            }
+          }
+        },
+        where: {
+          ...whereFilter
+        },
+      });
+
+      type RoomWithCategory = Room & {
+        category: RoomCategory;
+      };
+
+      const roomsByCategory: Record<string, RoomWithCategory[]> = {};
+
+      rooms.forEach((room) => {
+        if (!roomsByCategory[room.category.name]) {
+          roomsByCategory[room.category.name] = [];
+        }
+
+        roomsByCategory[room.category.name]?.push(room);
+      });
+
+      return {
+        rooms,
+        roomsByCategory,
+        roomsCategories: Object.keys(roomsByCategory),
+      };
+    },
+  ),
   getFilterData: publicProcedure.query(async ({ ctx: { db } }) => {
     const rooms = await db.room.findMany({
       include: {
