@@ -26,12 +26,11 @@ export const NavbarContent = ({ pathname, topScroll }: Props) => {
   const getTheme = (): NavbarTheme => {
     const routeKeys = Object.keys(themesByRoute);
 
-    const foundRouteKey =
-      routeKeys.find((route) => {
-        const pathRegExp = new RegExp(pathname.replace("/", "\\/"), "g");
+    const foundRouteKey = routeKeys.find((route) => {
+      const pathRegExp = new RegExp(pathname.replace("/", "\\/"), "g");
 
-        return pathRegExp.test(route);
-      }) ?? "NOT_FOUND";
+      return pathRegExp.test(route);
+    }) ?? "NOT_FOUND";
 
     return themesByRoute[foundRouteKey] ?? "light";
   };
@@ -66,7 +65,7 @@ export const NavbarContent = ({ pathname, topScroll }: Props) => {
         topScroll > 0 && getTheme() === "dark" && "backdrop-blur-sm",
         {
           "bg-gradient-to-b from-black to-black/0 ": getTheme() === "dark",
-          "bg-white": getTheme() === "light",
+          "bg-white border-b-[1px] border-neutral-100": getTheme() === "light",
         },
       )}
     >
@@ -74,11 +73,13 @@ export const NavbarContent = ({ pathname, topScroll }: Props) => {
         <div className="flex items-center gap-4">
           <MobileMenu pathname={pathname} theme={getTheme()} links={navLinks} />
 
-          <img
-            src={getTheme() === "dark" ? "/logo_sm_dark.svg" : "/logo_sm.svg"}
-            className="h-auto w-[100px]"
-            alt="Hotello | LUXURY"
-          />
+          <Link href="/">
+            <img
+              src={getTheme() === "dark" ? "/logo_sm_dark.svg" : "/logo_sm.svg"}
+              className="h-auto w-[100px]"
+              alt="Hotello | LUXURY"
+            />
+          </Link>
         </div>
 
         <div

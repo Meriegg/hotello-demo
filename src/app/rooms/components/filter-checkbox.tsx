@@ -13,9 +13,13 @@ export const FilterCheckbox = ({ onCheckedChange, label }: Props) => {
   const id = useId();
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-2 pl-4">
       <Checkbox id={id} onCheckedChange={onCheckedChange} />
-      {label && <Label htmlFor={id}>{label}</Label>}
+      {label && (
+        <Label htmlFor={id} className="text-sm text-neutral-900">
+          {label}
+        </Label>
+      )}
     </div>
   );
 };

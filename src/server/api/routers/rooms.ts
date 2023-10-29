@@ -1,30 +1,31 @@
 import { getPriceRange } from "~/lib/utils";
-import { createTRPCRouter, publicProcedure } from "../trpc"
-import { FilterValidator, FilterDataValidator } from "~/lib/zod/filter";
+import { createTRPCRouter, publicProcedure } from "../trpc";
+import { FilterDataValidator, FilterValidator } from "~/lib/zod/filter";
 import { z } from "zod";
+import type { Room, RoomCategory } from "@prisma/client";
 
 export const roomsRouter = createTRPCRouter({
   getRooms: publicProcedure.input(z.object({
-    filters: FilterValidator
+    filters: FilterValidator,
   })).query(async ({ ctx: { db }, input }) => {
-    let whereFilter: any = {}
+    let whereFilter: any = {};
 
     if (input?.filters?.priceRange?.length ?? 0 > 0) {
       whereFilter = {
         OR: [
           {
             price: {
-              equals: input.filters.priceRange?.at(0)
-            }
+              equals: input.filters.priceRange?.at(0),
+            },
           },
           {
             price: {
               gt: input.filters.priceRange?.at(0),
-              lt: input.filters.priceRange?.at(1)
-            }
-          }
-        ]
-      }
+              lt: input.filters.priceRange?.at(1),
+            },
+          },
+        ],
+      };
     }
 
     if (input.filters.categories.length > 0) {
@@ -32,17 +33,38 @@ export const roomsRouter = createTRPCRouter({
         ...whereFilter,
         category: {
           name: {
-            in: input.filters.categories
-          }
-        }
-      }
+            in: input.filters.categories,
+          },
+        },
+      };
     }
 
-    return await db.room.findMany({
-      include: { category: true }, where: {
-        ...whereFilter
+    const rooms = await db.room.findMany({
+      include: { category: true },
+      where: {
+        ...whereFilter,
+      },
+    });
+
+    type RoomWithCategory = Room & {
+      category: RoomCategory;
+    };
+
+    const roomsByCategory: Record<string, RoomWithCategory[]> = {};
+
+    rooms.forEach((room) => {
+      if (!roomsByCategory[room.category.name]) {
+        roomsByCategory[room.category.name] = [];
       }
-    })
+
+      roomsByCategory[room.category.name]?.push(room);
+    });
+
+    return {
+      rooms,
+      roomsByCategory,
+      roomsCategories: Object.keys(roomsByCategory),
+    };
   }),
   getFilterData: publicProcedure.query(async ({ ctx: { db } }) => {
     const rooms = await db.room.findMany({
@@ -64,4 +86,4 @@ export const roomsRouter = createTRPCRouter({
       priceRanges,
     });
   }),
-})
+});

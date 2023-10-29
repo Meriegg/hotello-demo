@@ -3,51 +3,62 @@
 import { api } from "~/trpc/react";
 import { useRoomsFilter } from "~/lib/zustand/useRoomsFilter";
 import { FilterCheckbox } from "./filter-checkbox";
+import { CheckInOutDatePicker } from "~/components/ui/checkinout-date-picker";
+import { Loader } from "~/components/ui/loader";
 
 export const RoomsFilter = () => {
   const { selectedPrices, setPriceRange, setCategories, categories } =
     useRoomsFilter();
-  const { isLoading, data } = api.rooms.getFilterData.useQuery();
-
-  if (isLoading || !data) {
-    return <p>Loading..</p>;
-  }
+  const { isLoading, isError, data } = api.rooms.getFilterData.useQuery();
 
   return (
-    <div className="flex h-[500px] w-[250px] flex-col gap-2 border">
-      <p>By price</p>
-      {data.priceRanges.map(({ range, slug }, i) => (
-        <FilterCheckbox
-          key={i}
-          onCheckedChange={(checked) => {
-            if (checked) {
-              setPriceRange([...selectedPrices, range]);
-            } else {
-              setPriceRange([
-                ...selectedPrices.filter((pRange) => pRange !== range),
-              ]);
-            }
-          }}
-          label={slug}
-        />
-      ))}
+    <>
+      {isLoading && <Loader label={null} />}
+      {isError && <p>Error</p>}
+      {data && !isLoading && !isError && (
+        <>
+          <p className="text-sm text-neutral-900">
+            By Date
+          </p>
+          <CheckInOutDatePicker className="flex-col gap-4" />
+          <p className="text-sm text-neutral-900">
+            By price{" "}
+            <span className="text-xs font-bold text-neutral-700">/night</span>
+          </p>
+          {data.priceRanges.map(({ range, slug }, i) => (
+            <FilterCheckbox
+              key={i}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  setPriceRange([...selectedPrices, range]);
+                } else {
+                  setPriceRange([
+                    ...selectedPrices.filter((pRange) => pRange !== range),
+                  ]);
+                }
+              }}
+              label={slug}
+            />
+          ))}
 
-      <p>By category</p>
-      {data.categories.map((category, i) => (
-        <FilterCheckbox
-          key={i}
-          onCheckedChange={(checked) => {
-            if (checked) {
-              setCategories([...categories, category]);
-            } else {
-              setCategories([
-                ...categories.filter((pCategory) => pCategory !== category),
-              ]);
-            }
-          }}
-          label={category}
-        />
-      ))}
-    </div>
+          <p className="text-sm text-neutral-900">By category</p>
+          {data.categories.map((category, i) => (
+            <FilterCheckbox
+              key={i}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  setCategories([...categories, category]);
+                } else {
+                  setCategories([
+                    ...categories.filter((pCategory) => pCategory !== category),
+                  ]);
+                }
+              }}
+              label={category}
+            />
+          ))}
+        </>
+      )}
+    </>
   );
 };
