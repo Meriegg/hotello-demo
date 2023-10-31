@@ -9,6 +9,8 @@ import { Loader } from "~/components/ui/loader";
 import { DesktopFilter } from "./components/desktop-filter";
 import { MobileFilter } from "./components/mobile-filter";
 import { useEffect, useRef } from "react";
+import { Ghost, PhoneCall, UserSquare } from "lucide-react";
+import { Button } from "~/components/ui/button";
 import autoAnimate from "@formkit/auto-animate";
 
 const Page = () => {
@@ -25,6 +27,7 @@ const Page = () => {
       },
     },
     {
+      // eslint-disable-next-line
       // @ts-ignore
       queryKey: ["rooms.getRooms", JSON.stringify(filterOptions)],
     },
@@ -44,32 +47,59 @@ const Page = () => {
       </div>
       <MaxWidthContainer
         ref={parent}
-        className="flex flex-col md:flex-row min-h-screen items-start gap-8 border-l-[1px] border-neutral-100"
+        className="flex min-h-screen flex-col items-start gap-8 border-l-[1px] border-neutral-100 md:flex-row"
       >
         <DesktopFilter />
         <MobileFilter />
-        {isLoading
-          ? <Loader />
-          : (
-            <div className="w-full max-w-[800px] mx-auto py-8 px-4 flex flex-col gap-24">
-              {rooms.roomsCategories.map((category) => (
-                <div className="flex flex-col gap-6">
-                  <div className="w-full flex items-center justify-between">
-                    <p className="text-base md:text-2xl text-neutral-700 flex items-center gap-2">
-                      <span className="text-[6px] md:text-[10px]">&#9679;</span>
-                      {" "}
-                      {category}
-                    </p>
-                  </div>
-                  <div className="w-full flex justify-evenly gap-8 lg:justify-between flex-wrap">
-                    {rooms.roomsByCategory[category]?.map((room) => (
-                      <RoomCard room={room} category={room.category.name} />
-                    ))}
-                  </div>
-                </div>
-              ))}
+        {rooms?.rooms.length <= 0
+          ? (
+            <div className="flex text-center w-full flex-col justify-center items-center gap-4 py-8">
+              <Ghost className="h-11 w-11 text-neutral-700" strokeWidth={1} />
+              <p className="text-neutral-700 text-lg tracking-wide max-w-[450px]">
+                We are sorry but we don't have any rooms that meet your
+                criteria.
+              </p>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="ghost"
+                  className="text-red-400 hover:underline hover:bg-transparent"
+                >
+                  View all rooms
+                </Button>
+                <p className="text-sm text-neutral-700">or</p>
+                <Button variant="ghost" className="gap-2">
+                  <PhoneCall className="w-4 h-4 text-curren" />
+                  Contact support
+                </Button>
+              </div>
             </div>
-          )}
+          )
+          : null}
+        {isLoading && <Loader />}
+        {!isLoading && rooms?.rooms?.length > 0 && (
+          <div className="mx-auto flex w-full max-w-[800px] flex-col gap-24 px-4 py-8">
+            {rooms.roomsCategories.map((category, i) => (
+              <div className="flex flex-col gap-6" key={i}>
+                <div className="flex w-full items-center justify-between">
+                  <p className="flex items-center gap-2 text-base text-neutral-700 md:text-2xl">
+                    <span className="text-[6px] md:text-[10px]">&#9679;</span>
+                    {" "}
+                    {category}
+                  </p>
+                </div>
+                <div className="flex w-full flex-wrap justify-evenly gap-8 lg:justify-between">
+                  {rooms.roomsByCategory[category]?.map((room, i) => (
+                    <RoomCard
+                      room={room}
+                      category={room.category.name}
+                      key={i}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </MaxWidthContainer>
       <Footer theme="light" />
     </>

@@ -44,6 +44,9 @@ export const CheckInOutDatePicker = (
   const [checkInDate, setCheckInDate] = useState<Date>();
   const [checkOutDate, setCheckOutDate] = useState<Date>();
 
+  const [cInOpen, setCInOpen] = useState(false);
+  const [cOutOpen, setCOutOpen] = useState(false);
+
   useEffect(() => {
     if (checkInDate && checkOutDate && onComplete) {
       onComplete(checkInDate, checkOutDate);
@@ -56,11 +59,8 @@ export const CheckInOutDatePicker = (
 
   return (
     <div className={cn("flex flex-wrap w-full", className)}>
-      <Popover>
-        <PopoverTrigger
-          className="flex-1 h-auto"
-          onSelect={(e) => console.log(e)}
-        >
+      <Popover open={cInOpen} onOpenChange={setCInOpen}>
+        <PopoverTrigger className="flex-1 h-auto">
           <DateDisplay
             label={
               <>
@@ -80,13 +80,15 @@ export const CheckInOutDatePicker = (
                 return;
               }
 
+              setCInOpen(false);
+              setCOutOpen(true);
               setCheckInDate(date);
             }}
           />
         </PopoverContent>
       </Popover>
 
-      <Popover>
+      <Popover open={cOutOpen} onOpenChange={setCOutOpen}>
         <PopoverTrigger className="flex-1 h-auto">
           <DateDisplay
             label={
@@ -107,6 +109,7 @@ export const CheckInOutDatePicker = (
                 return;
               }
 
+              setCOutOpen(false);
               setCheckOutDate(date);
             }}
           />

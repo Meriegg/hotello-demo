@@ -1,8 +1,7 @@
 import Link from "next/link";
-import type { Room } from "@prisma/client";
-import { Button } from "~/components/ui/button";
-import { ShoppingCartIcon } from "lucide-react";
 import { Fragment } from "react";
+import { RoomCardAddBtn } from "./room-card-addbtn";
+import type { Room } from "@prisma/client";
 
 interface Props {
   room: Room;
@@ -71,12 +70,7 @@ export const RoomCard = ({ room, category }: Props) => {
           >
             More details
           </Link>
-          <Button
-            className="w-auto flex-1 gap-2 items-center font-bold"
-            size="sm"
-          >
-            Add to cart <ShoppingCartIcon className="w-4 h-4 text-white" />
-          </Button>
+          <RoomCardAddBtn productId={room.id} />
         </div>
       </div>
     </div>

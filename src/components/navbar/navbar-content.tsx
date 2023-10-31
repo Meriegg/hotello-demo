@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import { cn } from "~/lib/utils";
 import { MaxWidthContainer } from "../MaxWidthContainer";
 import { MobileMenu } from "./mobile-menu";
+import { CartButton } from "./cart-button";
 
 interface Props {
   pathname: string;
@@ -16,7 +17,9 @@ export type NavLink = {
   notification?: JSX.Element | string | number;
 };
 
-export const NavbarContent = ({ pathname, topScroll }: Props) => {
+export const NavbarContent = (
+  { pathname, topScroll }: Props,
+) => {
   const themesByRoute: Record<string, NavbarTheme> = {
     "/": "dark",
   };
@@ -114,9 +117,7 @@ export const NavbarContent = ({ pathname, topScroll }: Props) => {
           ))}
         </div>
 
-        <button className="bg-red-400 px-8 py-3 text-sm text-white">
-          Book now!
-        </button>
+        <CartButton />
       </MaxWidthContainer>
     </div>
   );

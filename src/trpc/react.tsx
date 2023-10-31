@@ -30,6 +30,7 @@ export function TRPCReactProvider(props: {
           headers() {
             const heads = new Map(props.headers);
             heads.set("x-trpc-source", "react");
+            heads.set("Access-Control-Allow-Credentials", "include");
             return Object.fromEntries(heads);
           },
         }),

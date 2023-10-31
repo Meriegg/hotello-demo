@@ -17,6 +17,7 @@ export const roomsRouter = createTRPCRouter({
       const checkInDate = input.filters.checkInDate;
       const checkOutDate = input.filters.checkOutDate;
 
+      // eslint-disable-next-line
       let whereFilter: Record<any, any> = {};
 
       if (input?.filters?.priceRange?.length ?? 0 > 0) {
@@ -80,7 +81,7 @@ export const roomsRouter = createTRPCRouter({
                     },
                   ],
                 },
-              }
+              },
             },
           },
         };
@@ -88,24 +89,20 @@ export const roomsRouter = createTRPCRouter({
 
       const rooms = await db.room.findMany({
         include: {
-          category: {
-            select: {
-              name: true
-            }
-          },
+          category: true,
           bookings: {
             include: {
               booking: {
                 select: {
                   bookedCheckIn: true,
                   bookedCheckOut: true,
-                }
+                },
               },
-            }
-          }
+            },
+          },
         },
         where: {
-          ...whereFilter
+          ...whereFilter,
         },
       });
 
@@ -140,7 +137,9 @@ export const roomsRouter = createTRPCRouter({
     const categories = [...new Set(rooms.map((room) => room.category.name))];
 
     const priceRanges = rooms.map((room) =>
-      getPriceRange(room.price).filter((range) => !!range)[0]
+      getPriceRange(parseFloat(room.price.toString())).filter((range) =>
+        !!range
+      )[0]
     ).filter((obj, index, self) =>
       index === self.findIndex((o) => o?.slug === obj?.slug)
     );
