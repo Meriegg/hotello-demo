@@ -1,5 +1,7 @@
 "use client";
 
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Check, XIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { CheckInOutDatePicker } from "~/components/ui/checkinout-date-picker";
 import { Loader } from "~/components/ui/loader";
@@ -11,6 +13,7 @@ interface Props {
 }
 
 export const CheckRoomAvailability = ({ roomId }: Props) => {
+  const [containerRef] = useAutoAnimate();
   const [state, setState] = useState<
     "idle" | "available" | "error" | "unavailable" | "loading"
   >("idle");
@@ -32,7 +35,7 @@ export const CheckRoomAvailability = ({ roomId }: Props) => {
   );
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div ref={containerRef} className="w-full flex flex-col gap-2">
       {state === "loading" &&
         (
           <p className="text-sm flex items-cetner gap-2 text-neutral-700">
@@ -48,13 +51,19 @@ export const CheckRoomAvailability = ({ roomId }: Props) => {
       {state === "idle" &&
         <p className="text-sm text-neutral-700">Check availability</p>}
       {state === "available" &&
-        <p className="text-neutral-900 text-sm">This room is available!</p>}
+        (
+          <p className="text-green-600 text-sm flex items-center gap-1">
+            This room is available <Check className="w-3 h-3" />
+          </p>
+        )}
       {state === "unavailable" && (
-        <div className="w-full flex items-center gap-1 text-sm text-red-400">
-          <p className="text-neutral-900">This room is unavailable!</p>
+        <div className="w-full flex items-center justify-between text-sm text-red-400">
+          <p className="flex items-center gap-1">
+            This room is unavailable <XIcon className="w-3 h-3" />
+          </p>
 
           <button
-            className="hover:underline"
+            className="underline"
             onClick={() => {
               setState("idle");
 

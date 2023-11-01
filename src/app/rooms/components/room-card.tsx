@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { ImageCarousel } from "~/components/ui/image-carousel";
+import type { Room } from "@prisma/client";
 import { Fragment } from "react";
 import { RoomCardAddBtn } from "./room-card-addbtn";
-import type { Room } from "@prisma/client";
 
 interface Props {
   room: Room;
@@ -31,8 +32,7 @@ export const RoomCard = ({ room, category }: Props) => {
       style={{ width: "min(350px, 100%)" }}
       className="h-auto bg-white flex flex-col gap-0 room-card-shadow-hover transition-all duration-300"
     >
-      <div className="w-full min-h-[200px] bg-neutral-200">
-      </div>
+      <ImageCarousel images={room.images} containerClassname="max-h-[200px]" />
       <div className="p-4 flex flex-col justify-between gap-3 h-auto flex-1">
         <div className="flex flex-col gap-3">
           <p className="text-base text-neutral-900 font-bold">{room.name}</p>

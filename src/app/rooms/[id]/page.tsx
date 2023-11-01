@@ -7,6 +7,7 @@ import { Fragment } from "react";
 import { RoomCardAddBtn } from "../components/room-card-addbtn";
 import { CheckRoomAvailability } from "./components/check-availability";
 import { Footer } from "~/components/Footer";
+import { ImageCarousel } from "~/components/ui/image-carousel";
 
 const Page = async ({ params: { id: roomId } }: { params: { id: string } }) => {
   const room = await db.room.findUnique({
@@ -40,57 +41,54 @@ const Page = async ({ params: { id: roomId } }: { params: { id: string } }) => {
           <ChevronLeft className="w-5 h-5" /> Go Back
         </Link>
 
-        <div className="flex flex-col gap-2">
-          <p className="text-xs text-neutral-700 font-bold">{room.id}</p>
-          <div className="flex lg:flex-row flex-col items-start gap-8">
-            <div
-              className="aspect-video bg-neutral-200"
-              style={{ width: "min(500px, 100%)" }}
-            />
-            <div className="flex flex-col justify-between min-h-[300px] gap-2 max-w-[450px]">
-              <div className="flex flex-col gap-2">
-                <p className="text-neutral-900 text-2xl font-bold">
-                  {room.name}
-                </p>
-                <p className="text-base text-red-400 font-bold">
-                  ${room.price.toString()}
-                  <span className="font-normal text-sm">/night</span>
-                </p>
-              </div>
+        <div className="flex lg:flex-row flex-col items-center gap-8">
+          <ImageCarousel
+            containerClassname="max-w-[500px] max-h-[300px]"
+            images={room.images}
+          />
+          <div className="flex flex-col justify-between min-h-[300px] gap-2 max-w-[450px]">
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-bold text-neutral-700">{room.id}</p>
+              <p className="text-neutral-900 text-2xl font-bold">
+                {room.name}
+              </p>
+              <p className="text-base text-red-400 font-bold">
+                ${room.price.toString()}
+                <span className="font-normal text-sm">/night</span>
+              </p>
+            </div>
 
-              <div className="flex gap-2 items-start flex-wrap mt-4">
-                {roomDetails.map((entry, i) => (
-                  <Fragment
-                    key={i}
-                  >
-                    {typeof entry === "string"
-                      ? (
-                        <p className="text-sm text-neutral-700 flex items-center gap-1">
-                          <span className="text-[6px]">&#9679;</span> {entry}
-                        </p>
-                      )
-                      : (
-                        <Link
-                          href={entry.href}
-                          className="text-sm text-neutral-700 flex items-center gap-1 underline"
-                        >
-                          <span className="text-[6px]">&#9679;</span>
-                          {entry.text}
-                        </Link>
-                      )}
-                  </Fragment>
-                ))}
-                <p className="text-sm flex items-center gap-1 text-red-400">
-                  <span className="text-[6px]">&#9679;</span>{" "}
-                  {room.category.name}
-                </p>
-              </div>
+            <div className="flex gap-2 items-start flex-wrap mt-4">
+              {roomDetails.map((entry, i) => (
+                <Fragment
+                  key={i}
+                >
+                  {typeof entry === "string"
+                    ? (
+                      <p className="text-sm text-neutral-700 flex items-center gap-1">
+                        <span className="text-[6px]">&#9679;</span> {entry}
+                      </p>
+                    )
+                    : (
+                      <Link
+                        href={entry.href}
+                        className="text-sm text-neutral-700 flex items-center gap-1 underline"
+                      >
+                        <span className="text-[6px]">&#9679;</span>
+                        {entry.text}
+                      </Link>
+                    )}
+                </Fragment>
+              ))}
+              <p className="text-sm flex items-center gap-1 text-red-400">
+                <span className="text-[6px]">&#9679;</span> {room.category.name}
+              </p>
+            </div>
 
-              <div className="flex flex-col gap-4">
-                <CheckRoomAvailability roomId={room.id} />
+            <div className="flex flex-col gap-4">
+              <CheckRoomAvailability roomId={room.id} />
 
-                <RoomCardAddBtn productId={room.id} />
-              </div>
+              <RoomCardAddBtn productId={room.id} />
             </div>
           </div>
         </div>

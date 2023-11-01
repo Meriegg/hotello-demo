@@ -29,3 +29,14 @@
 .nice-shadow-md {
   box-shadow: rgba(17, 12, 46, 0.05) 0px 48px 100px 0px;
 }
+
+.carousel-container:hover .carousel-controls,
+.carousel-container:focus .carousel-controls {
+  opacity: 1;
+}
+
+@media (pointer: none), (pointer: coarse) {
+  .container-controls {
+    opacity: 1;
+  }
+}
