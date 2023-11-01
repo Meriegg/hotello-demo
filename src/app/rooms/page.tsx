@@ -9,7 +9,7 @@ import { Loader } from "~/components/ui/loader";
 import { DesktopFilter } from "./components/desktop-filter";
 import { MobileFilter } from "./components/mobile-filter";
 import { useEffect, useRef } from "react";
-import { Ghost, PhoneCall, UserSquare } from "lucide-react";
+import { Ghost, PhoneCall } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import autoAnimate from "@formkit/auto-animate";
 
@@ -59,19 +59,6 @@ const Page = () => {
                 We are sorry but we don't have any rooms that meet your
                 criteria.
               </p>
-              <div className="flex flex-col gap-2">
-                <Button
-                  variant="ghost"
-                  className="text-red-400 hover:underline hover:bg-transparent"
-                >
-                  View all rooms
-                </Button>
-                <p className="text-sm text-neutral-700">or</p>
-                <Button variant="ghost" className="gap-2">
-                  <PhoneCall className="w-4 h-4 text-curren" />
-                  Contact support
-                </Button>
-              </div>
             </div>
           )
           : null}

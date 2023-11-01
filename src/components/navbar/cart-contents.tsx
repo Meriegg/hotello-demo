@@ -1,11 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { api } from "~/trpc/react";
 import { Loader } from "../ui/loader";
 import type { Room } from "@prisma/client";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useState } from "react";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 const RoomDisplay = ({ room }: { room: Room }) => {
@@ -83,6 +83,11 @@ export const CartContents = () => {
         products.data.products.map((room) => (
           <RoomDisplay room={room} key={room.id} />
         ))}
+      {products?.data?.lessThanCookieWarn && (
+        <p className="text-xs text-center w-full font-bold text-yellow-500">
+          Not all items in your cart could be retrieved.
+        </p>
+      )}
       {!cartTotal.isError && (
         <div className="flex flex-col gap-2">
           <hr className="border-neutral-200" />
@@ -93,7 +98,7 @@ export const CartContents = () => {
                 <Loader containerClassName="p-0 w-fit h-fit" label={null} />
               )}
               {!cartTotal.isLoading && !cartTotal.isError &&
-                `$${cartTotal.data.total * stayInNights}`}
+                `$${(cartTotal.data.total * stayInNights).toFixed(2)}`}
             </span>
             {!cartTotal.isLoading && !cartTotal.isError &&
               `/${stayInNights} ${stayInNights > 1 ? "nights" : "night"}`}

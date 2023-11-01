@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import autoAnimate from "@formkit/auto-animate";
+import { Portal } from "../Portal";
 import { WEBSITE_LINK } from "@mariodev14/socials";
 import { cn } from "~/lib/utils";
 import { useEffect, useRef, useState } from "react";
-import { Portal } from "../Portal";
 import type { NavbarTheme, NavLink } from "./navbar-content";
 
 interface Props {
@@ -57,7 +57,9 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
         </div>
       </button>
 
-      <Portal targetNode={document.body}>
+      <Portal
+        targetNode={document.body}
+      >
         <nav
           className={cn(
             "fixed left-0 top-0 z-20 flex h-full w-full transform pl-8 transition-all duration-300 md:hidden",
@@ -103,7 +105,7 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
                     referrerPolicy="no-referrer"
                     className="font-bold underline"
                   >
-                    MarioDev
+                    MarioDeear
                   </a>
                 </p>
               </>

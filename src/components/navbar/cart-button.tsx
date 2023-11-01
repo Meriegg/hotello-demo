@@ -10,9 +10,9 @@ import { Portal } from "../Portal";
 
 import { usePathname, useRouter } from "next/navigation";
 import { useClickOutside } from "~/hooks/use-click-outside";
+import { cn } from "~/lib/utils";
 
 export const CartButton = () => {
-  const [mainContainerRef] = useAutoAnimate();
   const [isCartOpen, setCartOpen] = useState(false);
   const [buttonRef] = useAutoAnimate<HTMLButtonElement>();
   const [cartRef] = useClickOutside<HTMLDivElement>(() => {
@@ -31,41 +31,62 @@ export const CartButton = () => {
   }, [isCartOpen]);
 
   return (
-    <div ref={mainContainerRef}>
-      {isCartOpen && (
-        <>
-          <Portal targetNode={document.body}>
-            <div className="fixed inset-0 bg-black/80"></div>
-          </Portal>
-          <div
-            ref={cartRef}
-            className="absolute md:w-[450px] right-0 md:right-0 top-[73px] z-20 h-auto bg-white border-[1px] border-t-0 border-neutral-200"
-          >
-            <div className="w-full flex items-center justify-between p-4">
-              <p className="text-sm text-neutral-700">Your cart</p>
-              <button onClick={() => setCartOpen(false)}>
-                <XIcon className="w-4 h-4 text-neutral-900" />
-              </button>
-            </div>
-            <CartContents />
-          </div>
-        </>
-      )}
+    <>
+      <Portal
+        targetNode={document.body}
+      >
+        <div
+          className={cn(
+            "fixed duration-300 transform z-20 inset-0 bg-black/80",
+            {
+              "opacity-100": isCartOpen,
+              "scale-0 opacity-0": !isCartOpen,
+            },
+          )}
+          style={{
+            transition: `transform 0s ease ${
+              !isCartOpen ? ".3s" : "0s"
+            }, opacity .3s ease`,
+          }}
+        >
+        </div>
+      </Portal>
+      <div
+        ref={cartRef}
+        className={cn(
+          "absolute transition-all duration-300 md:w-[450px] right-0 md:right-4 top-24 h-auto bg-white border-[1px] border-t-0 border-neutral-200 transform",
+          {
+            "translate-y-0 opacity-100 scale-100": isCartOpen,
+            "translate-y-2 opacity-0 scale-0": !isCartOpen,
+          },
+        )}
+      >
+        <div className="w-full flex items-center justify-between p-4">
+          <p className="text-sm text-neutral-700">Your cart</p>
+          <button onClick={() => setCartOpen(false)}>
+            <XIcon className="w-4 h-4 text-neutral-900" />
+          </button>
+        </div>
+        <CartContents />
+      </div>
       <Button
         disabled={pathname === "/checkout"}
         onClick={() => {
-          if ((cartContents.data?.length ?? 0) <= 0) {
-            router.push("/rooms");
-            return;
-          }
+          switch (true) {
+            case (cartContents.data?.length ?? 0) <= 0 && pathname !== "/rooms":
+              router.push("/rooms");
+              return;
 
-          if (pathname === "/") {
-            router.push("/checkout");
-            return;
-          }
+            case pathname === "/":
+              router.push("/checkout");
+              return;
 
-          if ((cartContents.data?.length ?? 0) > 0) {
-            setCartOpen(!isCartOpen);
+            case (cartContents.data?.length ?? 0) > 0:
+              setCartOpen(!isCartOpen);
+              return;
+
+            default:
+              setCartOpen(!isCartOpen);
           }
         }}
         ref={buttonRef}
@@ -83,6 +104,6 @@ export const CartButton = () => {
             </span>
           )}
       </Button>
-    </div>
+    </>
   );
 };

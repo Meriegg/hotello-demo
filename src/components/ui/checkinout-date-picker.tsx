@@ -34,7 +34,7 @@ const DateDisplay = (
 
 interface Props {
   className?: string;
-  onComplete?: (checkIn: Date, checkOut: Date) => void;
+  onComplete?: (checkIn: Date, checkOut: Date, reset?: () => void) => void;
   onChange?: (checkIn?: Date, checkOut?: Date) => void;
 }
 
@@ -47,9 +47,14 @@ export const CheckInOutDatePicker = (
   const [cInOpen, setCInOpen] = useState(false);
   const [cOutOpen, setCOutOpen] = useState(false);
 
+  const reset = () => {
+    setCheckInDate(undefined);
+    setCheckOutDate(undefined);
+  };
+
   useEffect(() => {
     if (checkInDate && checkOutDate && onComplete) {
-      onComplete(checkInDate, checkOutDate);
+      onComplete(checkInDate, checkOutDate, reset);
     }
 
     if (onChange) {

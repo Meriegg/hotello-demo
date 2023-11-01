@@ -54,7 +54,7 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
         }),
       });
 
-      apiUtils.cart.getProductIds.invalidate();
+      apiUtils.cart.invalidate();
     },
   });
 

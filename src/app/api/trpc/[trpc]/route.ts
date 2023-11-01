@@ -1,12 +1,17 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { cookies } from "next/headers";
-import { type NextRequest, type NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 
 import { env } from "~/env.mjs";
 import { appRouter } from "~/server/api/root";
 import { createTRPCContext } from "~/server/api/trpc";
 
 const handler = (req: NextRequest) => {
+  req.headers.set(
+    "Access-Control-Allow-Origin",
+    env.NODE_ENV === "production"
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000",
+  );
   req.headers.set("Access-Control-Allow-Credentials", "true");
 
   return fetchRequestHandler({

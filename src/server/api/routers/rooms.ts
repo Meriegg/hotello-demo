@@ -149,4 +149,66 @@ export const roomsRouter = createTRPCRouter({
       priceRanges,
     });
   }),
+  checkRoomAvailability: publicProcedure.input(
+    z.object({
+      roomId: z.string(),
+      checkInDate: z.date(),
+      checkOutDate: z.date(),
+    }),
+  )
+    .mutation(
+      async ({ ctx: { db }, input: { roomId, checkOutDate, checkInDate } }) => {
+        const room = await db.room.findUnique({
+          where: {
+            id: roomId,
+            NOT: {
+              bookings: {
+                some: {
+                  booking: {
+                    OR: [
+                      {
+                        bookedCheckIn: {
+                          lte: checkOutDate,
+                        },
+                        bookedCheckOut: {
+                          gte: checkOutDate,
+                        },
+                      },
+                      {
+                        bookedCheckIn: {
+                          lte: checkInDate,
+                        },
+                        bookedCheckOut: {
+                          gte: checkInDate,
+                        },
+                      },
+                      {
+                        bookedCheckIn: {
+                          gte: checkInDate,
+                          lte: checkOutDate,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          include: {
+            bookings: {
+              include: {
+                booking: {
+                  select: {
+                    bookedCheckOut: true,
+                    bookedCheckIn: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        return { available: !!room };
+      },
+    ),
 });
