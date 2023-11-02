@@ -65,9 +65,10 @@ model User {
   billingPostalCode            String
   metadataSignedUpFromCheckout Boolean? @default(false)
 
-  pastGuests BookingRoomGuestDetails[] @relation("PastGuests")
-  role       UserRole                  @default(USER)
-  bookings   Booking[]                 @relation("userBookings")
+  aiConversations AiHelpResponse[]          @relation("AiConversations")
+  pastGuests      BookingRoomGuestDetails[] @relation("PastGuests")
+  role            UserRole                  @default(USER)
+  bookings        Booking[]                 @relation("userBookings")
 }
 
 enum PaymentMethod {
@@ -167,4 +168,24 @@ model Room {
   categoryId String
   category   RoomCategory  @relation(fields: [categoryId], references: [id], name: "roomsInCategory")
   bookings   BookingRoom[] @relation("bookingRoom")
+}
+
+enum ResponseFeedback {
+  empty
+  helpful
+  not_helpful
+}
+
+model AiHelpResponse {
+  id String @id @default(cuid())
+
+  userId     String?
+  user       User?            @relation(fields: [userId], references: [id], name: "AiConversations")
+  userPrompt String
+  feedback   ResponseFeedback @default(empty)
+
+  aiTextResponse   String
+  aiRoomidResponse String?
+
+  fullAiResponse Json?
 }
