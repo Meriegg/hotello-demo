@@ -99,8 +99,8 @@ export const Footer = ({ theme, className }: Props) => {
                   <HelpCircleIcon className="h-3 w-3" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  This is not a real Trustpilot evaluation, it's only present
-                  for design purposes.
+                  This is not a real Trustpilot evaluation, it&apos;s only
+                  present for design purposes.
                 </TooltipContent>
               </Tooltip>
             </p>

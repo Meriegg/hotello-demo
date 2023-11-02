@@ -7,24 +7,26 @@ import { CornerUpLeft, CornerUpRight } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useRoomsFilter } from "~/lib/zustand/useRoomsFilter";
 
-const DateDisplay = (
-  { selected, label }: { selected?: Date; label: JSX.Element },
-) => {
+const DateDisplay = ({
+  selected,
+  label,
+}: {
+  selected?: Date;
+  label: JSX.Element;
+}) => {
   return (
-    <div className="relative h-[50px] w-full flex items-center justify-center border-[1px] border-neutral-100">
-      {selected
-        ? (
-          <p className="text-xs text-neutral-900">
-            {new Intl.DateTimeFormat().format(selected)}
-          </p>
-        )
-        : null}
+    <div className="relative flex h-[50px] w-full items-center justify-center border-[1px] border-neutral-100">
+      {selected ? (
+        <p className="text-xs text-neutral-900">
+          {new Intl.DateTimeFormat().format(selected)}
+        </p>
+      ) : null}
       <p
         className={cn(
-          "text-xs text-neutral-700 transform transition-all duration-300 flex items-center justify-center gap-2 absolute p-1",
+          "absolute flex transform items-center justify-center gap-2 p-1 text-xs text-neutral-700 transition-all duration-300",
           !selected
-            ? "left-1/2 top-1/2 -translate-x-1/2 scale-100 w-full -translate-y-1/2"
-            : "-left-2 -top-3 w-fit bg-white scale-75",
+            ? "left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 scale-100"
+            : "-left-2 -top-3 w-fit scale-75 bg-white",
         )}
       >
         {label}
@@ -40,14 +42,12 @@ interface Props {
   preserveFilterState?: boolean;
 }
 
-export const CheckInOutDatePicker = (
-  {
-    className,
-    onComplete,
-    onChange,
-    preserveFilterState,
-  }: Props,
-) => {
+export const CheckInOutDatePicker = ({
+  className,
+  onComplete,
+  onChange,
+  preserveFilterState,
+}: Props) => {
   const filter = useRoomsFilter();
 
   const [checkInDate, setCheckInDate] = useState<Date>();
@@ -63,8 +63,8 @@ export const CheckInOutDatePicker = (
 
   useEffect(() => {
     if (preserveFilterState) {
-      setCheckOutDate(filter.checkOutDate as Date);
-      setCheckInDate(filter.checkInDate as Date);
+      setCheckOutDate(filter.checkOutDate!);
+      setCheckInDate(filter.checkInDate!);
     }
   }, []);
 
@@ -79,13 +79,13 @@ export const CheckInOutDatePicker = (
   }, [checkInDate, checkOutDate]);
 
   return (
-    <div className={cn("flex flex-wrap w-full", className)}>
+    <div className={cn("flex w-full flex-wrap", className)}>
       <Popover open={cInOpen} onOpenChange={setCInOpen}>
-        <PopoverTrigger className="flex-1 h-auto">
+        <PopoverTrigger className="h-auto flex-1">
           <DateDisplay
             label={
               <>
-                <CornerUpRight className="w-3 h-3" />
+                <CornerUpRight className="h-3 w-3" />
                 When are you arriving?
               </>
             }
@@ -110,11 +110,11 @@ export const CheckInOutDatePicker = (
       </Popover>
 
       <Popover open={cOutOpen} onOpenChange={setCOutOpen}>
-        <PopoverTrigger className="flex-1 h-auto">
+        <PopoverTrigger className="h-auto flex-1">
           <DateDisplay
             label={
               <>
-                <CornerUpLeft className="w-3 h-3" />
+                <CornerUpLeft className="h-3 w-3" />
                 When are you leaving?
               </>
             }

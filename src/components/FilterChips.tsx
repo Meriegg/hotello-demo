@@ -8,29 +8,26 @@ export const FilterChips = () => {
   const items = [
     {
       label: null,
-      text: (!!filterOptions.checkOutDate || !!filterOptions.checkInDate)
-        ? `${
-          !!filterOptions.checkInDate
-            ? `in: ${
-              new Intl.DateTimeFormat().format(
-                filterOptions.checkInDate,
-              )
+      text:
+        !!filterOptions.checkOutDate || !!filterOptions.checkInDate
+          ? `${
+              !!filterOptions.checkInDate
+                ? `in: ${new Intl.DateTimeFormat().format(
+                    filterOptions.checkInDate,
+                  )}`
+                : ""
+            } ${
+              !!filterOptions.checkInDate && !!filterOptions.checkOutDate
+                ? "-"
+                : ""
+            } ${
+              !!filterOptions.checkOutDate
+                ? `out: ${new Intl.DateTimeFormat().format(
+                    filterOptions.checkOutDate,
+                  )}`
+                : ""
             }`
-            : ""
-        } ${
-          (!!filterOptions.checkInDate && !!filterOptions.checkOutDate)
-            ? "-"
-            : ""
-        } ${
-          !!filterOptions.checkOutDate
-            ? `out: ${
-              new Intl.DateTimeFormat().format(
-                filterOptions.checkOutDate,
-              )
-            }`
-            : ""
-        }`
-        : null,
+          : null,
       removeFunc: () => {
         filterOptions.setDates(null, null);
 
@@ -43,9 +40,9 @@ export const FilterChips = () => {
       label: "category:",
       text: category,
       removeFunc: () => {
-        filterOptions.setCategories(
-          [...filterOptions.categories.filter((c) => c !== category)],
-        );
+        filterOptions.setCategories([
+          ...filterOptions.categories.filter((c) => c !== category),
+        ]);
       },
     })),
     ...filterOptions.selectedPrices.map((pRange) => ({
@@ -53,8 +50,8 @@ export const FilterChips = () => {
       text: `$${pRange[0]} - $${pRange[1]}`,
       removeFunc: () => {
         filterOptions.setPriceRange([
-          ...filterOptions.selectedPrices.filter((prevPRange) =>
-            prevPRange !== pRange
+          ...filterOptions.selectedPrices.filter(
+            (prevPRange) => prevPRange !== pRange,
           ),
         ]);
       },
@@ -63,14 +60,19 @@ export const FilterChips = () => {
 
   return (
     <div
-      className="flex items-center flex-wrap w-full gap-2"
+      className="flex w-full flex-wrap items-center gap-2"
       ref={containerRef}
     >
-      {items.map((chip) => (
-        <div className="text-xs px-2 rounded-md py-1 bg-neutral-50 text-neutral-700 flex items-center gap-2">
-          <p>{chip.label && <span>{chip.label}</span>} {chip.text}</p>
+      {items.map((chip, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-2 rounded-md bg-neutral-50 px-2 py-1 text-xs text-neutral-700"
+        >
+          <p>
+            {chip.label && <span>{chip.label}</span>} {chip.text}
+          </p>
           <button onClick={chip.removeFunc}>
-            <XIcon className="w-3 h-3 text-neutral-900" />
+            <XIcon className="h-3 w-3 text-neutral-900" />
           </button>
         </div>
       ))}

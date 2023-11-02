@@ -9,9 +9,7 @@ import { cookies } from "next/headers";
 
 export const POST = async (request: NextRequest) => {
   try {
-    const reqBody = await request.json();
-
-    const body = z.object({
+    const BodyValidator = z.object({
       key: z.string(),
       value: z.string(),
       verificationKey: z.string(),
@@ -20,9 +18,13 @@ export const POST = async (request: NextRequest) => {
         httpOnly: z.boolean().optional(),
         maxAge: z.number(),
       }),
-    }).parse(reqBody);
+    })
 
-    const decoded: any = jwt.verify(body.verificationKey, env.SECRET_KEY);
+    const reqBody = await request.json() as z.infer<typeof BodyValidator>;
+
+    const body = BodyValidator.parse(reqBody);
+
+    const decoded = jwt.verify(body.verificationKey, env.SECRET_KEY) as { exp: number, cookieName: string } | null;
     if (!decoded?.exp || !decoded?.cookieName) {
       return Response.error();
     }

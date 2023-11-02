@@ -9,9 +9,11 @@ interface Props {
 export const MaxWidthContainer = forwardRef<HTMLDivElement, Props>(
   ({ children, className }, ref) => {
     return (
-      <div ref={ref} className={cn("max-w-[1200px] mx-auto", className)}>
+      <div ref={ref} className={cn("mx-auto max-w-[1200px]", className)}>
         {children}
       </div>
     );
   },
 );
+
+MaxWidthContainer.displayName = "MaxWidthContainer";

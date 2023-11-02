@@ -11,16 +11,21 @@ interface Props {
 
 export const RoomCard = ({ room, category }: Props) => {
   const otherRoomKeys: string[] = Object.keys(room?.other ?? {});
-  const otherVals = otherRoomKeys?.length > 0
-    ? otherRoomKeys.map((key) =>
-      (room.other as Record<string, string | { text: string; href: string }>)[
-        key
-      ] as string | { text: string; href: string }
-    )
-    : null;
+  const otherVals =
+    otherRoomKeys?.length > 0
+      ? otherRoomKeys.map(
+          (key) =>
+            (
+              room.other as Record<
+                string,
+                string | { text: string; href: string }
+              >
+            )[key] as string | { text: string; href: string },
+        )
+      : null;
 
   const roomDetails = [
-    `$${room.price}/night`,
+    `$${room.price.toString()}/night`,
     `Accommodates ${room.accommodates} ${
       room.accommodates > 1 ? "people" : "person"
     }`,
@@ -30,46 +35,42 @@ export const RoomCard = ({ room, category }: Props) => {
   return (
     <div
       style={{ width: "min(350px, 100%)" }}
-      className="h-auto bg-white flex flex-col gap-0 room-card-shadow-hover transition-all duration-300"
+      className="room-card-shadow-hover flex h-auto flex-col gap-0 bg-white transition-all duration-300"
     >
       <ImageCarousel
         images={room.images}
         containerClassname="max-h-[200px] min-h-[200px]"
       />
-      <div className="p-4 flex flex-col justify-between gap-3 h-auto flex-1">
+      <div className="flex h-auto flex-1 flex-col justify-between gap-3 p-4">
         <div className="flex flex-col gap-3">
-          <p className="text-base text-neutral-900 font-bold">{room.name}</p>
-          <div className="flex gap-2 items-start flex-wrap">
+          <p className="text-base font-bold text-neutral-900">{room.name}</p>
+          <div className="flex flex-wrap items-start gap-2">
             {roomDetails.map((entry, i) => (
-              <Fragment
-                key={i}
-              >
-                {typeof entry === "string"
-                  ? (
-                    <p className="text-sm text-neutral-700 flex items-center gap-1">
-                      <span className="text-[6px]">&#9679;</span> {entry}
-                    </p>
-                  )
-                  : (
-                    <Link
-                      href={entry.href}
-                      className="text-sm text-neutral-700 flex items-center gap-1 underline"
-                    >
-                      <span className="text-[6px]">&#9679;</span>
-                      {entry.text}
-                    </Link>
-                  )}
+              <Fragment key={i}>
+                {typeof entry === "string" ? (
+                  <p className="flex items-center gap-1 text-sm text-neutral-700">
+                    <span className="text-[6px]">&#9679;</span> {entry}
+                  </p>
+                ) : (
+                  <Link
+                    href={entry.href}
+                    className="flex items-center gap-1 text-sm text-neutral-700 underline"
+                  >
+                    <span className="text-[6px]">&#9679;</span>
+                    {entry.text}
+                  </Link>
+                )}
               </Fragment>
             ))}
-            <p className="text-sm flex items-center gap-1 text-red-400">
+            <p className="flex items-center gap-1 text-sm text-red-400">
               <span className="text-[6px]">&#9679;</span> {category}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4 w-full">
+        <div className="flex w-full items-center gap-4">
           <Link
             href={`/rooms/${room.id}`}
-            className="text-xs text-red-400 hover:underline font-bold"
+            className="text-xs font-bold text-red-400 hover:underline"
           >
             More details
           </Link>

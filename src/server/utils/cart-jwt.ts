@@ -11,8 +11,8 @@ export const createCartJwt = (productIds: string[]) => {
 
 export const extractFromCartJwt = (token: string) => {
   try {
-    const decoded: any = jwt.verify(token, env.SECRET_KEY);
-    if (!decoded || !decoded?.products || !Array.isArray(decoded?.products)) {
+    const decoded = jwt.verify(token, env.SECRET_KEY) as { products: string[], exp: number } | null;
+    if (!decoded?.products || !Array.isArray(decoded?.products)) {
       return null;
     }
 
@@ -20,7 +20,7 @@ export const extractFromCartJwt = (token: string) => {
       return null;
     }
 
-    return decoded.products as string[];
+    return decoded.products
   } catch (error) {
     console.error(error);
     return null;

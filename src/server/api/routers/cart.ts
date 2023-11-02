@@ -7,7 +7,7 @@ import { createCookieVerification } from "~/server/utils/cookies";
 
 export const cartRouter = createTRPCRouter({
   addToCart: publicProcedure.input(z.object({ productId: z.string() }))
-    .mutation(async ({ input: { productId } }) => {
+    .mutation(({ input: { productId } }) => {
       const cookieVerificationToken = createCookieVerification("cart");
 
       const cookieStore = cookies();
@@ -31,7 +31,7 @@ export const cartRouter = createTRPCRouter({
 
       return { cartToken: newProductsToken, cookieVerificationToken };
     }),
-  getProductIds: publicProcedure.query(async () => {
+  getProductIds: publicProcedure.query(() => {
     const cookieStore = cookies();
     const cartCookie = cookieStore.get("cart")?.value;
     if (!cartCookie) {
@@ -51,7 +51,7 @@ export const cartRouter = createTRPCRouter({
     }
 
     const productIds = extractFromCartJwt(cartCookie);
-    if (!productIds || !productIds.length) {
+    if (!productIds?.length) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "You do not have any items in your cart.",
@@ -60,6 +60,7 @@ export const cartRouter = createTRPCRouter({
 
     const products = await db.room.findMany({
       where: { id: { in: productIds } },
+      include: { category: true }
     });
     if (!products.length) {
       throw new TRPCError({
@@ -89,7 +90,7 @@ export const cartRouter = createTRPCRouter({
     }
 
     const productIds = extractFromCartJwt(cartCookie);
-    if (!productIds || !productIds.length) {
+    if (!productIds?.length) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "You do not have any items in your cart.",
@@ -128,7 +129,7 @@ export const cartRouter = createTRPCRouter({
     };
   }),
   removeItem: publicProcedure.input(z.object({ productId: z.string() }))
-    .mutation(async ({ input: { productId } }) => {
+    .mutation(({ input: { productId } }) => {
       const cookieStore = cookies();
       const cartCookie = cookieStore.get("cart")?.value;
       if (!cartCookie) {
@@ -139,7 +140,7 @@ export const cartRouter = createTRPCRouter({
       }
 
       const productIds = extractFromCartJwt(cartCookie);
-      if (!productIds || !productIds?.length) {
+      if (!productIds?.length) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "You don't have any items in your cart.",

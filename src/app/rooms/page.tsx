@@ -52,17 +52,15 @@ const Page = () => {
       >
         <DesktopFilter />
         <MobileFilter />
-        {rooms?.rooms.length <= 0
-          ? (
-            <div className="flex text-center w-full flex-col justify-center items-center gap-4 py-8">
-              <Ghost className="h-11 w-11 text-neutral-700" strokeWidth={1} />
-              <p className="text-neutral-700 text-lg tracking-wide max-w-[450px]">
-                We are sorry but we don't have any rooms that meet your
-                criteria.
-              </p>
-            </div>
-          )
-          : null}
+        {rooms?.rooms.length <= 0 ? (
+          <div className="flex w-full flex-col items-center justify-center gap-4 py-8 text-center">
+            <Ghost className="h-11 w-11 text-neutral-700" strokeWidth={1} />
+            <p className="max-w-[450px] text-lg tracking-wide text-neutral-700">
+              We are sorry but we don&apos;t have any rooms that meet your
+              criteria.
+            </p>
+          </div>
+        ) : null}
         {isLoading && <Loader />}
         {!isLoading && rooms?.rooms?.length > 0 && (
           <div className="mx-auto flex w-full max-w-[800px] flex-col gap-24 px-4 py-8">
@@ -70,8 +68,7 @@ const Page = () => {
               <div className="flex flex-col gap-6" key={i}>
                 <div className="flex w-full items-center justify-between">
                   <p className="flex items-center gap-2 text-base text-neutral-700 md:text-2xl">
-                    <span className="text-[6px] md:text-[10px]">&#9679;</span>
-                    {" "}
+                    <span className="text-[6px] md:text-[10px]">&#9679;</span>{" "}
                     {category}
                   </p>
                 </div>

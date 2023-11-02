@@ -54,16 +54,16 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
         }),
       });
 
-      apiUtils.cart.invalidate();
+      apiUtils.cart.invalidate().catch((e) => console.error(e));
     },
   });
 
   return (
-    <div ref={parentRef} className="flex-1 w-full">
+    <div ref={parentRef} className="w-full flex-1">
       {!isInCart && (
         <Button
           onClick={() => addToCart.mutate({ productId })}
-          className="w-full flex gap-2 items-center font-bold"
+          className="flex w-full items-center gap-2 font-bold"
           size="sm"
           disabled={addToCart.isLoading || productsInCart.isLoading}
         >
@@ -75,13 +75,13 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
               label={null}
             />
           )}
-          Add to cart <ShoppingCartIcon className="w-4 h-4 text-white" />
+          Add to cart <ShoppingCartIcon className="h-4 w-4 text-white" />
         </Button>
       )}
 
       {isInCart && (
         <Button
-          className="w-full flex gap-2 items-center font-bold rounded-full"
+          className="flex w-full items-center gap-2 rounded-full font-bold"
           size="sm"
         >
           {addToCart.isLoading && (
@@ -92,7 +92,7 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
               label={null}
             />
           )}
-          In your cart! <CheckIcon className="w-4 h-4 text-white" />
+          In your cart! <CheckIcon className="h-4 w-4 text-white" />
         </Button>
       )}
     </div>
