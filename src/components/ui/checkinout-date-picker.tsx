@@ -5,6 +5,7 @@ import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { CornerUpLeft, CornerUpRight } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { useRoomsFilter } from "~/lib/zustand/useRoomsFilter";
 
 const DateDisplay = (
   { selected, label }: { selected?: Date; label: JSX.Element },
@@ -35,12 +36,20 @@ const DateDisplay = (
 interface Props {
   className?: string;
   onComplete?: (checkIn: Date, checkOut: Date, reset?: () => void) => void;
-  onChange?: (checkIn?: Date, checkOut?: Date) => void;
+  onChange?: (checkIn?: Date, checkOut?: Date, reset?: () => void) => void;
+  preserveFilterState?: boolean;
 }
 
 export const CheckInOutDatePicker = (
-  { className, onComplete, onChange }: Props,
+  {
+    className,
+    onComplete,
+    onChange,
+    preserveFilterState,
+  }: Props,
 ) => {
+  const filter = useRoomsFilter();
+
   const [checkInDate, setCheckInDate] = useState<Date>();
   const [checkOutDate, setCheckOutDate] = useState<Date>();
 
@@ -53,12 +62,19 @@ export const CheckInOutDatePicker = (
   };
 
   useEffect(() => {
+    if (preserveFilterState) {
+      setCheckOutDate(filter.checkOutDate as Date);
+      setCheckInDate(filter.checkInDate as Date);
+    }
+  }, []);
+
+  useEffect(() => {
     if (checkInDate && checkOutDate && onComplete) {
       onComplete(checkInDate, checkOutDate, reset);
     }
 
     if (onChange) {
-      onChange(checkInDate, checkOutDate);
+      onChange(checkInDate, checkOutDate, reset);
     }
   }, [checkInDate, checkOutDate]);
 

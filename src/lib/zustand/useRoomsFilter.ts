@@ -7,8 +7,10 @@ type PriceRange = [number, number];
 interface UseRoomsFilter extends TFilterValidator {
   setPriceRange: (selectedPrices: PriceRange[]) => void;
   setCategories: (categories: string[]) => void;
-  setDates: (checkIn: Date, checkOut: Date) => void;
+  setDates: (checkIn: Date | null, checkOut: Date | null) => void;
   clearFilters: () => void;
+  resetDates: (() => void) | null;
+  setResetDates: (val: (() => void) | null) => void;
 }
 
 export const useRoomsFilter = create<UseRoomsFilter>((set) => ({
@@ -17,6 +19,7 @@ export const useRoomsFilter = create<UseRoomsFilter>((set) => ({
   categories: [],
   checkInDate: null,
   checkOutDate: null,
+  resetDates: null,
   setPriceRange: (selectedPrices) => {
     if (!selectedPrices.length) {
       return set({ priceRange: null, selectedPrices: [] });
@@ -31,6 +34,7 @@ export const useRoomsFilter = create<UseRoomsFilter>((set) => ({
   setDates: (checkIn, checkOut) =>
     set({ checkInDate: checkIn, checkOutDate: checkOut }),
   setCategories: (categories) => set({ categories }),
+  setResetDates: (func) => set({ resetDates: func }),
   clearFilters: () =>
     set({
       priceRange: null,

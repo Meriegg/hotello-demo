@@ -9,9 +9,9 @@ import { Loader } from "~/components/ui/loader";
 import { DesktopFilter } from "./components/desktop-filter";
 import { MobileFilter } from "./components/mobile-filter";
 import { useEffect, useRef } from "react";
-import { Ghost, PhoneCall } from "lucide-react";
-import { Button } from "~/components/ui/button";
+import { Ghost } from "lucide-react";
 import autoAnimate from "@formkit/auto-animate";
+import { FilterChips } from "~/components/FilterChips";
 
 const Page = () => {
   const parent = useRef<HTMLDivElement>(null);
@@ -42,6 +42,7 @@ const Page = () => {
       <div className="border-b-[1px] border-neutral-100">
         <MaxWidthContainer className="flex min-h-[90px] flex-col items-start justify-center border-l-[1px] border-neutral-100 pl-6">
           <h1 className="text-2xl text-neutral-900">Here are our rooms!</h1>
+          <FilterChips />
           {/* <p className="text-sm text-neutral-700">12/12/2023 - 02/04/2024</p> */}
         </MaxWidthContainer>
       </div>

@@ -7,8 +7,14 @@ import { CheckInOutDatePicker } from "~/components/ui/checkinout-date-picker";
 import { Loader } from "~/components/ui/loader";
 
 export const RoomsFilter = () => {
-  const { selectedPrices, setPriceRange, setCategories, categories, setDates } =
-    useRoomsFilter();
+  const {
+    selectedPrices,
+    setPriceRange,
+    setCategories,
+    categories,
+    setDates,
+    setResetDates,
+  } = useRoomsFilter();
   const { isLoading, isError, data } = api.rooms.getFilterData.useQuery();
 
   return (
@@ -21,10 +27,10 @@ export const RoomsFilter = () => {
             By Date
           </p>
           <CheckInOutDatePicker
-            onComplete={(checkIn, checkOut) => {
-              console.log(checkIn);
-              console.log(checkOut);
-              setDates(checkIn, checkOut);
+            preserveFilterState={true}
+            onChange={(checkIn, checkOut, reset) => {
+              setDates(checkIn ?? null, checkOut ?? null);
+              setResetDates(reset ?? null);
             }}
             className="flex-col gap-4"
           />
@@ -35,6 +41,9 @@ export const RoomsFilter = () => {
           {data.priceRanges.map(({ range, slug }, i) => (
             <FilterCheckbox
               key={i}
+              checked={selectedPrices.findIndex((pRange) =>
+                pRange === range
+              ) !== -1}
               onCheckedChange={(checked) => {
                 if (checked) {
                   setPriceRange([...selectedPrices, range]);
@@ -52,6 +61,7 @@ export const RoomsFilter = () => {
           {data.categories.map((category, i) => (
             <FilterCheckbox
               key={i}
+              checked={categories.findIndex((c) => c === category) !== -1}
               onCheckedChange={(checked) => {
                 if (checked) {
                   setCategories([...categories, category]);

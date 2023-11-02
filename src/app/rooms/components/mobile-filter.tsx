@@ -21,9 +21,12 @@ export const MobileFilter = () => {
     >
       <p
         className={cn(
-          "absolute top-0 transform p-4 text-xs font-bold text-neutral-700 transition-all duration-300",
+          "absolute top-0 transform p-4 text-xs font-bold text-neutral-700",
           isOpen ? "left-1/2 -translate-x-1/2" : "left-0",
         )}
+        style={{
+          transition: "position .3s ease, transform .8s ease",
+        }}
       >
         filter
       </p>

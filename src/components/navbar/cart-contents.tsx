@@ -66,12 +66,12 @@ export const CartContents = () => {
   });
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-4" ref={containerRef}>
+    <div className="flex flex-col gap-4 px-4 pb-4 w-full" ref={containerRef}>
       {products.isLoading && (
         <Loader label="Fetching rooms" containerClassName="py-2 pb-6" />
       )}
       {products.isError && (
-        <div className="flex flex-col text-center pb-6 gap-2">
+        <div className="flex flex-col text-center pb-6 gap-2 w-full">
           <p className="font-bold text-red-400">Oh snap!</p>
           <p className="text-sm max-w-prose text-neutral-700">
             {products.error?.message ||
@@ -123,7 +123,8 @@ export const CartContents = () => {
               </p>
               <button
                 className="text-red-400 text-lg"
-                onClick={() => setStayInNights((prev) => prev + 1)}
+                onClick={() =>
+                  setStayInNights((prev) => prev + 1)}
               >
                 +
               </button>

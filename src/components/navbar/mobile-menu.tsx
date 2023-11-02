@@ -38,8 +38,8 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
             "w-full transform border-[1px] transition-all duration-300",
             isOpen && "rotate-45",
             {
-              "border-white": theme === "dark",
-              "border-neutral-900": theme === "light",
+              "border-white bg-white": theme === "dark",
+              "border-neutral-900 bg-neutral-900": theme === "light",
             },
           )}
         >
@@ -49,8 +49,8 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
             "transform border-[1px] transition-all duration-300",
             isOpen ? "w-full -rotate-45" : "w-[15px]",
             {
-              "border-white": theme === "dark",
-              "border-neutral-900": theme === "light",
+              "border-white bg-white": theme === "dark",
+              "border-neutral-900 bg-neutral-900": theme === "light",
             },
           )}
         >
@@ -105,7 +105,7 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
                     referrerPolicy="no-referrer"
                     className="font-bold underline"
                   >
-                    MarioDeear
+                    MarioDev.
                   </a>
                 </p>
               </>

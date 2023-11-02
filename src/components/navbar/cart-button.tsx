@@ -54,10 +54,10 @@ export const CartButton = () => {
       <div
         ref={cartRef}
         className={cn(
-          "absolute transition-all duration-300 md:w-[450px] right-0 md:right-4 top-24 h-auto bg-white border-[1px] border-t-0 border-neutral-200 transform",
+          "absolute transition-all duration-300 md:w-[450px] right-0 md:right-4 top-24 h-auto bg-white border-[1px] border-t-0 border-neutral-200 transform overflow-hidden",
           {
-            "translate-y-0 opacity-100 scale-100": isCartOpen,
-            "translate-y-2 opacity-0 scale-0": !isCartOpen,
+            "translate-y-0 opacity-100 w-full": isCartOpen,
+            "translate-y-2 opacity-0 w-0 h-0": !isCartOpen,
           },
         )}
       >

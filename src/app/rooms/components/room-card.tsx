@@ -32,7 +32,10 @@ export const RoomCard = ({ room, category }: Props) => {
       style={{ width: "min(350px, 100%)" }}
       className="h-auto bg-white flex flex-col gap-0 room-card-shadow-hover transition-all duration-300"
     >
-      <ImageCarousel images={room.images} containerClassname="max-h-[200px]" />
+      <ImageCarousel
+        images={room.images}
+        containerClassname="max-h-[200px] min-h-[200px]"
+      />
       <div className="p-4 flex flex-col justify-between gap-3 h-auto flex-1">
         <div className="flex flex-col gap-3">
           <p className="text-base text-neutral-900 font-bold">{room.name}</p>
