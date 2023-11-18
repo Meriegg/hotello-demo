@@ -14,6 +14,8 @@ export const RoomsFilter = () => {
     categories,
     setDates,
     setResetDates,
+    checkInDate,
+    checkOutDate,
   } = useRoomsFilter();
   const { isLoading, isError, data } = api.rooms.getFilterData.useQuery();
 
@@ -27,7 +29,12 @@ export const RoomsFilter = () => {
             By Date
           </p>
           <CheckInOutDatePicker
-            preserveFilterState={true}
+            initialData={!!(checkInDate && checkOutDate)
+              ? {
+                checkIn: checkInDate,
+                checkOut: checkOutDate,
+              }
+              : null}
             onChange={(checkIn, checkOut, reset) => {
               setDates(checkIn ?? null, checkOut ?? null);
               setResetDates(reset ?? null);

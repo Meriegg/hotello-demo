@@ -1,3 +1,51 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Neutral */
+  --neutral-50: 40deg, 23%, 97%;
+  --neutral-100: 43deg, 13%, 90%;
+  --neutral-200: 40deg, 15%, 80%;
+  --neutral-700: 37deg, 11%, 28%;
+  --neutral-900: 42deg, 15%, 13%;
+
+  /* Red */
+  --red-400: 0deg 64% 55%;
+
+  /* Yellow */
+  --yellow-500: 42deg, 87%, 55%;
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+@layer utilities {
+  .glassmorphic {
+    backdrop-filter: blur(24px) saturate(100%);
+    -webkit-backdrop-filter: blur(24px) saturate(100%);
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.room-card-shadow-hover:hover,
+.nice-shadow-md {
+  box-shadow: rgba(17, 12, 46, 0.05) 0px 48px 100px 0px;
+}
+
+.carousel-container:hover .carousel-controls,
+.carousel-container:focus .carousel-controls {
+  opacity: 1;
+}
+
+@media (pointer: none), (pointer: coarse) {
+  .container-controls {
+    opacity: 1;
+  }
+}

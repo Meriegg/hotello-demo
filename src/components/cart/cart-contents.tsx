@@ -53,7 +53,9 @@ const RoomDisplay = ({ room }: { room: Room }) => {
   );
 };
 
-export const CartContents = () => {
+export const CartContents = (
+  { onCheckoutClick }: { onCheckoutClick?: () => void },
+) => {
   const [containerRef] = useAutoAnimate<HTMLDivElement>();
   const [stayInNights, setStayInNights] = useState(1);
   const products = api.cart.getProducts.useQuery(undefined, {
@@ -70,8 +72,8 @@ export const CartContents = () => {
       )}
       {products.isError && (
         <div className="flex w-full flex-col gap-2 pb-6 text-center">
-          <p className="font-bold text-red-400">Oh snap!</p>
-          <p className="max-w-prose text-sm text-neutral-700">
+          <p className="font-bold text-neutral-900">Oh snap!</p>
+          <p className="max-w-prose text-xs text-neutral-700">
             {products.error?.message ||
               "An error happened, please try again or contact support."}
           </p>
@@ -115,8 +117,7 @@ export const CartContents = () => {
                       return prev;
                     }
                     return prev - 1;
-                  })
-                }
+                  })}
               >
                 -
               </button>
@@ -125,7 +126,8 @@ export const CartContents = () => {
               </p>
               <button
                 className="text-lg text-red-400"
-                onClick={() => setStayInNights((prev) => prev + 1)}
+                onClick={() =>
+                  setStayInNights((prev) => prev + 1)}
               >
                 +
               </button>
@@ -133,6 +135,7 @@ export const CartContents = () => {
 
             <Link
               href="/checkout"
+              onClick={onCheckoutClick}
               className="flex items-center gap-2 text-xs font-bold text-red-400 hover:underline"
             >
               Continue to checkout <ArrowRight className="h-3 w-3" />

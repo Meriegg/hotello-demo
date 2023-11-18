@@ -149,18 +149,22 @@ export const roomsRouter = createTRPCRouter({
       priceRanges,
     });
   }),
-  checkRoomAvailability: publicProcedure.input(
+  checkRoomsAvailability: publicProcedure.input(
     z.object({
-      roomId: z.string(),
+      roomIds: z.string().array(),
       checkInDate: z.date(),
       checkOutDate: z.date(),
     }),
   )
     .mutation(
-      async ({ ctx: { db }, input: { roomId, checkOutDate, checkInDate } }) => {
-        const room = await db.room.findUnique({
+      async (
+        { ctx: { db }, input: { roomIds, checkOutDate, checkInDate } },
+      ) => {
+        const rooms = await db.room.findMany({
           where: {
-            id: roomId,
+            id: {
+              in: roomIds,
+            },
             NOT: {
               bookings: {
                 some: {
@@ -208,7 +212,21 @@ export const roomsRouter = createTRPCRouter({
           },
         });
 
-        return { available: !!room };
+        const areAllAvailable = rooms.length === roomIds.length;
+
+        const unavailableRooms = areAllAvailable
+          ? null
+          : await db.room.findMany({
+            where: {
+              id: {
+                in: roomIds.filter((id) =>
+                  rooms.findIndex((room) => room.id === id) === -1
+                ),
+              },
+            },
+          });
+
+        return { available: areAllAvailable, unavailableRooms };
       },
     ),
 });

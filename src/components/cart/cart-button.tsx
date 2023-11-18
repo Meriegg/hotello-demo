@@ -67,7 +67,7 @@ export const CartButton = () => {
             <XIcon className="w-4 h-4 text-neutral-900" />
           </button>
         </div>
-        <CartContents />
+        <CartContents onCheckoutClick={() => setCartOpen(false)} />
       </div>
       <Button
         disabled={pathname === "/checkout"}

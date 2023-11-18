@@ -21,12 +21,17 @@ model CheckoutSession {
   step CheckoutStep @default(PERSONAL_DETAILS)
 
   // this is the cookie that contains the cart data
-  cartDataCookie String
+  productIds      String[]
+  productJsonCopy Json?
 
-  personaldetails_firstName String?
-  personaldetails_lastName  String?
-  personaldetails_phoneNum  String?
-  personaldetails_age       Int?
+  createdOn DateTime @default(now())
+
+  personaldetails_firstName       String?
+  personaldetails_lastName        String?
+  personaldetails_phoneNum        String?
+  personaldetails_phoneNumCountry String?
+  personaldetails_email           String?
+  personaldetails_age             Int?
 
   billingdetails_countryOrRegion String?
   billingdetails_address         String?

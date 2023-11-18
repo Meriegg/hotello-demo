@@ -20,7 +20,7 @@ export const CheckRoomAvailability = ({ roomId }: Props) => {
 
   const resetDatesRef = useRef<{ reset: (() => void) | null }>({ reset: null });
 
-  const availability = api.rooms.checkRoomAvailability.useMutation({
+  const availability = api.rooms.checkRoomsAvailability.useMutation({
     onSuccess: (data) => {
       setState(data.available ? "available" : "unavailable");
     },
@@ -82,7 +82,7 @@ export const CheckRoomAvailability = ({ roomId }: Props) => {
           availability.mutate({
             checkOutDate: checkOut,
             checkInDate: checkIn,
-            roomId,
+            roomIds: [roomId],
           });
 
           resetDatesRef.current.reset = reset ?? null;

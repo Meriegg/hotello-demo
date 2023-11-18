@@ -3,7 +3,7 @@ import { Fragment } from "react";
 import { cn } from "~/lib/utils";
 import { MaxWidthContainer } from "../MaxWidthContainer";
 import { MobileMenu } from "./mobile-menu";
-import { CartButton } from "./cart-button";
+import { CartButton } from "../cart/cart-button";
 
 interface Props {
   pathname: string;
