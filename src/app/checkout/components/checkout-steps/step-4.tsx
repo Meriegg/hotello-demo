@@ -3,10 +3,12 @@ import type { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { CheckoutFormValidator } from "~/lib/zod/checkout-form";
 import { calculateStayDuration } from "~/server/utils/calculate-stay-duration";
+import { api } from "~/trpc/react";
 
 interface Props {
   form: UseFormReturn<z.infer<typeof CheckoutFormValidator>>;
   items: Room[];
+  checkoutSessionId: string;
 }
 
 const InfoDisplay = (
@@ -20,15 +22,29 @@ const InfoDisplay = (
   );
 };
 
-export const Step4 = ({ form, items }: Props) => {
+export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
   const formValues = form.getValues();
+  const apiUtils = api.useUtils();
+  const goToStep = api.checkout.goToStep.useMutation({
+    onSuccess: () => {
+      apiUtils.checkout.invalidate().catch((e) => console.error(e));
+    },
+  });
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
         <div className="text-xs w-full flex items-center justify-between">
           <p className="text-neutral-700">Your personal information</p>
-          <button className="text-red-400 italic underline">
+          <button
+            onClick={() =>
+              goToStep.mutate({
+                step: "PERSONAL_DETAILS",
+                sessionId: checkoutSessionId,
+              })}
+            disabled={goToStep.isLoading}
+            className="text-red-400 italic underline disabled:opacity-70 disabled:cursor-not-allowed"
+          >
             Go to step 1
           </button>
         </div>
@@ -57,7 +73,15 @@ export const Step4 = ({ form, items }: Props) => {
       <div className="flex flex-col gap-3">
         <div className="text-xs w-full flex items-center justify-between">
           <p className="text-neutral-700">Billing information</p>
-          <button className="text-red-400 italic underline">
+          <button
+            onClick={() =>
+              goToStep.mutate({
+                step: "BILLING_DETAILS",
+                sessionId: checkoutSessionId,
+              })}
+            disabled={goToStep.isLoading}
+            className="text-red-400 italic underline disabled:opacity-70 disabled:cursor-not-allowed"
+          >
             Go to step 2
           </button>
         </div>
@@ -84,7 +108,15 @@ export const Step4 = ({ form, items }: Props) => {
       <div className="flex flex-col gap-3">
         <div className="text-xs w-full flex items-center justify-between">
           <p className="text-neutral-700">Booking details</p>
-          <button className="text-red-400 italic underline">
+          <button
+            onClick={() =>
+              goToStep.mutate({
+                step: "BOOKING_DETAILS",
+                sessionId: checkoutSessionId,
+              })}
+            disabled={goToStep.isLoading}
+            className="text-red-400 italic underline disabled:opacity-70 disabled:cursor-not-allowed"
+          >
             Go to step 3
           </button>
         </div>
@@ -121,8 +153,8 @@ export const Step4 = ({ form, items }: Props) => {
           {Object.keys(formValues.step3.guestInformation).map((key, i) => {
             const roomValues = items.find((item) => item.id === key);
             const values = formValues.step3.guestInformation[key];
-            const peopleArray = Object.keys(values.people).map((key) =>
-              values.people[key]
+            const peopleArray = Object.keys(values?.people ?? {}).map((key) =>
+              values?.people[key] ?? null
             );
 
             if (!roomValues) return null;

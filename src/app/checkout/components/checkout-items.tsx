@@ -42,14 +42,14 @@ export const CheckoutItems = ({ items }: Props) => {
 
   return (
     <table
-      className="table-auto text-left flex-1"
+      className="table-auto overflow-x-scroll text-left flex-1 w-full lg:w-fit"
       cellPadding="16px"
     >
       <thead className="text-neutral-700 font-light text-sm border-b-[1px] border-neutral-100">
         <tr>
-          <th className="font-light">#</th>
+          <th className="font-light lg:block hidden">#</th>
           <th className="font-light">Name</th>
-          <th className="font-light">Price</th>
+          <th className="font-light md:block hidden">Price</th>
           <th className="font-light">Additional</th>
           <th />
         </tr>
@@ -57,16 +57,21 @@ export const CheckoutItems = ({ items }: Props) => {
       <tbody>
         {items.map((room, i) => (
           <tr key={i}>
-            <td>
+            <td className="lg:table-cell hidden">
               <img
-                className="max-w-[70px] rounded-md"
+                className="max-w-[70px] rounded-md lg:block hidden"
                 src={room.images[0]}
               />
             </td>
-            <td className="text-sm font-bold text-neutral-700 max-w-[250px]">
+            <td className="text-sm font-bold text-neutral-700 max-w-[250px] flex flex-col gap-2">
               {room.name}
+
+              <p className="text-red-400 text-sm md:hidden block font-bold">
+                ${room.price.toString()}
+                <span className="text-xs font-light">/night em</span>
+              </p>
             </td>
-            <td className="text-red-400 text-sm font-bold">
+            <td className="text-red-400 text-sm md:table-cell hidden font-bold">
               ${room.price.toString()}
               <span className="text-xs font-light">/night</span>
             </td>

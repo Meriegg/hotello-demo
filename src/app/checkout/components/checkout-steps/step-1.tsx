@@ -16,10 +16,12 @@ export const Step1 = ({ form }: Props) => {
       <div className="flex items-center gap-2">
         <Input
           {...form.register("step1.firstName")}
+          containerClassName="w-full"
           error={step1?.firstName?.message}
           label="First name"
         />
         <Input
+          containerClassName="w-full"
           {...form.register("step1.lastName")}
           error={step1?.lastName?.message}
           label="Last name"

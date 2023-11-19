@@ -28,4 +28,4 @@ export const StepsInOrderArray: CheckoutStep[] = [
   "BOOKING_DETAILS",
   "REVIEW_INFORMATION",
   "FINAL_PAYMENT",
-];
+] as const;

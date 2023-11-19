@@ -239,7 +239,13 @@ export const Checkoutform = ({ items }: Props) => {
       step: "step 4",
       stepNum: 3,
       slug: "Review information",
-      form: <Step4 form={form} items={items} />,
+      form: (
+        <Step4
+          form={form}
+          items={items}
+          checkoutSessionId={checkoutSession.data?.checkoutSession.id ?? ""}
+        />
+      ),
       nextBtn: {
         contents: (
           <>
@@ -269,7 +275,7 @@ export const Checkoutform = ({ items }: Props) => {
   return (
     <div
       ref={parentRef}
-      className="flex flex-1 max-w-[500px] flex-col gap-4 p-4 border-[1px] border-neutral-100 mb-8"
+      className="flex lg:mx-0 w-full mx-auto flex-1 lg:max-w-[500px] flex-col gap-4 p-4 border-[1px] border-neutral-100 mb-8"
     >
       {checkoutSession.isLoading && <Loader label="Fetching data" />}
       {!checkoutSession.isLoading && checkoutSession.data && (

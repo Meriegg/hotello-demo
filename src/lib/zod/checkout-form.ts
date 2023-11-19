@@ -1,4 +1,15 @@
+import type { CheckoutStep } from "@prisma/client";
 import { z } from "zod";
+
+export const CheckoutSteps = z.enum(
+  [
+    "FINAL_PAYMENT",
+    "BILLING_DETAILS",
+    "BOOKING_DETAILS",
+    "PERSONAL_DETAILS",
+    "REVIEW_INFORMATION",
+  ] as CheckoutStep[],
+);
 
 export const CheckoutStep1Validator = z.object({
   firstName: z.string(),

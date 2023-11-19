@@ -14,6 +14,7 @@ import {
   CheckoutStep3Validator,
 } from "~/lib/zod/checkout-form";
 import { getStepStrData, StepsInOrderArray } from "~/server/utils/checkout";
+import type { CheckoutStep } from "@prisma/client";
 
 export const checkoutRouter = createTRPCRouter({
   getCheckoutSession: publicProcedure.query(async ({ ctx: { db } }) => {
@@ -191,4 +192,27 @@ export const checkoutRouter = createTRPCRouter({
       };
     },
   ),
+  goToStep: publicProcedure.input(
+    z.object({
+      sessionId: z.string(),
+      step: z.enum(
+        [
+          "FINAL_PAYMENT",
+          "BILLING_DETAILS",
+          "BOOKING_DETAILS",
+          "PERSONAL_DETAILS",
+          "REVIEW_INFORMATION",
+        ],
+      ),
+    }),
+  ).mutation(async ({ ctx: { db }, input: { sessionId, step } }) => {
+    return await db.checkoutSession.update({
+      where: {
+        id: sessionId,
+      },
+      data: {
+        step,
+      },
+    });
+  }),
 });

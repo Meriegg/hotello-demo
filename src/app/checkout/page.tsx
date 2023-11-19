@@ -43,7 +43,7 @@ const Page = () => {
       <MaxWidthContainer className="border-l-[1px] border-neutral-100 min-h-screen">
         <p className="text-2xl font-bold text-neutral-900 p-12">Checkout</p>
 
-        <div className="w-full flex items-start">
+        <div className="w-full flex items-start lg:flex-row flex-col-reverse">
           <CheckoutItems items={cartItems.data.products} />
           <Checkoutform items={cartItems.data.products} />
         </div>

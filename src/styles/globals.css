@@ -49,7 +49,7 @@
 }
 
 .input-container:focus-within .input-label {
-  @apply -top-[10px] left-1 translate-y-0 transform text-xs;
+  @apply -top-2 left-1 translate-y-0 transform text-xs;
 }
 
 .input-main:not(:placeholder-shown) + .input-label {

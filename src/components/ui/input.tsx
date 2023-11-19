@@ -37,14 +37,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               "input-main",
               className,
             )}
-            placeholder={placeholder ?? ""}
+            placeholder={placeholder ?? " "}
             ref={ref}
             {...props}
           />
           {label && (
             <Label
               htmlFor={propsId ?? id}
-              className="input-label absolute z-0 text-sm text-neutral-700 bg-white transition-all duration-300"
+              className="cursor-text input-label absolute z-0 text-sm text-neutral-700 bg-white transition-all duration-300"
             >
               {label}
             </Label>
