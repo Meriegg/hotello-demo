@@ -45,15 +45,19 @@
 }
 
 .input-container .input-label {
-  @apply left-4 top-1/2 -translate-y-1/2 transform bg-white px-1;
+  @apply left-4 top-1/2 -translate-y-1/2 transform bg-transparent px-1;
+}
+
+.input-container input:disabled + .input-label {
+  @apply left-2 rounded-lg;
 }
 
 .input-container:focus-within .input-label {
-  @apply -top-2 left-1 translate-y-0 transform text-xs;
+  @apply -top-2 left-1 translate-y-0 transform bg-white text-xs;
 }
 
 .input-main:not(:placeholder-shown) + .input-label {
-  @apply -top-2 left-1 translate-y-0 transform text-xs;
+  @apply -top-2 left-1 translate-y-0 transform bg-white text-xs;
 }
 
 @media (pointer: none), (pointer: coarse) {

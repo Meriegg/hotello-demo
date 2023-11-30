@@ -22,6 +22,8 @@ import { useState } from "react";
 import { Step3 } from "./checkout-steps/step3/index";
 import type { Room } from "@prisma/client";
 import { Step4 } from "./checkout-steps/step-4";
+import { useToast } from "~/hooks/use-toast";
+import Link from "next/link";
 
 export type StepType = {
   slug: string;
@@ -39,6 +41,17 @@ interface Props {
 }
 
 export const Checkoutform = ({ items }: Props) => {
+  const { toast } = useToast();
+  const [cookieError, setCookieError] = useState(false);
+  const [usedDbData, setUsedDbData] = useState(false);
+  const [showUseDbData, setShowUseDbData] = useState(false);
+  const authSession = api.account.getCurrentSession.useQuery(undefined, {
+    onSuccess: () => {
+      setShowUseDbData(true);
+    },
+    retry: 0,
+  });
+
   const [didLoadData, setDidLoadData] = useState(false);
   const [parentRef] = useAutoAnimate();
   const apiUtils = api.useUtils();
@@ -72,9 +85,9 @@ export const Checkoutform = ({ items }: Props) => {
   });
 
   const checkoutSession = api.checkout.getCheckoutSession.useQuery(undefined, {
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       if (data.createdNew) {
-        await fetch("/api/setcookie", {
+        fetch("/api/setcookie", {
           method: "POST",
           body: JSON.stringify({
             key: "checkout",
@@ -86,6 +99,15 @@ export const Checkoutform = ({ items }: Props) => {
               maxAge: 60 * 60 * 24 * 7,
             },
           }),
+        }).catch(() => {
+          toast({
+            variant: "destructive",
+            title: "An error happened",
+            description:
+              "An error happened while trying to persist your session.",
+          });
+
+          setCookieError(true);
         });
       }
 
@@ -99,7 +121,7 @@ export const Checkoutform = ({ items }: Props) => {
         lastName: checkoutSesh.personaldetails_lastName ?? "",
         phoneNumber: checkoutSesh.personaldetails_phoneNum,
         phoneNumCountry: checkoutSesh.personaldetails_phoneNumCountry,
-        age: checkoutSesh.personaldetails_age as number,
+        age: checkoutSesh.personaldetails_age!,
       });
 
       form.setValue("step2", {
@@ -154,7 +176,7 @@ export const Checkoutform = ({ items }: Props) => {
   });
 
   const stepNums: Record<string, StepType> = {
-    "PERSONAL_DETAILS": {
+    PERSONAL_DETAILS: {
       step: "step 1",
       stepNum: 0,
       slug: "Personal Details",
@@ -162,20 +184,20 @@ export const Checkoutform = ({ items }: Props) => {
       nextBtn: {
         contents: (
           <>
-            Billing details <ArrowRight className="w-4 h-4 text-white" />
+            Billing details <ArrowRight className="h-4 w-4 text-white" />
           </>
         ),
         validateStep: () => {
           const { success } = CheckoutStep1Validator.safeParse(
             form.getValues("step1"),
           );
-          form.trigger("step1");
+          form.trigger("step1").catch((e) => console.error(e));
 
           return success;
         },
       },
     },
-    "BILLING_DETAILS": {
+    BILLING_DETAILS: {
       step: "step 2",
       stepNum: 1,
       form: <Step2 form={form} />,
@@ -183,7 +205,7 @@ export const Checkoutform = ({ items }: Props) => {
       nextBtn: {
         contents: (
           <>
-            Booking details <ArrowRight className="w-4 h-4 text-white" />
+            Booking details <ArrowRight className="h-4 w-4 text-white" />
           </>
         ),
         validateStep: () => {
@@ -208,13 +230,13 @@ export const Checkoutform = ({ items }: Props) => {
             }
           }
 
-          form.trigger("step2");
+          form.trigger("step2").catch((e) => console.error(e));
 
           return success;
         },
       },
     },
-    "BOOKING_DETAILS": {
+    BOOKING_DETAILS: {
       step: "step 3",
       stepNum: 2,
       form: <Step3 items={items} form={form} />,
@@ -222,20 +244,20 @@ export const Checkoutform = ({ items }: Props) => {
       nextBtn: {
         contents: (
           <>
-            Review information <ArrowRight className="w-4 h-4 text-white" />
+            Review information <ArrowRight className="h-4 w-4 text-white" />
           </>
         ),
         validateStep: () => {
           const { success } = CheckoutStep3Validator.safeParse(
             form.getValues("step3"),
           );
-          form.trigger("step3");
+          form.trigger("step3").catch((e) => console.error(e));
 
           return success;
         },
       },
     },
-    "REVIEW_INFORMATION": {
+    REVIEW_INFORMATION: {
       step: "step 4",
       stepNum: 3,
       slug: "Review information",
@@ -249,7 +271,7 @@ export const Checkoutform = ({ items }: Props) => {
       nextBtn: {
         contents: (
           <>
-            Final payment <ArrowRight className="w-4 h-4 text-white" />
+            Final payment <ArrowRight className="h-4 w-4 text-white" />
           </>
         ),
         validateStep: () => {
@@ -257,7 +279,7 @@ export const Checkoutform = ({ items }: Props) => {
         },
       },
     },
-    "FINAL_PAYMENT": {
+    FINAL_PAYMENT: {
       step: "step 5",
       stepNum: 4,
       slug: "Final payment",
@@ -275,18 +297,106 @@ export const Checkoutform = ({ items }: Props) => {
   return (
     <div
       ref={parentRef}
-      className="flex lg:mx-0 w-full mx-auto flex-1 lg:max-w-[500px] flex-col gap-4 p-4 border-[1px] border-neutral-100 mb-8"
+      className="mx-auto mb-8 flex w-full flex-1 flex-col gap-4 border-[1px] border-neutral-100 p-4 lg:mx-0 lg:max-w-[500px]"
     >
-      {checkoutSession.isLoading && <Loader label="Fetching data" />}
-      {!checkoutSession.isLoading && checkoutSession.data && (
-        <StepRenderer
-          currentSession={stepNums[checkoutSession.data.checkoutSession.step] ??
-            null}
-          loadingNextStep={nextStepMutation.isLoading}
-          nextStep={nextStep}
-          form={form}
-        />
-      )}
+      {cookieError
+        ? (
+          <>
+            <p className="font-bold text-lg text-center text-red-400">Error</p>
+            <p className="text-neutral-700 text-sm text-center">
+              This checkout session will not be persisted, meaning that if you
+              refresh this page the data you entered will be lost.{" "}
+              <Link
+                href="/legal/other/checkout-cookie-error"
+                className="text-red-400 hover:underline"
+              >
+                More info
+              </Link>
+            </p>
+            <p className="text-neutral-700 text-sm text-center">
+              Please check your internet connection and refresh this page before
+              continuing without persistent sessions
+            </p>
+            <p className="text-neutral-700 text-sm text-center">
+              Please save this sequence in case you need to contact support:
+              {" "}
+              <span className="font-bold text-red-400 underline">
+                {checkoutSession?.data?.checkoutSession?.id}
+              </span>
+            </p>
+            <button
+              onClick={() => setCookieError(false)}
+              className="text-sm text-neutral-900 text-center px-2 py-2 bg-neutral-50 hover:bg-neutral-100 rounded-md"
+            >
+              Agree with the terms above and continue
+            </button>
+          </>
+        )
+        : (
+          <>
+            {checkoutSession.isLoading && <Loader label="Fetching data" />}
+            {!checkoutSession.isLoading && checkoutSession.data && (
+              <StepRenderer
+                currentSession={stepNums[
+                  checkoutSession.data.checkoutSession.step
+                ] ??
+                  null}
+                loadingNextStep={nextStepMutation.isLoading}
+                nextStep={nextStep}
+                form={form}
+              />
+            )}
+            {showUseDbData &&
+              checkoutSession.data?.checkoutSession.step ===
+                "PERSONAL_DETAILS" &&
+              !usedDbData && (
+              <div className="flex flex-col gap-2">
+                <hr className="w-full border-neutral-100" />
+                <p className="text-sm text-neutral-700">
+                  Use your current account data?
+                </p>
+                <div className="flex items-center gap-2 text-sm text-red-400">
+                  <button
+                    className="underline"
+                    onClick={() => {
+                      setShowUseDbData(false);
+                      setUsedDbData(true);
+                      if (authSession?.data) {
+                        form.setValue("step1", {
+                          firstName: authSession.data.user.firstName,
+                          lastName: authSession.data.user.lastName,
+                          email: authSession.data.user.email,
+                          age: authSession.data.user.age,
+                          phoneNumber: authSession.data.user.phoneNum,
+                          phoneNumCountry:
+                            authSession.data.user.phoneNumCountry,
+                        });
+
+                        form.setValue("step2", {
+                          address: authSession.data.user.billingAddress,
+                          countryOrRegion: authSession.data.user.billingRegion,
+                          cityOrTown: authSession.data.user.billingCityTown,
+                          postalCode: authSession.data.user.billingPostalCode,
+                        });
+                      }
+                    }}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUsedDbData(true);
+                      setShowUseDbData(false);
+                    }}
+                    className="underline"
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
     </div>
   );
 };

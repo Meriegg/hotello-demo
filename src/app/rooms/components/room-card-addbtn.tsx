@@ -38,8 +38,6 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
   });
   const addToCart = api.cart.addToCart.useMutation({
     onSuccess: async (data) => {
-      console.log(data);
-
       await fetch("/api/setcookie", {
         method: "POST",
         body: JSON.stringify({

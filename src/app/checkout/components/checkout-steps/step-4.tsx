@@ -55,7 +55,7 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
           />
           <InfoDisplay
             label="Age"
-            value={formValues.step1.age.toString()}
+            value={formValues.step1.age?.toString()}
           />
           <InfoDisplay
             label="Phone number"

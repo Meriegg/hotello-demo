@@ -4,6 +4,7 @@ import { Merriweather } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import { Toaster } from "~/components/ui/toaster";
 import { Navbar } from "~/components/navbar/navbar";
 
 const merriweather = Merriweather({
@@ -26,6 +27,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-serif ${merriweather.variable}`}>
+        <Toaster />
+
         <TRPCReactProvider headers={headers()}>
           <Navbar />
           {children}

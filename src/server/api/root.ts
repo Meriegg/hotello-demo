@@ -1,3 +1,4 @@
+import { accountsRouter } from "./routers/account";
 import { aiRouter } from "./routers/ai";
 import { cartRouter } from "./routers/cart";
 import { checkoutRouter } from "./routers/checkout";
@@ -9,6 +10,7 @@ export const appRouter = createTRPCRouter({
   cart: cartRouter,
   ai: aiRouter,
   checkout: checkoutRouter,
+  account: accountsRouter,
 });
 
 export type AppRouter = typeof appRouter;

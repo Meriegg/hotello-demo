@@ -1,5 +1,7 @@
+"use client";
+
 import { MaxWidthContainer } from "~/components/MaxWidthContainer";
-import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -7,8 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useToast } from "~/hooks/use-toast";
 
 const Page = () => {
+  const { toast } = useToast();
+
   return (
     <MaxWidthContainer>
       <h1 className="py-12 text-3xl font-bold">Components</h1>
@@ -25,6 +30,18 @@ const Page = () => {
           </SelectContent>
         </Select>
       </div>
+
+      <Button
+        onClick={() => {
+          toast({
+            title: "Test Toast",
+            description: "This is a toast",
+            variant: "destructive",
+          });
+        }}
+      >
+        Toast
+      </Button>
     </MaxWidthContainer>
   );
 };

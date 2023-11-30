@@ -13,3 +13,7 @@ export const getPriceRange = (price: number) => {
     }
   });
 };
+
+export const randomNum = (min: number, max: number) => {
+  return Math.random() * (max - min) + min;
+};

@@ -14,7 +14,6 @@ import {
   CheckoutStep3Validator,
 } from "~/lib/zod/checkout-form";
 import { getStepStrData, StepsInOrderArray } from "~/server/utils/checkout";
-import type { CheckoutStep } from "@prisma/client";
 
 export const checkoutRouter = createTRPCRouter({
   getCheckoutSession: publicProcedure.query(async ({ ctx: { db } }) => {
@@ -101,7 +100,7 @@ export const checkoutRouter = createTRPCRouter({
   nextStep: publicProcedure.input(
     z.object({
       sessionId: z.string(),
-      formData: z.any(),
+      formData: z.record(z.string(), z.any()),
     }),
   ).mutation(
     async ({ ctx: { db }, input: { sessionId, formData } }) => {
@@ -123,15 +122,16 @@ export const checkoutRouter = createTRPCRouter({
       }
 
       const stepData = getStepStrData(checkoutSession.step);
-      if (!stepData) {
+      if (!stepData?.slug) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Invalid step.",
         });
       }
 
+      const formDataKey: string = stepData.slug;
       const bodyData = stepData?.validator
-        ? stepData.validator.parse(formData[stepData.slug])
+        ? stepData.validator.parse(formData[formDataKey])
         : null;
 
       const nextStep = StepsInOrderArray.at(stepData.num);

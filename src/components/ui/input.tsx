@@ -6,7 +6,7 @@ import { cn } from "~/lib/utils";
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
-  error?: string;
+  error?: string | null;
   containerClassName?: string;
 }
 
@@ -44,7 +44,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {label && (
             <Label
               htmlFor={propsId ?? id}
-              className="cursor-text input-label absolute z-0 text-sm text-neutral-700 bg-white transition-all duration-300"
+              className="cursor-text input-label absolute z-0 text-sm text-neutral-700 bg-none transition-all duration-300"
             >
               {label}
             </Label>

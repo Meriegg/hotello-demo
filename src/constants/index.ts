@@ -12,3 +12,6 @@ export const DefaultPriceRanges = [
     range: [800, Infinity],
   },
 ] as { slug: string; range: [number, number] }[];
+
+export const encryptionAlgorithm = "sha256";
+export const cipherAlgorithm = "aes-256-cbc";

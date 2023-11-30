@@ -3,6 +3,7 @@
 import type { Room, RoomCategory } from "@prisma/client";
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useToast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 
 type RoomWithCategory = Room & {
@@ -15,9 +16,10 @@ interface Props {
 
 export const CheckoutItems = ({ items }: Props) => {
   const apiUtils = api.useUtils();
+  const { toast } = useToast();
   const removeFromCart = api.cart.removeItem.useMutation({
-    onSuccess: async (data) => {
-      await fetch("/api/setcookie", {
+    onSuccess: (data) => {
+      fetch("/api/setcookie", {
         method: "POST",
         body: JSON.stringify({
           key: "cart",
@@ -29,27 +31,33 @@ export const CheckoutItems = ({ items }: Props) => {
             maxAge: 60 * 60 * 24 * 7,
           },
         }),
+      }).catch(() => {
+        toast({
+          title: "An error happened",
+          description: "Could not remove item from cart.",
+          variant: "destructive",
+        });
       });
     },
     onSettled: () => {
       apiUtils.cart.invalidate().catch((e) => console.error(e));
-      apiUtils.checkout.getCheckoutSession.invalidate().catch((e) =>
-        console.error(e)
-      );
+      apiUtils.checkout.getCheckoutSession
+        .invalidate()
+        .catch((e) => console.error(e));
     },
     retry: 0,
   });
 
   return (
     <table
-      className="table-auto overflow-x-scroll text-left flex-1 w-full lg:w-fit"
+      className="w-full flex-1 table-auto overflow-x-scroll text-left lg:w-fit"
       cellPadding="16px"
     >
-      <thead className="text-neutral-700 font-light text-sm border-b-[1px] border-neutral-100">
+      <thead className="border-b-[1px] border-neutral-100 text-sm font-light text-neutral-700">
         <tr>
-          <th className="font-light lg:block hidden">#</th>
+          <th className="hidden font-light lg:block">#</th>
           <th className="font-light">Name</th>
-          <th className="font-light md:block hidden">Price</th>
+          <th className="hidden font-light md:block">Price</th>
           <th className="font-light">Additional</th>
           <th />
         </tr>
@@ -57,21 +65,21 @@ export const CheckoutItems = ({ items }: Props) => {
       <tbody>
         {items.map((room, i) => (
           <tr key={i}>
-            <td className="lg:table-cell hidden">
+            <td className="hidden lg:table-cell">
               <img
-                className="max-w-[70px] rounded-md lg:block hidden"
+                className="hidden max-w-[70px] rounded-md lg:block"
                 src={room.images[0]}
               />
             </td>
-            <td className="text-sm font-bold text-neutral-700 max-w-[250px] flex flex-col gap-2">
+            <td className="flex max-w-[250px] flex-col gap-2 text-sm font-bold text-neutral-700">
               {room.name}
 
-              <p className="text-red-400 text-sm md:hidden block font-bold">
+              <p className="block text-sm font-bold text-red-400 md:hidden">
                 ${room.price.toString()}
                 <span className="text-xs font-light">/night em</span>
               </p>
             </td>
-            <td className="text-red-400 text-sm md:table-cell hidden font-bold">
+            <td className="hidden text-sm font-bold text-red-400 md:table-cell">
               ${room.price.toString()}
               <span className="text-xs font-light">/night</span>
             </td>
@@ -80,9 +88,7 @@ export const CheckoutItems = ({ items }: Props) => {
                 • Accommodates {room.accommodates}{" "}
                 {room.accommodates > 1 ? "people" : "person"}
               </p>
-              <p className="text-xs text-neutral-700">
-                • {room.category.name}
-              </p>
+              <p className="text-xs text-neutral-700">• {room.category.name}</p>
               {room.discountPercentage && (
                 <p className="text-xs text-neutral-700">
                   • ${room.discountPercentage}% discount
@@ -99,9 +105,9 @@ export const CheckoutItems = ({ items }: Props) => {
               <button
                 disabled={removeFromCart.isLoading}
                 onClick={() => removeFromCart.mutate({ productId: room.id })}
-                className="disabled:opacity-70 disabled:cursor-not-allowed"
+                className="disabled:cursor-not-allowed disabled:opacity-70"
               >
-                <Trash2 className="w-4 h-4 text-red-400" />
+                <Trash2 className="h-4 w-4 text-red-400" />
               </button>
             </td>
           </tr>

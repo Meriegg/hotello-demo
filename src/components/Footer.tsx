@@ -44,7 +44,13 @@ export const Footer = ({ theme, className }: Props) => {
                 </a>
               </p>
               <p className="text-neutral-200">•</p>
-              <Link href="/faq" className="text-white hover:underline">
+              <Link
+                href="/faq"
+                className={cn("hover:underline", {
+                  "text-white": theme === "light",
+                  "text-neutral-900": theme === "dark",
+                })}
+              >
                 FAQ
               </Link>
               <p className="text-neutral-200">•</p>
@@ -81,11 +87,9 @@ export const Footer = ({ theme, className }: Props) => {
           </div>
           <div className="flex flex-col items-start gap-2">
             <img
-              src={
-                theme === "light"
-                  ? "/trustpilot_mini_light.svg"
-                  : "/trustpilot_mini_dark.svg"
-              }
+              src={theme === "light"
+                ? "/trustpilot_mini_light.svg"
+                : "/trustpilot_mini_dark.svg"}
             />
             <p
               className={cn("flex items-center gap-1 text-xs font-bold", {

@@ -70,10 +70,39 @@ model User {
   billingPostalCode            String
   metadataSignedUpFromCheckout Boolean? @default(false)
 
-  aiConversations AiHelpResponse[]          @relation("AiConversations")
-  pastGuests      BookingRoomGuestDetails[] @relation("PastGuests")
-  role            UserRole                  @default(USER)
-  bookings        Booking[]                 @relation("userBookings")
+  emailVerifications EmailVerification[]       @relation("EmailVerifications")
+  userSessions       UserSession[]             @relation("UserSessions")
+  aiConversations    AiHelpResponse[]          @relation("AiConversations")
+  pastGuests         BookingRoomGuestDetails[] @relation("PastGuests")
+  role               UserRole                  @default(USER)
+  bookings           Booking[]                 @relation("userBookings")
+}
+
+model UserSession {
+  id String @id @default(cuid())
+
+  sessionToken            String  @unique
+  publicVerificationToken String
+  currentIPHash           String?
+  numOfIpChanges          Int     @default(0)
+  requiresVerificaiton    Boolean @default(false)
+
+  expiresOn DateTime
+  createdOn DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], name: "UserSessions")
+}
+
+model EmailVerification {
+  id          String   @id @default(cuid())
+  code        String
+  alreadyUsed Boolean  @default(false)
+  expiresOn   DateTime
+  createdOn   DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], name: "EmailVerifications")
 }
 
 enum PaymentMethod {
