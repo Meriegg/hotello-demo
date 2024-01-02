@@ -12,9 +12,9 @@ import { CheckIcon } from "lucide-react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import type { UseFormReturn } from "react-hook-form";
-import { CheckoutFormValidator } from "~/lib/zod/checkout-form";
+import type { CheckoutFormValidator } from "~/lib/zod/checkout-form";
 import { Button } from "~/components/ui/button";
-import { z } from "zod";
+import type { z } from "zod";
 import { Loader } from "~/components/ui/loader";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -28,24 +28,20 @@ interface Props {
   existingBookingId: string | null;
 }
 
-export const PaymentForm = (
-  {
-    clientSecret,
-    privacyCheck,
-    reservationCheck,
-    form,
-    existingBookingId,
-  }: Props,
-) => {
+export const PaymentForm = ({
+  clientSecret,
+  privacyCheck,
+  reservationCheck,
+  form,
+  existingBookingId,
+}: Props) => {
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
   const [activeLoadingStep, setActiveLoadingStep] = useState<number | null>(
     null,
   );
-  const [message, setMessage] = useState<string | null>(
-    null,
-  );
+  const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
@@ -90,9 +86,9 @@ export const PaymentForm = (
         payment_method: {
           card: cardElement,
           billing_details: {
-            name: `${form.getValues("step1.firstName")} ${
-              form.getValues("step1.lastName")
-            }`,
+            name: `${form.getValues("step1.firstName")} ${form.getValues(
+              "step1.lastName",
+            )}`,
             email: form.getValues("step1.email"),
             address: {
               city: form.getValues("step2.cityOrTown"),
@@ -127,15 +123,19 @@ export const PaymentForm = (
       setLoading(false);
 
       router.push(`/paymentStatus/${bookingId}`);
+
+      // eslint-disable-next-line
     } catch (error: any) {
       setLoading(false);
       setIsError(true);
+
+      // eslint-disable-next-line
       setMessage(`Something went wrong. ${error?.message}`);
     }
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full mt-4">
+    <div className="mt-4 flex w-full flex-col gap-2">
       <p className="text-sm text-neutral-700">Payment details</p>
       <CardNumberElement
         options={{
@@ -145,22 +145,26 @@ export const PaymentForm = (
           },
           disabled: isLoading,
         }}
-        className="w-full text-sm text-neutral-900 px-5 py-4 border-neutral-100 border-[1px] font-serif! transition-all duration-300"
+        className="font-serif! w-full border-[1px] border-neutral-100 px-5 py-4 text-sm text-neutral-900 transition-all duration-300"
       />
       <div className="flex items-center gap-2">
         <CardExpiryElement
           options={{ disabled: isLoading }}
-          className="w-full text-sm text-neutral-900 px-5 py-4 border-neutral-100 border-[1px] font-serif!"
+          className="font-serif! w-full border-[1px] border-neutral-100 px-5 py-4 text-sm text-neutral-900"
         />
         <CardCvcElement
           options={{ disabled: isLoading }}
-          className="w-full text-sm text-neutral-900 px-5 py-4 border-neutral-100 border-[1px] font-serif!"
+          className="font-serif! w-full border-[1px] border-neutral-100 px-5 py-4 text-sm text-neutral-900"
         />
       </div>
 
-      <div className="flex items-center justify-between w-full">
-        <img src="/powered_by_stripe.svg" className="w-[120px] h-auto" />
-        <p className="text-xs text-neutral-700 text-italic font-normal">
+      <div className="flex w-full items-center justify-between">
+        <img
+          src="/powered_by_stripe.svg"
+          className="h-auto w-[120px]"
+          alt="Powered by stripe"
+        />
+        <p className="text-italic text-xs font-normal text-neutral-700">
           Your details are secure
         </p>
       </div>
@@ -170,32 +174,31 @@ export const PaymentForm = (
           <Button
             onClick={() => completeBooking()}
             disabled={!privacyCheck || !reservationCheck}
-            className="flex w-full items-center gap-2 mt-2"
+            className="mt-2 flex w-full items-center gap-2"
           >
-            Complete booking <CheckIcon className="w-4 h-4 text-white" />
+            Complete booking <CheckIcon className="h-4 w-4 text-white" />
           </Button>
         </>,
         document.getElementById("COMPLETE_BOOKING_BUTTON_PORTAL") ??
           document.body,
       )}
 
-      {(isLoading || message || isError) && (
+      {(isLoading ?? message ?? isError) && (
         <>
           {createPortal(
-            <div className="absolute inset-0 w-full bg-black/80 z-20 p-6">
+            <div className="absolute inset-0 z-20 w-full bg-black/80 p-6">
               <div className="flex items-start gap-2">
                 {loadingSteps.map((step, i) => (
-                  <div key={i} className="w-full flex flex-col gap-2">
+                  <div key={i} className="flex w-full flex-col gap-2">
                     <div
                       className={cn(
                         "h-[4px] w-full rounded-full shadow-sm",
                         activeLoadingStep === i ? "bg-white" : "bg-white/30",
                       )}
-                    >
-                    </div>
+                    ></div>
                     <p
                       className={cn(
-                        "text-center text-sm flex items-center w-full justify-center gap-2",
+                        "flex w-full items-center justify-center gap-2 text-center text-sm",
                         activeLoadingStep === i
                           ? "text-white"
                           : "text-white/70",
@@ -214,13 +217,14 @@ export const PaymentForm = (
                     {message && activeLoadingStep === i && (
                       <p
                         className={cn(
-                          "text-sm w-full text-center font-bold",
+                          "w-full text-center text-sm font-bold",
                           isError ? "text-red-400" : "text-white/70",
                         )}
                       >
-                        {message} {isError && (
+                        {message}{" "}
+                        {isError && (
                           <button
-                            className="underline text-white font-normal"
+                            className="font-normal text-white underline"
                             onClick={() => {
                               setLoading(false);
                               setIsError(false);
@@ -237,32 +241,33 @@ export const PaymentForm = (
                 ))}
 
                 {(activeLoadingStep === null ||
-                  activeLoadingStep > loadingSteps.length - 1) && message && (
-                  <p
-                    className={cn(
-                      "absolute text-center top-1/2 left-1/2 transform text-base font-bold -translate-y-1/2 -translate-x-1/2",
-                      isError ? "text-red-400/70" : "text-white",
-                    )}
-                  >
-                    {message} {isError && (
-                      <button
-                        className="underline text-white font-normal"
-                        onClick={() => {
-                          setLoading(false);
-                          setIsError(false);
-                          setMessage(null);
-                          setActiveLoadingStep(null);
-                        }}
-                      >
-                        Try again?
-                      </button>
-                    )}
-                  </p>
-                )}
+                  activeLoadingStep > loadingSteps.length - 1) &&
+                  message && (
+                    <p
+                      className={cn(
+                        "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-center text-base font-bold",
+                        isError ? "text-red-400/70" : "text-white",
+                      )}
+                    >
+                      {message}{" "}
+                      {isError && (
+                        <button
+                          className="font-normal text-white underline"
+                          onClick={() => {
+                            setLoading(false);
+                            setIsError(false);
+                            setMessage(null);
+                            setActiveLoadingStep(null);
+                          }}
+                        >
+                          Try again?
+                        </button>
+                      )}
+                    </p>
+                  )}
               </div>
             </div>,
-            document.getElementById("LOADING_OVERLAY_PORTAL") ??
-              document.body,
+            document.getElementById("LOADING_OVERLAY_PORTAL") ?? document.body,
           )}
         </>
       )}

@@ -4,17 +4,7 @@ export const calculatePrices = (items: Room[], stayDuration: number) => {
   let baseRoomsPrice = 0;
 
   items.forEach((item) => {
-    const discountPercentage = parseFloat(
-      item.discountPercentage?.toString() ?? "0",
-    );
-    const discountPrice = parseFloat(
-      item.discountedPrice?.toString() ?? "0",
-    );
-    const itemPrice = parseFloat(item.price.toString());
-
-    baseRoomsPrice +=
-      ((discountPercentage && discountPrice) ? discountPrice : itemPrice) *
-      100;
+    baseRoomsPrice += item.price;
   });
 
   const cartTotal = baseRoomsPrice * stayDuration;

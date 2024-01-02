@@ -47,7 +47,7 @@ export const FilterChips = () => {
     })),
     ...filterOptions.selectedPrices.map((pRange) => ({
       label: "price range:",
-      text: `$${pRange[0]} - $${pRange[1]}`,
+      text: `$${pRange[0] / 100} - $${pRange[1] / 100}`,
       removeFunc: () => {
         filterOptions.setPriceRange([
           ...filterOptions.selectedPrices.filter(

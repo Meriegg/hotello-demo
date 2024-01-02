@@ -5,7 +5,7 @@ import type { User } from "@prisma/client";
 import { getCode as getCountryCode, getNames } from "country-list";
 import { SaveIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import type { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { PhoneNumInput } from "~/components/ui/phoneinput";
@@ -47,14 +47,14 @@ export const ChangeAccountDetails = ({ user }: Props) => {
   });
 
   const changeDetails = api.account.changeAccountDetails.useMutation({
-    onSuccess: (data) => {
+    onSuccess: () => {
       router.refresh();
     },
   });
 
   return (
     <form
-      className="flex flex-col gap-2 mt-4"
+      className="mt-4 flex flex-col gap-2"
       onSubmit={form.handleSubmit((data) => {
         const countryCode = getCountryCode(data.billingRegion ?? "");
 
@@ -76,16 +76,16 @@ export const ChangeAccountDetails = ({ user }: Props) => {
       })}
       style={{ width: "min(500px, 100%)" }}
     >
-      <div className="flex items-center gap-2 w-full">
+      <div className="flex w-full items-center gap-2">
         <Input
-          className="disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70 rounded-tl-[15px]"
+          className="rounded-tl-[15px] disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
           containerClassName="w-full"
           label="First Name"
           error={form.formState.errors.firstName?.message}
           {...form.register("firstName")}
         />
         <Input
-          className="disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70 rounded-tr-[15px]"
+          className="rounded-tr-[15px] disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
           error={form.formState.errors.lastName?.message}
           containerClassName="w-full"
           label="Last Name"
@@ -101,12 +101,12 @@ export const ChangeAccountDetails = ({ user }: Props) => {
           form.setValue("phoneNum", value);
           form.setValue(
             "phoneNumCountry",
-            (country as any)?.countryCode ?? "",
+            (country as { countryCode?: string })?.countryCode ?? "",
           );
         }}
       />
       <Input
-        className="disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70"
+        className="disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
         value={user.email}
         label="Email"
         disabled
@@ -119,25 +119,28 @@ export const ChangeAccountDetails = ({ user }: Props) => {
           <SelectValue placeholder="Country or Region" />
         </SelectTrigger>
         <SelectContent>
-          {getNames().map((name) => <SelectItem value={name}>{name}
-          </SelectItem>)}
+          {getNames().map((name, i) => (
+            <SelectItem key={i} value={name}>
+              {name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
       <Input
-        className="disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70"
+        className="disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
         label="Address"
         {...form.register("billingAddress")}
       />
 
       <Input
-        className="disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70"
+        className="disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
         label="City or town"
         {...form.register("billingCityTown")}
       />
 
       <Input
-        className="disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70 rounded-b-[15px]"
+        className="rounded-b-[15px] disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
         label="Postal code"
         error={form.formState.errors.billingPostalCode?.message}
         {...form.register("billingPostalCode")}
@@ -146,18 +149,19 @@ export const ChangeAccountDetails = ({ user }: Props) => {
       <Button
         type="submit"
         disabled={!form.formState.isDirty || changeDetails.isLoading}
-        className="flex active:ring-2 ring-neutral-50 transition-all duration-300 gap-2 w-fit bg-neutral-50 px-8 hover:bg-neutral-100 font-bold rounded-md text-neutral-900"
+        className="flex w-fit gap-2 rounded-md bg-neutral-50 px-8 font-bold text-neutral-900 ring-neutral-50 transition-all duration-300 hover:bg-neutral-100 active:ring-2"
       >
-        Save changes {changeDetails.isLoading
-          ? (
-            <Loader
-              containerClassName="p-0 w-fit"
-              labelClassName="p-0 w-fit"
-              loaderClassName="p-0 w-fit"
-              label={null}
-            />
-          )
-          : <SaveIcon className="w-4 h-4" />}
+        Save changes{" "}
+        {changeDetails.isLoading ? (
+          <Loader
+            containerClassName="p-0 w-fit"
+            labelClassName="p-0 w-fit"
+            loaderClassName="p-0 w-fit"
+            label={null}
+          />
+        ) : (
+          <SaveIcon className="h-4 w-4" />
+        )}
       </Button>
     </form>
   );

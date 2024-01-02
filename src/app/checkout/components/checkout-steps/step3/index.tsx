@@ -3,11 +3,11 @@
 import type { Room } from "@prisma/client";
 import { CheckIcon } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
-import { z } from "zod";
+import type { z } from "zod";
 import { CheckInOutDatePicker } from "~/components/ui/checkinout-date-picker";
 import { Loader } from "~/components/ui/loader";
 import { cn } from "~/lib/utils";
-import { CheckoutFormValidator } from "~/lib/zod/checkout-form";
+import type { CheckoutFormValidator } from "~/lib/zod/checkout-form";
 import { calculateStayDuration } from "~/server/utils/calculate-stay-duration";
 import { api } from "~/trpc/react";
 import { GuestInformationForm } from "./guest-information";
@@ -74,23 +74,23 @@ const CheckRoomDates = ({ form, items }: Props) => {
       )}
       {form.formState.errors.step3?.allRoomsAvailable?.message &&
         !checkRoomDatesMutation.isLoading && (
-        <div className="flex flex-col gap-2">
-          <p className="w-full text-xs text-red-400">
-            The following rooms are not available within this timeframe:
-          </p>
-          <div>
-            {checkRoomDatesMutation.data?.unavailableRooms?.map((room) => (
-              <div className="flex items-center gap-2 pl-4" key={room.id}>
-                <p className="text-[6px] text-neutral-700">&#9679;</p>
-                <p className="text-sm text-neutral-700">{room.name}</p>
-                <p className="text-xs italic text-red-400">
-                  ${room.price.toString()}
-                </p>
-              </div>
-            ))}
+          <div className="flex flex-col gap-2">
+            <p className="w-full text-xs text-red-400">
+              The following rooms are not available within this timeframe:
+            </p>
+            <div>
+              {checkRoomDatesMutation.data?.unavailableRooms?.map((room) => (
+                <div className="flex items-center gap-2 pl-4" key={room.id}>
+                  <p className="text-[6px] text-neutral-700">&#9679;</p>
+                  <p className="text-sm text-neutral-700">{room.name}</p>
+                  <p className="text-xs italic text-red-400">
+                    ${room.price / 100}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       {(form.formState.errors.step3?.bookingCheckIn?.message ??
         form.formState.errors.step3?.bookingCheckOut?.message) && (
         <p className="w-full text-xs text-red-400">
@@ -107,8 +107,8 @@ const CheckRoomDates = ({ form, items }: Props) => {
             );
 
             return (
-              <div className="w-full flex flex-col gap-2">
-                <div className="w-full flex items-center justify-between">
+              <div className="flex w-full flex-col gap-2">
+                <div className="flex w-full items-center justify-between">
                   <p className="text-sm text-neutral-700">Calculated stay:</p>
                   <p className="text-xs font-bold text-red-400">
                     {calculatedStayInDays}{" "}
@@ -124,12 +124,11 @@ const CheckRoomDates = ({ form, items }: Props) => {
                   />
                 )}
                 {!cartTotal.isLoading && !cartTotal.isError && (
-                  <div className="w-full flex items-center justify-between">
+                  <div className="flex w-full items-center justify-between">
                     <p className="text-sm text-neutral-700">Total:</p>
                     <p className="text-xs font-bold text-red-400">
-                      ${(calculatedStayInDays * cartTotal.data.total).toFixed(
-                        2,
-                      )}
+                      $
+                      {(calculatedStayInDays * cartTotal.data.total).toFixed(2)}
                     </p>
                   </div>
                 )}

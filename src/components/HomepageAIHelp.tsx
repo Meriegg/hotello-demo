@@ -10,7 +10,6 @@ import { Loader } from "./ui/loader";
 import type { Room } from "@prisma/client";
 import { cn } from "~/lib/utils";
 import Link from "next/link";
-import { setISODay } from "date-fns";
 
 const MessageDisplay = ({
   message,
@@ -88,7 +87,7 @@ const AiResponseDisplay = ({
                 </p>
                 <div className="flex flex-col gap-1 pl-3">
                   <p className="text-xs text-neutral-200">
-                    • ${dbChosenRoom.price.toString()} per. night
+                    • ${dbChosenRoom.price / 100} per. night
                   </p>
                   <p className="text-xs text-neutral-200">
                     • Accommodates {dbChosenRoom.accommodates}{" "}

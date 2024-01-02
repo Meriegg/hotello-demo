@@ -3,7 +3,6 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { FilterDataValidator, FilterValidator } from "~/lib/zod/filter";
 import { z } from "zod";
 import type { Room, RoomCategory } from "@prisma/client";
-import { getUserSession } from "~/server/utils/get-user-session";
 
 export const roomsRouter = createTRPCRouter({
   getRooms: publicProcedure.input(z.object({

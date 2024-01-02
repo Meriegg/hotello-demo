@@ -22,9 +22,11 @@ interface Props {
   disableChangeEmail?: boolean;
 }
 
-export const VerifyCodeForm = (
-  { userId, verifySeshId, disableChangeEmail = false }: Props,
-) => {
+export const VerifyCodeForm = ({
+  userId,
+  verifySeshId,
+  disableChangeEmail = false,
+}: Props) => {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const router = useRouter();
@@ -35,7 +37,7 @@ export const VerifyCodeForm = (
       setError(error.message);
     },
     onSuccess: (data) => {
-      const redirect = searchParams.get("redirect");
+      const redirect = searchParams?.get("redirect");
 
       if (data.cookieVerificationToken) {
         fetch("/api/setcookie", {
@@ -63,7 +65,8 @@ export const VerifyCodeForm = (
             }
 
             router.push(redirect ?? "/account");
-          });
+          })
+          .catch((e) => console.error(e));
         return;
       }
 
@@ -79,8 +82,8 @@ export const VerifyCodeForm = (
       toast({
         variant: "destructive",
         title: "An error happened",
-        description: error?.message ??
-          "Cannot change email, please try again later",
+        description:
+          error?.message ?? "Cannot change email, please try again later",
       });
     },
   });
@@ -182,7 +185,7 @@ export const VerifyCodeForm = (
             </TooltipTrigger>
             {disableChangeEmail && (
               <TooltipContent>
-                You can't change your email on signup.
+                You can&apos;t change your email on signup.
               </TooltipContent>
             )}
           </Tooltip>
@@ -192,10 +195,10 @@ export const VerifyCodeForm = (
           onClick={() => resendCodeMutation.mutate()}
           className="text-xs text-neutral-900 hover:underline disabled:opacity-70"
         >
-          {(isResendDisabled && resendCountdown)
+          {isResendDisabled && resendCountdown
             ? `Wait ${resendCountdown} ${
-              resendCountdown > 1 ? "seconds" : "second"
-            }`
+                resendCountdown > 1 ? "seconds" : "second"
+              }`
             : "Resend code"}
         </button>
       </div>

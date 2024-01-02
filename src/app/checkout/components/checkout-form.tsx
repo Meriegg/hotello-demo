@@ -2,7 +2,7 @@
 
 import postalCodes from "postal-codes-js";
 import { getCode as getCountryCode } from "country-list";
-import { z } from "zod";
+import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -117,18 +117,20 @@ export const Checkoutform = ({ items }: Props) => {
               maxAge: 60 * 60 * 24 * 7,
             },
           }),
-        }).then((res) => {
-          if (res.status === 500) {
-            toast({
-              variant: "destructive",
-              title: "An error happened",
-              description:
-                "An error happened while trying to persist your session.",
-            });
+        })
+          .then((res) => {
+            if (res.status === 500) {
+              toast({
+                variant: "destructive",
+                title: "An error happened",
+                description:
+                  "An error happened while trying to persist your session.",
+              });
 
-            setCookieError(true);
-          }
-        });
+              setCookieError(true);
+            }
+          })
+          .catch((e) => console.error(e));
       }
 
       if (didLoadData) return;
@@ -159,7 +161,7 @@ export const Checkoutform = ({ items }: Props) => {
       });
 
       form.setValue("step5", {
-        paymentType: checkoutSesh.paymentType,
+        paymentType: checkoutSesh.paymentType ?? "FULL_UPFRONT",
       });
 
       type GuestInformationType = z.infer<
@@ -333,8 +335,8 @@ export const Checkoutform = ({ items }: Props) => {
       {cookieError
         ? (
           <>
-            <p className="font-bold text-lg text-center text-red-400">Error</p>
-            <p className="text-neutral-700 text-sm text-center">
+            <p className="text-center text-lg font-bold text-red-400">Error</p>
+            <p className="text-center text-sm text-neutral-700">
               This checkout session will not be persisted, meaning that if you
               refresh this page the data you entered will be lost.{" "}
               <Link
@@ -344,11 +346,11 @@ export const Checkoutform = ({ items }: Props) => {
                 More info
               </Link>
             </p>
-            <p className="text-neutral-700 text-sm text-center">
+            <p className="text-center text-sm text-neutral-700">
               Please check your internet connection and refresh this page before
               continuing without persistent sessions
             </p>
-            <p className="text-neutral-700 text-sm text-center">
+            <p className="text-center text-sm text-neutral-700">
               Please save this sequence in case you need to contact support:
               {" "}
               <span className="font-bold text-red-400 underline">
@@ -357,7 +359,7 @@ export const Checkoutform = ({ items }: Props) => {
             </p>
             <button
               onClick={() => setCookieError(false)}
-              className="text-sm text-neutral-900 text-center px-2 py-2 bg-neutral-50 hover:bg-neutral-100 rounded-md"
+              className="rounded-md bg-neutral-50 px-2 py-2 text-center text-sm text-neutral-900 hover:bg-neutral-100"
             >
               Agree with the terms above and continue
             </button>
@@ -370,8 +372,7 @@ export const Checkoutform = ({ items }: Props) => {
               <StepRenderer
                 currentSession={stepNums[
                   checkoutSession.data.checkoutSession.step
-                ] ??
-                  null}
+                ] ?? null}
                 loadingNextStep={nextStepMutation.isLoading}
                 nextStep={nextStep}
                 form={form}
@@ -384,7 +385,10 @@ export const Checkoutform = ({ items }: Props) => {
               <div className="flex flex-col gap-2">
                 <hr className="w-full border-neutral-100" />
                 <p className="text-sm text-neutral-700">
-                  Use your current account data?
+                  Use your current account data? <br />{" "}
+                  <span className="text-xs">
+                    Your phone number won't be included
+                  </span>
                 </p>
                 <div className="flex items-center gap-2 text-sm text-red-400">
                   <button
@@ -393,17 +397,11 @@ export const Checkoutform = ({ items }: Props) => {
                       setShowUseDbData(false);
                       setUsedDbData(true);
                       if (authSession?.data) {
-                        form.setValue(
-                          "step1.phoneNumCountry",
-                          authSession.data.user.phoneNumCountry,
-                        );
-
                         form.setValue("step1", {
                           firstName: authSession.data.user.firstName,
                           lastName: authSession.data.user.lastName,
                           email: authSession.data.user.email,
                           age: authSession.data.user.age,
-                          phoneNumber: authSession.data.user.phoneNum,
                         });
 
                         form.setValue("step2", {
@@ -441,16 +439,18 @@ export const Checkoutform = ({ items }: Props) => {
           <hr className="border-neutral-100" />
           <div className="flex flex-col gap-1">
             <p className="text-sm text-neutral-700">Checkout session id</p>
-            <p className="text-base text-red-400 font-bold">
+            <p className="text-base font-bold text-red-400">
               {checkoutSession.data?.checkoutSession.id ?? "-"}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-sm text-neutral-700">Payment intent id</p>
-            <p className="text-base text-red-400 font-bold">
+            <p className="text-base font-bold text-red-400">
               {checkoutSession.data?.checkoutSession.paymentIntentId ?? "-"}
             </p>
           </div>
+
+          <pre className="text-xs text-neutral-700">{JSON.stringify(form.watch(), null, 2)}</pre>
         </div>
       )}
     </div>

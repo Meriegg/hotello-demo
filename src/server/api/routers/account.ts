@@ -28,7 +28,7 @@ import { resend } from "~/lib/resend";
 
 export const accountsRouter = createTRPCRouter({
   getCurrentSession: privateProcedure.query(
-    async ({ ctx: { userSession, user } }) => ({
+    ({ ctx: { userSession, user } }) => ({
       userSession,
       user,
     }),
@@ -43,13 +43,11 @@ export const accountsRouter = createTRPCRouter({
     if (block) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: `You are being rate limited${
-          timeDiffInSeconds
-            ? `, please wait ${timeDiffInSeconds} ${
-              timeDiffInSeconds > 1 ? "seconds" : "second"
-            } and try again.`
-            : "."
-        }`,
+        message: `You are being rate limited${timeDiffInSeconds
+          ? `, please wait ${timeDiffInSeconds} ${timeDiffInSeconds > 1 ? "seconds" : "second"
+          } and try again.`
+          : "."
+          }`,
       });
     }
 
@@ -95,13 +93,11 @@ export const accountsRouter = createTRPCRouter({
       if (block) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: `You are being rate limited${
-            timeDiffInSeconds
-              ? `, please wait ${timeDiffInSeconds} ${
-                timeDiffInSeconds > 1 ? "seconds" : "second"
-              } and try again.`
-              : "."
-          }`,
+          message: `You are being rate limited${timeDiffInSeconds
+            ? `, please wait ${timeDiffInSeconds} ${timeDiffInSeconds > 1 ? "seconds" : "second"
+            } and try again.`
+            : "."
+            }`,
         });
       }
 
@@ -197,7 +193,7 @@ export const accountsRouter = createTRPCRouter({
     }
 
     const rateLimitKey = `verify_ratelimit[${tokenUserId}]`;
-    const rateLimit = await kv.get(rateLimitKey) as number | null;
+    const rateLimit: number | null = await kv.get(rateLimitKey);
     if (rateLimit) {
       const currentTimestamp = Date.now();
       const timeDiff = (currentTimestamp - rateLimit) / 1000;
@@ -325,13 +321,11 @@ export const accountsRouter = createTRPCRouter({
       if (block) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: `You are being rate limited${
-            timeDiffInSeconds
-              ? `, please wait ${timeDiffInSeconds} ${
-                timeDiffInSeconds > 1 ? "seconds" : "second"
-              } and try again.`
-              : "."
-          }`,
+          message: `You are being rate limited${timeDiffInSeconds
+            ? `, please wait ${timeDiffInSeconds} ${timeDiffInSeconds > 1 ? "seconds" : "second"
+            } and try again.`
+            : "."
+            }`,
         });
       }
 
@@ -467,7 +461,8 @@ export const accountsRouter = createTRPCRouter({
   requestEmailChange: privateProcedure.mutation(async ({ ctx: { user } }) => {
     const token = createEmailChangeJwt(user.id);
 
-    // @ts-ignore
+    // eslint-disable-next-line
+    // @ts-expect-error
     const emailData = await resend.emails.send({
       from: "Acme <onboarding@resend.dev>",
       to: ["delivered@resend.dev", user.email],

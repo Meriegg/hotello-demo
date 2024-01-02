@@ -552,15 +552,13 @@ export const checkoutRouter = createTRPCRouter({
       }[] = [];
 
       const roomKeys: string[] = Object.keys(input.step3.guestInformation);
-      for (let i = 0; i < roomKeys.length; i++) {
-        const roomKey = roomKeys[i] as string;
+      for (const roomKey of roomKeys) {
         const roomData = input.step3.guestInformation[roomKey];
         if (!roomData) continue;
 
         const peopleKeys = Object.keys(roomData.people);
 
-        for (let j = 0; j < peopleKeys.length; j++) {
-          const personKey = peopleKeys[j] as string;
+        for (const personKey of peopleKeys) {
           const personDetails = roomData.people[personKey];
           if (!personDetails) continue;
 

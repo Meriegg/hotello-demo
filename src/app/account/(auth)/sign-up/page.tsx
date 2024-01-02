@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import type { z } from "zod";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 import { SignUpDataSchema } from "./validation";
@@ -56,11 +56,12 @@ const Page = () => {
             return;
           }
 
-          const redirect = searchParams.get("redirect");
+          const redirect = searchParams?.get("redirect");
           router.push(
             `${data.redirectTo}${redirect ? `?redirect=${redirect}` : ""}`,
           );
-        });
+        })
+        .catch((e) => console.error(e));
     },
     onError: (error) => {
       setError(error?.message ?? "An error happened, please try again later.");
@@ -90,36 +91,36 @@ const Page = () => {
 
   return (
     <div
-      className="w-full flex flex-col items-center pt-12 gap-2 mx-auto px-2"
+      className="mx-auto flex w-full flex-col items-center gap-2 px-2 pt-12"
       style={{ width: "min(450px, 100%)" }}
     >
       {error && (
-        <p className="text-sm text-center mt-2 font-bold text-red-900 py-3 w-full px-2 rounded-md border-[1px] border-red-400/50 bg-red-400/10">
+        <p className="mt-2 w-full rounded-md border-[1px] border-red-400/50 bg-red-400/10 px-2 py-3 text-center text-sm font-bold text-red-900">
           {error}
         </p>
       )}
 
-      <p className="text-2xl text-neutral-900 text-center">
+      <p className="text-center text-2xl text-neutral-900">
         Create a new account
       </p>
-      <p className="text-neutral-700 text-sm">
+      <p className="text-sm text-neutral-700">
         please fill in the required details to continue
       </p>
 
-      <div className="flex flex-col gap-2 w-full mt-4">
+      <div className="mt-4 flex w-full flex-col gap-2">
         <div className="flex items-center gap-2">
           <Input
             label="First Name"
             disabled={signUpMutation.isLoading || isRedirecting}
             error={form.formState.errors?.firstName?.message}
-            className="w-full disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70 rounded-md rounded-tl-2xl"
+            className="w-full rounded-md rounded-tl-2xl disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
             {...form.register("firstName")}
           />
           <Input
             label="Last Name"
             disabled={signUpMutation.isLoading || isRedirecting}
             error={form.formState.errors?.lastName?.message}
-            className="w-full disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70 rounded-md rounded-tr-2xl"
+            className="w-full rounded-md rounded-tr-2xl disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
             {...form.register("lastName")}
           />
         </div>
@@ -127,7 +128,7 @@ const Page = () => {
           label="Your email"
           disabled={signUpMutation.isLoading || isRedirecting}
           error={form.formState.errors?.email?.message}
-          className="w-full disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70 rounded-md"
+          className="w-full rounded-md disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
           {...form.register("email")}
         />
 
@@ -136,7 +137,7 @@ const Page = () => {
             form.setValue("phoneNum", value);
             form.setValue(
               "phoneNumCountry",
-              (country as any)?.countryCode ?? "",
+              (country as { countryCode?: string })?.countryCode ?? "",
             );
           }}
           inputClass="!rounded-md"
@@ -152,7 +153,7 @@ const Page = () => {
           pattern="[0-9]"
           disabled={signUpMutation.isLoading || isRedirecting}
           error={form.formState.errors?.age?.message}
-          className="w-full disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70 rounded-md"
+          className="w-full rounded-md disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
           {...form.register("age", {
             valueAsNumber: true,
           })}
@@ -160,12 +161,14 @@ const Page = () => {
 
         <Button
           onClick={() => {
-            form.trigger();
-            form.handleSubmit((data) => {
-              signUpMutation.mutate({ ...data });
-            })();
+            form.trigger().catch((e) => console.error(e));
+            form
+              .handleSubmit((data) => {
+                signUpMutation.mutate({ ...data });
+              })()
+              .catch((e) => console.error(e));
           }}
-          className="flex items-center gap-2 bg-neutral-100 rounded-b-2xl rounded-t-md text-neutral-900 hover:bg-neutral-200 active:ring-4 ring-neutral-100 transition-all duration-300 transform font-bold"
+          className="flex transform items-center gap-2 rounded-b-2xl rounded-t-md bg-neutral-100 font-bold text-neutral-900 ring-neutral-100 transition-all duration-300 hover:bg-neutral-200 active:ring-4"
           disabled={signUpMutation.isLoading || isRedirecting}
         >
           {(signUpMutation.isLoading || isRedirecting) && (
@@ -175,10 +178,10 @@ const Page = () => {
               loaderClassName="p-0 w-fit"
             />
           )}
-          Continue <ArrowRight className="w-4 h-4" />
+          Continue <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
-      <div className="flex items-center w-full justify-between">
+      <div className="flex w-full items-center justify-between">
         <Link
           href="/account/email-issues"
           className="text-xs text-neutral-900 hover:underline"
@@ -192,14 +195,15 @@ const Page = () => {
           Log in
         </Link>
       </div>
-      <p className="text-center text-xs text-neutral-700 mt-1">
+      <p className="mt-1 text-center text-xs text-neutral-700">
         By pressing “continue” you agree to our{" "}
         <Link href="/legal/terms" className="text-neutral-900 underline">
           Terms and Conditions
         </Link>{" "}
         and any other document present in our{" "}
-        <Link className="text-neutral-900 underline" href="/legal">Legal</Link>
-        {" "}
+        <Link className="text-neutral-900 underline" href="/legal">
+          Legal
+        </Link>{" "}
         page.
       </p>
     </div>

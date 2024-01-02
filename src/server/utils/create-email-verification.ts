@@ -1,8 +1,8 @@
 import { randomNum } from "~/lib/utils";
 
 export const createEmailVerificationCode = () => {
-  let numbers = "123456789".split("").map((c) => parseInt(c));
-  let code = [];
+  const numbers = "123456789".split("").map((c) => parseInt(c));
+  const code = [];
 
   for (let i = 0; i < 6; i++) {
     const randomNumber = randomNum(0, numbers.length - 1);

@@ -52,17 +52,19 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
             maxAge: 60 * 60 * 24 * 7,
           },
         }),
-      }).then((res) => {
-        if (res.status === 500) {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not add to cart.",
-          });
-        }
+      })
+        .then((res) => {
+          if (res.status === 500) {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Could not add to cart.",
+            });
+          }
 
-        apiUtils.cart.invalidate().catch((e) => console.error(e));
-      });
+          apiUtils.cart.invalidate().catch((e) => console.error(e));
+        })
+        .catch((e) => console.error(e));
     },
     retry: 0,
   });

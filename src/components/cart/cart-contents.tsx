@@ -38,7 +38,7 @@ const RoomDisplay = ({ room }: { room: Room }) => {
       <div className="flex flex-col justify-between">
         <p className="text-sm font-bold text-neutral-900">{room.name}</p>
         <div className="flex items-center gap-2">
-          <p className="text-xs text-red-400">${room.price.toString()}</p>
+          <p className="text-xs text-red-400">${room.price / 100}</p>
           <p className="text-neutral-200">•</p>
           <button
             onClick={() => removeItemMutation.mutate({ productId: room.id })}
@@ -53,9 +53,11 @@ const RoomDisplay = ({ room }: { room: Room }) => {
   );
 };
 
-export const CartContents = (
-  { onCheckoutClick }: { onCheckoutClick?: () => void },
-) => {
+export const CartContents = ({
+  onCheckoutClick,
+}: {
+  onCheckoutClick?: () => void;
+}) => {
   const [containerRef] = useAutoAnimate<HTMLDivElement>();
   const [stayInNights, setStayInNights] = useState(1);
   const products = api.cart.getProducts.useQuery(undefined, {
@@ -117,7 +119,8 @@ export const CartContents = (
                       return prev;
                     }
                     return prev - 1;
-                  })}
+                  })
+                }
               >
                 -
               </button>
@@ -126,8 +129,7 @@ export const CartContents = (
               </p>
               <button
                 className="text-lg text-red-400"
-                onClick={() =>
-                  setStayInNights((prev) => prev + 1)}
+                onClick={() => setStayInNights((prev) => prev + 1)}
               >
                 +
               </button>

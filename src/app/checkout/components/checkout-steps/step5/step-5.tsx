@@ -6,8 +6,8 @@ import { Elements } from "@stripe/react-stripe-js";
 import { env } from "~/env.mjs";
 import { api } from "~/trpc/react";
 import type { UseFormReturn } from "react-hook-form";
-import { CheckoutFormValidator } from "~/lib/zod/checkout-form";
-import { z } from "zod";
+import type { CheckoutFormValidator } from "~/lib/zod/checkout-form";
+import type { z } from "zod";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Label } from "~/components/ui/label";
 import {
@@ -39,11 +39,14 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
     retry: 0,
   });
 
-  const paymentFormData = api.checkout.configurePaymentForm.useQuery({
-    paymentType: form.watch("step5.paymentType"),
-  }, {
-    cacheTime: 0,
-  });
+  const paymentFormData = api.checkout.configurePaymentForm.useQuery(
+    {
+      paymentType: form.watch("step5.paymentType"),
+    },
+    {
+      cacheTime: 0,
+    },
+  );
 
   if (userSession.isLoading) {
     return <Loader label="Fetching account data" />;
@@ -53,7 +56,7 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
     return (
       <div className="text-center">
         <p className="text-2xl font-bold text-neutral-900">Oops</p>
-        <p className="text-sm text-neutral-700 mt-2">
+        <p className="mt-2 text-sm text-neutral-700">
           Please{" "}
           <Link
             href="/account/login?redirect=/checkout"
@@ -64,7 +67,7 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
           or{" "}
           <Link
             href="/account/sign-up?redirect=/checkout"
-            className="text-red-400 hover:underline mt-2"
+            className="mt-2 text-red-400 hover:underline"
           >
             create an account
           </Link>{" "}
@@ -92,34 +95,32 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
   return (
     <TooltipProvider>
       <div>
-        <p className="text-neutral-700 text-sm text-italic font-normal">
+        <p className="text-italic text-sm font-normal text-neutral-700">
           Amount due now
         </p>
-        {form.watch("step5.paymentType") === "FULL_UPFRONT"
-          ? (
-            <p className="text-lg font-bold text-red-400">
-              ${paymentFormData.data.totalUpfront.display.toFixed(2)}{" "}
-              <span className="text-xs text-italic font-normal tracking-normal">
-                Fully refundable
-              </span>
-            </p>
-          )
-          : (
-            <p className="text-lg font-bold text-red-400">
-              ${paymentFormData.data.reservationHold.display.toFixed(2)}{" "}
-              <span className="text-xs text-italic font-normal tracking-normal">
-                non-refundable reservation hold{" "}
-                <Tooltip>
-                  <TooltipTrigger>
-                    <HelpCircleIcon className="w-3 h-3 text-neutral-700 ml-1" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    This amount will be deducted from your total.
-                  </TooltipContent>
-                </Tooltip>
-              </span>
-            </p>
-          )}
+        {form.watch("step5.paymentType") === "FULL_UPFRONT" ? (
+          <p className="text-lg font-bold text-red-400">
+            ${paymentFormData.data.totalUpfront.display.toFixed(2)}{" "}
+            <span className="text-italic text-xs font-normal tracking-normal">
+              Fully refundable
+            </span>
+          </p>
+        ) : (
+          <p className="text-lg font-bold text-red-400">
+            ${paymentFormData.data.reservationHold.display.toFixed(2)}{" "}
+            <span className="text-italic text-xs font-normal tracking-normal">
+              non-refundable reservation hold{" "}
+              <Tooltip>
+                <TooltipTrigger>
+                  <HelpCircleIcon className="ml-1 h-3 w-3 text-neutral-700" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  This amount will be deducted from your total.
+                </TooltipContent>
+              </Tooltip>
+            </span>
+          </p>
+        )}
 
         <RadioGroup
           onValueChange={(val) => {
@@ -128,7 +129,7 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
               val as FormData["step5"]["paymentType"],
             );
           }}
-          className="flex w-full items-start justiy-evenly mt-4"
+          className="justiy-evenly mt-4 flex w-full items-start"
         >
           <div className="flex flex-col gap-1">
             <div className="flex items-start gap-2">
@@ -140,7 +141,7 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
               <Label htmlFor="rd1">Full amount Upfront</Label>
             </div>
 
-            <p className="text-neutral-700 text-italic font-regular text-sm">
+            <p className="text-italic font-regular text-sm text-neutral-700">
               Note: Full amount is refundable
             </p>
           </div>
@@ -156,7 +157,7 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
                 Reservation hold
               </Label>
             </div>
-            <p className="text-neutral-700 text-italic font-regular text-sm">
+            <p className="text-italic font-regular text-sm text-neutral-700">
               Note: Reservation hold is{" "}
               <span className="text-red-400">non-refundable</span>
             </p>

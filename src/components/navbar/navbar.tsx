@@ -19,5 +19,5 @@ export const Navbar = () => {
     return () => window.removeEventListener("scroll", scrollCallback);
   }, []);
 
-  return <NavbarContent pathname={pathname} topScroll={topScroll} />;
+  return <NavbarContent pathname={pathname ?? "/"} topScroll={topScroll} />;
 };

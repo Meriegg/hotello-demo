@@ -1,38 +1,36 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Room } from "@prisma/client";
+import type { Room } from "@prisma/client";
 import { ChevronDown } from "lucide-react";
-import { ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { UseFormReturn } from "react-hook-form";
-import { z } from "zod";
+import type { UseFormReturn } from "react-hook-form";
+import type { z } from "zod";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { CheckoutFormValidator } from "~/lib/zod/checkout-form";
+import type { CheckoutFormValidator } from "~/lib/zod/checkout-form";
 
-const GIFormDisplay = (
-  {
-    firstNameValue,
-    firstNameChange,
-    lastNameValue,
-    lastNameChange,
-    ageValue,
-    ageChange,
-    index,
-  }: {
-    firstNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
-    lastNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
-    ageChange: (e: ChangeEvent<HTMLInputElement>) => void;
-    firstNameValue: string;
-    lastNameValue: string;
-    ageValue: string | number;
-    index: number;
-  },
-) => {
+const GIFormDisplay = ({
+  firstNameValue,
+  firstNameChange,
+  lastNameValue,
+  lastNameChange,
+  ageValue,
+  ageChange,
+  index,
+}: {
+  firstNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  lastNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  ageChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  firstNameValue: string;
+  lastNameValue: string;
+  ageValue: string | number;
+  index: number;
+}) => {
   const [isEditing, setEditing] = useState(true);
 
   return (
     <div
-      className={cn("flex gap-2 w-full", !isEditing ? "flex-row" : "flex-col")}
+      className={cn("flex w-full gap-2", !isEditing ? "flex-row" : "flex-col")}
     >
       <p className="text-xs italic text-neutral-700">#{index + 1}</p>
       {!isEditing && (
@@ -41,7 +39,7 @@ const GIFormDisplay = (
             {firstNameValue || "(No first name)"}{" "}
             {lastNameValue || "(No last name)"}
           </p>
-          <div className="text-xs flex items-center gap-2">
+          <div className="flex items-center gap-2 text-xs">
             <p className="text-neutral-900">Age {ageValue || "(No age)"}</p>
             <button
               className="italic text-red-400 hover:underline"
@@ -54,7 +52,7 @@ const GIFormDisplay = (
       )}
       {isEditing && (
         <>
-          <div className="flex items-center gap-2 w-full px-0">
+          <div className="flex w-full items-center gap-2 px-0">
             <Input
               label="First name"
               value={firstNameValue}
@@ -68,7 +66,7 @@ const GIFormDisplay = (
               onChange={lastNameChange}
             />
           </div>
-          <div className="flex items-center gap-2 w-full px-0">
+          <div className="flex w-full items-center gap-2 px-0">
             <Input
               label="Age"
               type="number"
@@ -87,12 +85,13 @@ const GIFormDisplay = (
   );
 };
 
-const GuestInformationFormItem = (
-  { form, item }: {
-    item: Room;
-    form: UseFormReturn<z.infer<typeof CheckoutFormValidator>>;
-  },
-) => {
+const GuestInformationFormItem = ({
+  form,
+  item,
+}: {
+  item: Room;
+  form: UseFormReturn<z.infer<typeof CheckoutFormValidator>>;
+}) => {
   const [parentRef] = useAutoAnimate();
   const [isFormOpen, setFormOpen] = useState(false);
   const people = form.watch("step3.guestInformation")[item.id]?.people;
@@ -118,13 +117,13 @@ const GuestInformationFormItem = (
     <div
       ref={parentRef}
       className={cn(
-        "py-3 relative transition-all duration-300",
+        "relative py-3 transition-all duration-300",
         isFormOpen && "pb-[50px]",
       )}
       style={{ transitionDelay: "300ms" }}
     >
       <div className="flex items-center gap-2">
-        <p className="text-sm text-neutral-900 font-bold line-clamp-1 max-w-[300px]">
+        <p className="line-clamp-1 max-w-[300px] text-sm font-bold text-neutral-900">
           {item.name}
         </p>
         <p className="text-xs text-red-400">
@@ -132,35 +131,36 @@ const GuestInformationFormItem = (
         </p>
       </div>
 
-      {isFormOpen
-        ? (
-          <div className="mt-2 flex flex-col gap-4">
-            {Object.keys(people).map((key, i) => (
-              <GIFormDisplay
-                index={i}
-                key={i}
-                ageChange={(e) =>
-                  handleObjChange("age", parseInt(e.target.value), key)}
-                firstNameChange={(e) =>
-                  handleObjChange("firstName", e.target.value, key)}
-                lastNameChange={(e) =>
-                  handleObjChange("lastName", e.target.value, key)}
-                ageValue={people[parseInt(key)]?.age ?? ""}
-                firstNameValue={people[parseInt(key)]?.firstName ?? ""}
-                lastNameValue={people[parseInt(key)]?.lastName ?? ""}
-              />
-            ))}
-          </div>
-        )
-        : null}
+      {isFormOpen ? (
+        <div className="mt-2 flex flex-col gap-4">
+          {Object.keys(people).map((key, i) => (
+            <GIFormDisplay
+              index={i}
+              key={i}
+              ageChange={(e) =>
+                handleObjChange("age", parseInt(e.target.value), key)
+              }
+              firstNameChange={(e) =>
+                handleObjChange("firstName", e.target.value, key)
+              }
+              lastNameChange={(e) =>
+                handleObjChange("lastName", e.target.value, key)
+              }
+              ageValue={people[parseInt(key)]?.age ?? ""}
+              firstNameValue={people[parseInt(key)]?.firstName ?? ""}
+              lastNameValue={people[parseInt(key)]?.lastName ?? ""}
+            />
+          ))}
+        </div>
+      ) : null}
 
       <button
         onClick={() => setFormOpen(!isFormOpen)}
-        className="w-[30px] h-[30px] bg-neutral-50 flex items-center justify-center rounded-md absolute right-0 bottom-2"
+        className="absolute bottom-2 right-0 flex h-[30px] w-[30px] items-center justify-center rounded-md bg-neutral-50"
       >
         <ChevronDown
           className={cn(
-            "w-4 h-4 text-neutral-900 transition-all duration-300 transform",
+            "h-4 w-4 transform text-neutral-900 transition-all duration-300",
             isFormOpen && "rotate-180",
           )}
         />

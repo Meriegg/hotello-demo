@@ -57,11 +57,11 @@ const Page = () => {
             return;
           }
 
-          const redirect = searchParams.get("redirect");
+          const redirect = searchParams?.get("redirect");
           router.push(
             `${data.redirectTo}${redirect ? `?redirect=${redirect}` : ""}`,
           );
-        });
+        }).catch((e) => console.error(e));
     },
   });
 

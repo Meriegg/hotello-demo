@@ -19,68 +19,65 @@ const Page = async ({ params: { id: roomId } }: { params: { id: string } }) => {
   }
 
   const otherRoomKeys: string[] = Object.keys(room?.other ?? {});
-  const otherVals = otherRoomKeys?.length > 0
-    ? otherRoomKeys.map((key) =>
-      (room.other as Record<string, string | { text: string; href: string }>)[
-        key
-      ] as string | { text: string; href: string }
-    )
-    : null;
+  const otherVals =
+    otherRoomKeys?.length > 0
+      ? otherRoomKeys.map(
+          (key) =>
+            (
+              room.other as Record<
+                string,
+                string | { text: string; href: string }
+              >
+            )[key] as string | { text: string; href: string },
+        )
+      : null;
 
-  const roomDetails = [
-    ...(otherVals ?? []),
-  ];
+  const roomDetails = [...(otherVals ?? [])];
 
   return (
     <>
-      <MaxWidthContainer className="py-8 flex flex-col gap-8 px-4">
+      <MaxWidthContainer className="flex flex-col gap-8 px-4 py-8">
         <Link
           href="/rooms"
-          className="flex w-fit items-center gap-2 text-sm text-neutral-700 hover:underline hover:text-neutral-900"
+          className="flex w-fit items-center gap-2 text-sm text-neutral-700 hover:text-neutral-900 hover:underline"
         >
-          <ChevronLeft className="w-5 h-5" /> Go Back
+          <ChevronLeft className="h-5 w-5" /> Go Back
         </Link>
 
-        <div className="flex lg:flex-row flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-8 lg:flex-row">
           <ImageCarousel
             containerClassname="max-w-[500px] max-h-[300px] min-h-[300px]"
             images={room.images}
           />
-          <div className="flex flex-col justify-between min-h-[300px] gap-2 max-w-[450px]">
+          <div className="flex min-h-[300px] max-w-[450px] flex-col justify-between gap-2">
             <div className="flex flex-col gap-2">
               <p className="text-xs font-bold text-neutral-700">{room.id}</p>
-              <p className="text-neutral-900 text-2xl font-bold">
-                {room.name}
-              </p>
-              <p className="text-base text-red-400 font-bold">
-                ${room.price.toString()}
-                <span className="font-normal text-sm">/night</span>
+              <p className="text-2xl font-bold text-neutral-900">{room.name}</p>
+              <p className="text-base font-bold text-red-400">
+                ${room.price / 100}
+                <span className="text-sm font-normal">/night</span>
               </p>
             </div>
 
-            <div className="flex gap-2 items-start flex-wrap mt-4">
+            <div className="mt-4 flex flex-wrap items-start gap-2">
               {roomDetails.map((entry, i) => (
-                <Fragment
-                  key={i}
-                >
-                  {typeof entry === "string"
-                    ? (
-                      <p className="text-sm text-neutral-700 flex items-center gap-1">
-                        <span className="text-[6px]">&#9679;</span> {entry}
-                      </p>
-                    )
-                    : (
-                      <Link
-                        href={entry.href}
-                        className="text-sm text-neutral-700 flex items-center gap-1 underline"
-                      >
-                        <span className="text-[6px]">&#9679;</span>
-                        {entry.text}
-                      </Link>
-                    )}
+                <Fragment key={i}>
+                  {typeof entry === "string" ? (
+                    <p className="flex items-center gap-1 text-sm text-neutral-700">
+                      <span className="text-[6px]">&#9679;</span> {entry}
+                    </p>
+                  ) : (
+                    <Link
+                      href={entry.href}
+                      className="flex items-center gap-1 text-sm text-neutral-700 underline"
+                    >
+                      <span className="text-[6px]">&#9679;</span>
+                      {entry.text}
+                    </Link>
+                  )}
                 </Fragment>
               ))}
-              <p className="text-sm flex items-center gap-1 text-red-400">
+              <p className="flex items-center gap-1 text-sm text-red-400">
                 <span className="text-[6px]">&#9679;</span> {room.category.name}
               </p>
             </div>
@@ -93,7 +90,7 @@ const Page = async ({ params: { id: roomId } }: { params: { id: string } }) => {
           </div>
         </div>
       </MaxWidthContainer>
-      <Footer theme="light" className="transform translate-y-full" />
+      <Footer theme="light" className="translate-y-full transform" />
     </>
   );
 };

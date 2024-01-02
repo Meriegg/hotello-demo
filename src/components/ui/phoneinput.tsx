@@ -8,18 +8,15 @@ type Props = PhoneInputProps & {
   error?: string | null;
 };
 
-export const PhoneNumInput = (
-  {
-    inputStyle,
-    buttonClass,
-    defaultCountry,
-    inputClass,
-    error,
-    ...props
-  }: Props,
-) => {
+export const PhoneNumInput = ({
+  buttonClass,
+  defaultCountry,
+  inputClass,
+  error,
+  ...props
+}: Props) => {
   return (
-    <div className="flex flex-col gap-1 w-full">
+    <div className="flex w-full flex-col gap-1">
       <PhoneInput
         {...props}
         inputClass={cn(

@@ -1,7 +1,7 @@
-import { z } from "zod";
+import type { z } from "zod";
 import { PhoneNumInput } from "~/components/ui/phoneinput";
 import { Input } from "~/components/ui/input";
-import { CheckoutFormValidator } from "~/lib/zod/checkout-form";
+import type { CheckoutFormValidator } from "~/lib/zod/checkout-form";
 import { type UseFormReturn } from "react-hook-form";
 
 interface Props {
@@ -9,7 +9,9 @@ interface Props {
 }
 
 export const Step1 = ({ form }: Props) => {
-  const { errors: { step1 } } = form.formState;
+  const {
+    errors: { step1 },
+  } = form.formState;
 
   return (
     <div className="flex flex-col gap-2">
@@ -36,10 +38,13 @@ export const Step1 = ({ form }: Props) => {
       />
       <PhoneNumInput
         onChange={(value, country) => {
-          form.setValue("step1.phoneNumber", value);
+          form.setValue(
+            "step1.phoneNumber",
+            value ?? form.getValues("step1.phoneNumber"),
+          );
           form.setValue(
             "step1.phoneNumCountry",
-            (country as any)?.countryCode ?? "",
+            (country as { countryCode?: string })?.countryCode ?? "",
           );
         }}
         inputClass="!rounded-[5px]"

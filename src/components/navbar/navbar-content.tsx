@@ -17,9 +17,7 @@ export type NavLink = {
   notification?: JSX.Element | string | number;
 };
 
-export const NavbarContent = (
-  { pathname, topScroll }: Props,
-) => {
+export const NavbarContent = ({ pathname, topScroll }: Props) => {
   const themesByRoute: Record<string, NavbarTheme> = {
     "/": "dark",
   };
@@ -29,11 +27,12 @@ export const NavbarContent = (
   const getTheme = (): NavbarTheme => {
     const routeKeys = Object.keys(themesByRoute);
 
-    const foundRouteKey = routeKeys.find((route) => {
-      const pathRegExp = new RegExp(pathname.replace("/", "\\/"), "g");
+    const foundRouteKey =
+      routeKeys.find((route) => {
+        const pathRegExp = new RegExp(pathname.replace("/", "\\/"), "g");
 
-      return pathRegExp.test(route);
-    }) ?? "NOT_FOUND";
+        return pathRegExp.test(route);
+      }) ?? "NOT_FOUND";
 
     return themesByRoute[foundRouteKey] ?? "light";
   };
@@ -68,7 +67,7 @@ export const NavbarContent = (
         topScroll > 0 && getTheme() === "dark" && "backdrop-blur-sm",
         {
           "bg-gradient-to-b from-black to-black/0 ": getTheme() === "dark",
-          "bg-white border-b-[1px] border-neutral-100": getTheme() === "light",
+          "border-b-[1px] border-neutral-100 bg-white": getTheme() === "light",
         },
       )}
     >

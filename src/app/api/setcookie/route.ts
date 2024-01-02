@@ -4,7 +4,7 @@
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { env } from "~/env.mjs";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 
 export const POST = async (request: NextRequest) => {

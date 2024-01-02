@@ -67,18 +67,19 @@ export const CheckoutItems = ({ items }: Props) => {
               <img
                 className="hidden max-w-[70px] rounded-md lg:block"
                 src={room.images[0]}
+                alt="First room image"
               />
             </td>
             <td className="flex max-w-[250px] flex-col gap-2 text-sm font-bold text-neutral-700">
               {room.name}
 
               <p className="block text-sm font-bold text-red-400 md:hidden">
-                ${room.price.toString()}
-                <span className="text-xs font-light">/night em</span>
+                ${room.price / 100}
+                <span className="text-xs font-light">/night</span>
               </p>
             </td>
             <td className="hidden text-sm font-bold text-red-400 md:table-cell">
-              ${room.price.toString()}
+              ${room.price / 100}
               <span className="text-xs font-light">/night</span>
             </td>
             <td>
@@ -87,11 +88,6 @@ export const CheckoutItems = ({ items }: Props) => {
                 {room.accommodates > 1 ? "people" : "person"}
               </p>
               <p className="text-xs text-neutral-700">• {room.category.name}</p>
-              {room.discountPercentage && (
-                <p className="text-xs text-neutral-700">
-                  • ${room.discountPercentage}% discount
-                </p>
-              )}
               <Link
                 href={`/rooms/${room.id}`}
                 className="text-xs text-red-400 underline"

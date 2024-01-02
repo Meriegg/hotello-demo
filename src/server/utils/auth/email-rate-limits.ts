@@ -10,7 +10,7 @@ export const verifyUserIp = async (ip: string | null) => {
 
   const emailRatelimitKey = `email_ratelimit[${ip}]`;
 
-  const pastDate = await kv.get(emailRatelimitKey) as number;
+  const pastDate: number | null = await kv.get(emailRatelimitKey);
   const currentDate = Date.now();
   const timeDiff = pastDate
     ? Math.floor((currentDate - pastDate) / 1000)

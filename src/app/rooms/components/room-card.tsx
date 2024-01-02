@@ -25,7 +25,7 @@ export const RoomCard = ({ room, category }: Props) => {
       : null;
 
   const roomDetails = [
-    `$${room.price.toString()}/night`,
+    `$${room.price / 100}/night`,
     `Accommodates ${room.accommodates} ${
       room.accommodates > 1 ? "people" : "person"
     }`,

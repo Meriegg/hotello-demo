@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 export const POST = async (request: NextRequest) => {
@@ -7,7 +7,7 @@ export const POST = async (request: NextRequest) => {
     cookieName: z.string(),
   });
 
-  const body = await request.json();
+  const body = await request.json() as z.infer<typeof BodyValidator>;
   const data = BodyValidator.parse(body);
   const cookieStore = cookies();
 

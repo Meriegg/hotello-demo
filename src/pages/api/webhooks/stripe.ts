@@ -1,7 +1,7 @@
 /// <reference types="stripe-event-types" />
 
-import { NextApiRequest, NextApiResponse } from "next";
-import { Stripe } from "stripe";
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { Stripe } from "stripe";
 import { stripe } from "~/lib/stripe";
 import { buffer } from "micro";
 import { env } from "~/env.mjs";
@@ -15,7 +15,7 @@ export const config = {
 
 type WebhookEventType = Stripe.DiscriminatedEvent;
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const routeHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   let event: WebhookEventType | null = null;
 
   const signature = req.headers["stripe-signature"];
@@ -33,7 +33,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       signature,
       env.STRIPE_ENDPOINT_SECRET,
     ) as WebhookEventType;
+
+    // eslint-disable-next-line
   } catch (err: any) {
+
+    // eslint-disable-next-line
     console.log(`⚠️  Webhook signature verification failed.`, err?.message);
     return res.status(401).end().json({
       message: "Stripe webhook signature verification failed.",
@@ -81,3 +85,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   return res.status(200).end().json({ message: "Success." });
 };
+
+export default routeHandler;

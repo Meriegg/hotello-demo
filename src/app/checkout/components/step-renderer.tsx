@@ -1,7 +1,7 @@
 "use client";
 
-import { z } from "zod";
-import { CheckoutFormValidator } from "~/lib/zod/checkout-form";
+import type { z } from "zod";
+import type { CheckoutFormValidator } from "~/lib/zod/checkout-form";
 import type { StepType } from "./checkout-form";
 import type { UseFormReturn } from "react-hook-form";
 import { cn } from "~/lib/utils";
@@ -15,9 +15,11 @@ interface Props {
   loadingNextStep: boolean;
 }
 
-export const StepRenderer = (
-  { currentSession, loadingNextStep, nextStep }: Props,
-) => {
+export const StepRenderer = ({
+  currentSession,
+  loadingNextStep,
+  nextStep,
+}: Props) => {
   if (!currentSession) {
     return (
       <p className="text-center text-sm text-neutral-700">
@@ -28,34 +30,34 @@ export const StepRenderer = (
 
   return (
     <>
-      <div className="w-full flex items-center justify-between">
+      <div className="flex w-full items-center justify-between">
         <div className="flex flex-col">
-          <p className="text-xs text-neutral-700 font-light">
+          <p className="text-xs font-light text-neutral-700">
             {currentSession.step}
           </p>
-          <p className="text-base text-neutral-900 font-bold">
+          <p className="text-base font-bold text-neutral-900">
             {currentSession.slug}
           </p>
         </div>
         <div className="flex items-center gap-1">
           {Array.from(new Array(5)).map((_, i) => (
             <div
+              key={i}
               className={cn(
-                "w-[7px] h-[7px] bg-neutral-100",
+                "h-[7px] w-[7px] bg-neutral-100",
                 currentSession.stepNum === i && "bg-red-400",
               )}
-            >
-            </div>
+            ></div>
           ))}
         </div>
       </div>
       {currentSession.form}
       {!!currentSession?.nextBtn && (
         <Button
-          className="gap-2 flex items-center"
+          className="flex items-center gap-2"
           disabled={loadingNextStep}
           onClick={() => {
-            const isValid = currentSession.nextBtn?.validateStep() || false;
+            const isValid = currentSession.nextBtn?.validateStep() ?? false;
             if (!isValid) return;
 
             nextStep();

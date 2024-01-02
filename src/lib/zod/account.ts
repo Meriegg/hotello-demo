@@ -7,7 +7,7 @@ export const ChangeAccountDetailsSchema = z.object({
         case "too_small":
           return { message: "This must not be empty." };
         default:
-          return { message: issue?.message || "Invalid value." };
+          return { message: issue?.message ?? "Invalid value." };
       }
     },
   }).min(1),
@@ -17,7 +17,7 @@ export const ChangeAccountDetailsSchema = z.object({
         case "too_small":
           return { message: "This must not be empty." };
         default:
-          return { message: issue?.message || "Invalid value." };
+          return { message: issue?.message ?? "Invalid value." };
       }
     },
   }).min(1),

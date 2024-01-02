@@ -26,11 +26,11 @@ const Page = () => {
       <div className="flex w-full flex-col items-center justify-center gap-4 py-8 text-center">
         <Ghost className="h-11 w-11 text-neutral-700" strokeWidth={1} />
         <p className="max-w-[450px] text-lg tracking-wide text-neutral-700">
-          It looks like you don't have any items in your cart.
+          It looks like you don&apos;t have any items in your cart.
         </p>
         <Link
           href="/rooms"
-          className="text-red-400 hover:underline text-sm font-bold"
+          className="text-sm font-bold text-red-400 hover:underline"
         >
           Take a look at our rooms!
         </Link>
@@ -40,10 +40,10 @@ const Page = () => {
 
   return (
     <>
-      <MaxWidthContainer className="border-l-[1px] border-neutral-100 min-h-screen">
-        <p className="text-2xl font-bold text-neutral-900 p-12">Checkout</p>
+      <MaxWidthContainer className="min-h-screen border-l-[1px] border-neutral-100">
+        <p className="p-12 text-2xl font-bold text-neutral-900">Checkout</p>
 
-        <div className="w-full flex items-start lg:flex-row flex-col-reverse">
+        <div className="flex w-full flex-col-reverse items-start lg:flex-row">
           <CheckoutItems items={cartItems.data.products} />
           <Checkoutform items={cartItems.data.products} />
         </div>

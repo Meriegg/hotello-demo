@@ -47,7 +47,7 @@ const isAuthed = t.middleware(async (opts) => {
   const { error, code, message, userSession } = await getUserSession(
     opts.ctx.headers,
   );
-  if (error || !userSession) {
+  if (error ?? !userSession) {
     throw new TRPCError({
       code: code as TRPC_ERROR_CODE_KEY,
       message: message,

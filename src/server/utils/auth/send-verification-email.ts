@@ -20,6 +20,7 @@ export const sendVerificationEmail = async (
 
   const code = createEmailVerificationCode();
 
+  // eslint-disable-next-line
   // @ts-ignore
   const emailData = await resend.emails.send({
     from: "Acme <onboarding@resend.dev>",
