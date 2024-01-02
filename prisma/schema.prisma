@@ -136,6 +136,10 @@ model Booking {
   baseRoomsPrice       Int
   reservationHoldPrice Int
 
+  customerCheckIn    DateTime?
+  customerCheckOut   DateTime?
+  otherServicesPrice Int?      @default(0)
+
   // If the user pays in full this will be 0
   // If the user pays a reservation hold, the reservation hold price
   // will be detucted
@@ -157,7 +161,7 @@ model BookingRoom {
   id String @id @default(cuid())
 
   calculatedStayInDays Int
-  finalPriceForRoom    Decimal @db.Decimal(12, 2)
+  finalPriceForRoom    Int
 
   roomId String
   room   Room   @relation(fields: [roomId], references: [id], name: "bookingRoom")
@@ -193,14 +197,12 @@ model RoomCategory {
 }
 
 model Room {
-  id                 String    @id @default(cuid())
-  name               String    @unique
-  price              Decimal   @db.Decimal(12, 2)
-  images             String[]
-  discountPercentage Int?
-  discountedPrice    Decimal?  @db.Decimal(12, 2)
-  createdOn          DateTime  @default(now())
-  updatedOn          DateTime?
+  id        String    @id @default(cuid())
+  name      String    @unique
+  price     Int
+  images    String[]
+  createdOn DateTime  @default(now())
+  updatedOn DateTime?
 
   hasSpecialNeeds Boolean
   accommodates    Int

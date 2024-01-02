@@ -516,4 +516,20 @@ export const accountsRouter = createTRPCRouter({
       };
     },
   ),
+  getUserBookings: privateProcedure.query(
+    async ({ ctx: { db, userSession } }) => {
+      return await db.booking.findMany({
+        where: {
+          userId: userSession.userId,
+        },
+        include: {
+          rooms: {
+            include: {
+              guestDetails: true,
+            },
+          },
+        },
+      });
+    },
+  ),
 });

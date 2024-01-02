@@ -185,7 +185,7 @@ export const PaymentForm = (
             <div className="absolute inset-0 w-full bg-black/80 z-20 p-6">
               <div className="flex items-start gap-2">
                 {loadingSteps.map((step, i) => (
-                  <div className="w-full flex flex-col gap-2">
+                  <div key={i} className="w-full flex flex-col gap-2">
                     <div
                       className={cn(
                         "h-[4px] w-full rounded-full shadow-sm",

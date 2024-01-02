@@ -305,9 +305,21 @@ export const checkoutRouter = createTRPCRouter({
           },
           data: {
             paymentIntentId: newPaymentIntent.id,
-            paymentType: paymentType,
+            paymentType,
           },
         });
+
+        if (checkoutSession.createdBookingId) {
+          await db.booking.update({
+            where: {
+              id: checkoutSession.createdBookingId,
+            },
+            data: {
+              paymentIntentId: newPaymentIntent.id,
+              paymentType,
+            },
+          });
+        }
 
         return {
           totalUpfront: {
@@ -328,7 +340,7 @@ export const checkoutRouter = createTRPCRouter({
           id: checkoutSession.id,
         },
         data: {
-          paymentType: paymentType,
+          paymentType,
         },
       });
 
@@ -361,9 +373,21 @@ export const checkoutRouter = createTRPCRouter({
           },
           data: {
             paymentIntentId: newPaymentIntent.id,
-            paymentType: paymentType,
+            paymentType,
           },
         });
+
+        if (checkoutSession.createdBookingId) {
+          await db.booking.update({
+            where: {
+              id: checkoutSession.createdBookingId,
+            },
+            data: {
+              paymentIntentId: newPaymentIntent.id,
+              paymentType,
+            },
+          });
+        }
 
         return {
           totalUpfront: {
