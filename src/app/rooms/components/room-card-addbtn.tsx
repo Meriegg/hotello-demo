@@ -5,6 +5,7 @@ import { CheckIcon, ShoppingCartIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Loader } from "~/components/ui/loader";
+import { useToast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const RoomCardAddBtn = ({ productId }: Props) => {
+  const { toast } = useToast();
   const [parentRef] = useAutoAnimate<HTMLDivElement>();
   const [isInCart, setIsInCart] = useState(false);
 
@@ -37,8 +39,8 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
     retry: 0,
   });
   const addToCart = api.cart.addToCart.useMutation({
-    onSuccess: async (data) => {
-      await fetch("/api/setcookie", {
+    onSuccess: (data) => {
+      fetch("/api/setcookie", {
         method: "POST",
         body: JSON.stringify({
           key: "cart",
@@ -50,10 +52,17 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
             maxAge: 60 * 60 * 24 * 7,
           },
         }),
+      }).then((res) => {
+        if (res.status === 500) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not add to cart.",
+          });
+        }
+
+        apiUtils.cart.invalidate().catch((e) => console.error(e));
       });
-    },
-    onSettled: () => {
-      apiUtils.cart.invalidate().catch((e) => console.error(e));
     },
     retry: 0,
   });

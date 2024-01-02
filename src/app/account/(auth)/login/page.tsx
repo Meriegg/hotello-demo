@@ -2,7 +2,7 @@
 
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -13,6 +13,7 @@ import { api } from "~/trpc/react";
 
 const Page = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
 
   const currentSession = api.account.getCurrentSession.useQuery(undefined, {
@@ -24,11 +25,14 @@ const Page = () => {
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const loginMutation = api.account.login.useMutation({
     onError: (error) => {
       setError(error.message);
     },
     onSuccess: (data) => {
+      setIsRedirecting(true);
+
       fetch("/api/setcookie", {
         method: "POST",
         body: JSON.stringify({
@@ -42,16 +46,21 @@ const Page = () => {
           },
         }),
       })
-        .then(() => {
-          router.push(data.redirectTo);
-        })
-        .catch(() => {
-          toast({
-            variant: "destructive",
-            title: "An error happened",
-            description:
-              "An error happened while logging you in, please try again and check your internet connection.",
-          });
+        .then((res) => {
+          if (res.status === 500) {
+            toast({
+              variant: "destructive",
+              title: "An error happened",
+              description:
+                "An error happened while logging you in, please try again and check your internet connection.",
+            });
+            return;
+          }
+
+          const redirect = searchParams.get("redirect");
+          router.push(
+            `${data.redirectTo}${redirect ? `?redirect=${redirect}` : ""}`,
+          );
         });
     },
   });
@@ -74,7 +83,7 @@ const Page = () => {
 
   return (
     <div
-      className="w-full flex flex-col items-center mt-12 gap-2 mx-auto px-2"
+      className="w-full flex flex-col items-center pt-12 gap-2 mx-auto px-2"
       style={{ width: "min(450px, 100%)" }}
     >
       <p className="text-2xl text-neutral-900 text-center">
@@ -87,7 +96,7 @@ const Page = () => {
       <div className="flex flex-col gap-2 w-full mt-4">
         <Input
           label="Your email"
-          disabled={loginMutation.isLoading}
+          disabled={loginMutation.isLoading || isRedirecting}
           value={email}
           error={error}
           onChange={(e) => {
@@ -99,9 +108,9 @@ const Page = () => {
         <Button
           onClick={() => submit()}
           className="flex items-center gap-2 bg-neutral-100 rounded-b-2xl rounded-t-md text-neutral-900 hover:bg-neutral-200 active:ring-4 ring-neutral-100 transition-all duration-300 transform font-bold"
-          disabled={loginMutation.isLoading}
+          disabled={loginMutation.isLoading || isRedirecting}
         >
-          {loginMutation.isLoading && (
+          {(loginMutation.isLoading || isRedirecting) && (
             <Loader
               label={null}
               containerClassName="p-0 w-fit"

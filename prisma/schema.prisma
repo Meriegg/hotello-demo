@@ -46,7 +46,10 @@ model CheckoutSession {
   // until then they will be stored here 
   bookingdetails_guestInformation Json?
 
-  // TODO: Any other stripe information for the final step 
+  paymentIntentId  String?
+  paymentType      PaymentType? @default(FULL_UPFRONT)
+  createdBookingId String?      @unique
+  createdBooking   Booking?
 }
 
 enum UserRole {
@@ -64,11 +67,13 @@ model User {
   age             Int
   createdOn       DateTime @default(now())
 
-  billingRegion                String
-  billingAddress               String
-  billingCityTown              String
-  billingPostalCode            String
-  metadataSignedUpFromCheckout Boolean? @default(false)
+  billingRegion     String?
+  billingAddress    String?
+  billingCityTown   String?
+  billingPostalCode String?
+
+  signedUpFromCheckout Boolean? @default(false)
+  isNewUser            Boolean  @default(true)
 
   emailVerifications EmailVerification[]       @relation("EmailVerifications")
   userSessions       UserSession[]             @relation("UserSessions")
@@ -105,14 +110,15 @@ model EmailVerification {
   user   User   @relation(fields: [userId], references: [id], name: "EmailVerifications")
 }
 
-enum PaymentMethod {
-  IN_FULL
+enum PaymentType {
+  FULL_UPFRONT
   RESERVATION_HOLD
 }
 
 enum PaymentStatus {
   PAID
-  // TODO: Add other payment statuses
+  PENDING
+  FAILED
 }
 
 model Booking {
@@ -127,23 +133,24 @@ model Booking {
   bookedCheckOut       DateTime
   calculatedStayInDays Int
 
-  baseRoomsPrice       Decimal @db.Decimal(12, 2)
-  reservationHoldPrice Decimal @db.Decimal(12, 2)
+  baseRoomsPrice       Int
+  reservationHoldPrice Int
 
   // If the user pays in full this will be 0
   // If the user pays a reservation hold, the reservation hold price
   // will be detucted
-  priceToPayOnCheckIn Decimal @db.Decimal(12, 2)
+  priceToPayOnCheckIn Int
 
-  paymentType   PaymentMethod
-  paymentStatus PaymentStatus
-
-  isFullyPaid Boolean
+  paymentType     PaymentType
+  paymentStatus   PaymentStatus
+  paymentIntentId String        @unique
 
   createdOn DateTime @default(now())
 
   billingUserDetailsCopy Json?
   billingRoomsDataCopy   Json?
+  checkoutSession        CheckoutSession? @relation(fields: [checkoutSessionId], references: [id])
+  checkoutSessionId      String?          @unique
 }
 
 model BookingRoom {

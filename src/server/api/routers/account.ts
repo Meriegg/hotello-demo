@@ -17,6 +17,14 @@ import {
   rateLimitUserIp,
   verifyUserIp,
 } from "~/server/utils/auth/email-rate-limits";
+import { SignUpDataSchema } from "~/app/account/(auth)/sign-up/validation";
+import { ChangeAccountDetailsSchema } from "~/lib/zod/account";
+import {
+  createEmailChangeJwt,
+  verifyEmailChangeJwt,
+} from "~/server/utils/email-change-jwt";
+import { EmailChangeEmail } from "~/components/emails/email-change";
+import { resend } from "~/lib/resend";
 
 export const accountsRouter = createTRPCRouter({
   getCurrentSession: privateProcedure.query(
@@ -78,6 +86,72 @@ export const accountsRouter = createTRPCRouter({
       cookieVerificationToken,
     };
   }),
+  signUp: publicProcedure.input(SignUpDataSchema).mutation(
+    async ({ ctx: { db, headers }, input }) => {
+      const userIp = headers.get("x-forwarded-for");
+      const { block, timeDiffInSeconds } = await verifyUserIp(
+        userIp,
+      );
+      if (block) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: `You are being rate limited${
+            timeDiffInSeconds
+              ? `, please wait ${timeDiffInSeconds} ${
+                timeDiffInSeconds > 1 ? "seconds" : "second"
+              } and try again.`
+              : "."
+          }`,
+        });
+      }
+
+      const existingUser = await db.user.findFirst({
+        where: {
+          OR: [
+            {
+              email: input.email,
+            },
+            {
+              phoneNum: input.phoneNum,
+            },
+          ],
+        },
+      });
+      if (existingUser) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Email or phone number is already taken.",
+        });
+      }
+
+      const newUser = await db.user.create({
+        data: {
+          ...input,
+        },
+      });
+
+      const emailData = await sendVerificationEmail({ userId: newUser.id });
+      if (emailData.error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: emailData.errorMessage ?? "Failed to send email",
+        });
+      }
+
+      await rateLimitUserIp(userIp);
+
+      const cookieVerificationToken = createCookieVerification(
+        "email-verification-token",
+      );
+      const emailVerificationToken = createEmailVerificationJwt(newUser.id);
+
+      return {
+        redirectTo: `/account/verify/${newUser.id}`,
+        emailVerificationToken,
+        cookieVerificationToken,
+      };
+    },
+  ),
   verifyCode: publicProcedure.input(
     z.object({
       userId: z.string(),
@@ -100,6 +174,25 @@ export const accountsRouter = createTRPCRouter({
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "Invalid email verification token.",
+      });
+    }
+
+    if (tokenUserId !== input.userId) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Token UID mismatch.",
+      });
+    }
+
+    const dbUser = await db.user.findUnique({
+      where: {
+        id: input.userId,
+      },
+    });
+    if (!dbUser) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "This user does not exist.",
       });
     }
 
@@ -208,6 +301,17 @@ export const accountsRouter = createTRPCRouter({
       },
     });
 
+    if (dbUser.isNewUser) {
+      await db.user.update({
+        where: {
+          id: dbUser.id,
+        },
+        data: {
+          isNewUser: false,
+        },
+      });
+    }
+
     return {
       newSession,
       cookieVerificationToken,
@@ -264,7 +368,72 @@ export const accountsRouter = createTRPCRouter({
       };
     },
   ),
-  logout: privateProcedure.mutation(async ({ ctx: { db, userSession } }) => {
+  changeEmail: publicProcedure.mutation(async ({ ctx: { db } }) => {
+    const cookieStore = cookies();
+    const emailVerificationToken = cookieStore.get("email-verification-token")
+      ?.value;
+    if (!emailVerificationToken) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You are not authorized to perform this action.",
+      });
+    }
+
+    const tokenUserId = verifyEmailVerificationJwt(emailVerificationToken);
+    if (!tokenUserId) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Invalid email verification token.",
+      });
+    }
+
+    const dbUser = await db.user.findUnique({
+      where: {
+        id: tokenUserId,
+      },
+    });
+    if (!dbUser) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "This user does not exist",
+      });
+    }
+
+    await db.emailVerification.updateMany({
+      where: {
+        userId: tokenUserId,
+      },
+      data: {
+        alreadyUsed: true,
+      },
+    });
+
+    if (dbUser.isNewUser) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You can't change your email on sign uptDda ",
+      });
+    }
+
+    return {
+      redirectTo: "/account/login",
+    };
+  }),
+  logout: privateProcedure.input(
+    z.object({ allDevices: z.boolean().optional() }).optional(),
+  ).mutation(async ({ ctx: { db, userSession }, input }) => {
+    if (input?.allDevices) {
+      const deletedSessions = await db.userSession.deleteMany({
+        where: {
+          userId: userSession.userId,
+        },
+      });
+
+      return {
+        deletedSessions,
+      };
+    }
+
     const deletedSession = await db.userSession.delete({
       where: {
         id: userSession.id,
@@ -282,4 +451,69 @@ export const accountsRouter = createTRPCRouter({
 
     return deletedSession;
   }),
+  changeAccountDetails: privateProcedure.input(ChangeAccountDetailsSchema)
+    .mutation(async ({ ctx: { db, userSession }, input }) => {
+      const editedAccount = await db.user.update({
+        where: {
+          id: userSession.userId,
+        },
+        data: {
+          ...input,
+        },
+      });
+
+      return editedAccount;
+    }),
+  requestEmailChange: privateProcedure.mutation(async ({ ctx: { user } }) => {
+    const token = createEmailChangeJwt(user.id);
+
+    // @ts-ignore
+    const emailData = await resend.emails.send({
+      from: "Acme <onboarding@resend.dev>",
+      to: ["delivered@resend.dev", user.email],
+      subject: "Hotello email change",
+      react: EmailChangeEmail({ token }),
+    });
+    if (emailData.error) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Failed to send email.",
+      });
+    }
+
+    return user.id;
+  }),
+  modifyEmail: privateProcedure.input(
+    z.object({ verificationToken: z.string(), newEmail: z.string().email() }),
+  ).mutation(
+    async ({ input: { newEmail, verificationToken }, ctx: { user, db } }) => {
+      const tokenUserId = verifyEmailChangeJwt(verificationToken);
+      if (!tokenUserId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid verification token.",
+        });
+      }
+
+      if (tokenUserId !== user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to perform this action.",
+        });
+      }
+
+      await db.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          email: newEmail,
+        },
+      });
+
+      return {
+        success: true,
+      };
+    },
+  ),
 });

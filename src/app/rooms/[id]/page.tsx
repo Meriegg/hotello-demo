@@ -43,7 +43,7 @@ const Page = async ({ params: { id: roomId } }: { params: { id: string } }) => {
 
         <div className="flex lg:flex-row flex-col items-center gap-8">
           <ImageCarousel
-            containerClassname="max-w-[500px] max-h-[300px]"
+            containerClassname="max-w-[500px] max-h-[300px] min-h-[300px]"
             images={room.images}
           />
           <div className="flex flex-col justify-between min-h-[300px] gap-2 max-w-[450px]">

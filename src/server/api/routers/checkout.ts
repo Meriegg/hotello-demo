@@ -1,5 +1,6 @@
+import { stripe } from "~/lib/stripe";
 import { cookies } from "next/headers";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, privateProcedure, publicProcedure } from "../trpc";
 import { extractFromCartJwt } from "~/server/utils/cart-jwt";
 import { TRPCError } from "@trpc/server";
 import {
@@ -9,11 +10,25 @@ import {
 import { createCookieVerification } from "~/server/utils/cookies";
 import { z } from "zod";
 import {
+  CheckoutFormValidator,
   CheckoutStep1Validator,
   CheckoutStep2Validator,
   CheckoutStep3Validator,
+  CheckoutStep5Validator,
 } from "~/lib/zod/checkout-form";
 import { getStepStrData, StepsInOrderArray } from "~/server/utils/checkout";
+import { calculateStayDuration } from "~/server/utils/calculate-stay-duration";
+import { calculatePrices } from "~/server/utils/calculate-prices";
+
+const createNewPaymentIntent = async (amount: number) => {
+  return await stripe.paymentIntents.create({
+    amount: amount,
+    currency: "usd",
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  });
+};
 
 export const checkoutRouter = createTRPCRouter({
   getCheckoutSession: publicProcedure.query(async ({ ctx: { db } }) => {
@@ -214,5 +229,374 @@ export const checkoutRouter = createTRPCRouter({
         step,
       },
     });
+  }),
+  configurePaymentForm: publicProcedure.input(CheckoutStep5Validator).query(
+    async ({ ctx: { db }, input: { paymentType } }) => {
+      const cookieStore = cookies();
+      const cartToken = cookieStore.get("cart")?.value;
+      if (!cartToken) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You do not have any items in your cart.",
+        });
+      }
+
+      const checkoutSessionToken = cookieStore.get("checkout")?.value;
+      const checkoutSessionId = verifyCheckoutJwt(checkoutSessionToken ?? "");
+      const checkoutSession = await db.checkoutSession.findUnique({
+        where: { id: checkoutSessionId ?? "" },
+      });
+
+      const cartItems = extractFromCartJwt(cartToken);
+      if (!cartItems?.length) {
+        await db.checkoutSession.update({
+          where: {
+            id: checkoutSession?.id ?? "",
+          },
+          data: {
+            productIds: [],
+            productJsonCopy: {},
+          },
+        });
+
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You do not have any items in your cart.",
+        });
+      }
+
+      const dbItems = await db.room.findMany({
+        where: {
+          id: {
+            in: cartItems,
+          },
+        },
+      });
+
+      if (
+        !checkoutSession?.bookingdetails_checkIn ||
+        !checkoutSession.bookingdetails_checkOut
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid form details",
+        });
+      }
+
+      const calculatedStayInDays = calculateStayDuration(
+        checkoutSession.bookingdetails_checkIn,
+        checkoutSession.bookingdetails_checkOut,
+      );
+      const { cartTotal, reservationHold } = calculatePrices(
+        dbItems,
+        calculatedStayInDays,
+      );
+
+      const amountDue = paymentType === "FULL_UPFRONT"
+        ? cartTotal.stripe
+        : reservationHold.stripe;
+
+      if (!checkoutSession.paymentIntentId) {
+        const newPaymentIntent = await createNewPaymentIntent(amountDue);
+
+        await db.checkoutSession.update({
+          where: {
+            id: checkoutSession.id,
+          },
+          data: {
+            paymentIntentId: newPaymentIntent.id,
+            paymentType: paymentType,
+          },
+        });
+
+        return {
+          totalUpfront: {
+            stripe: cartTotal.stripe,
+            display: cartTotal.display,
+          },
+          reservationHold: {
+            stripe: reservationHold.stripe,
+            display: reservationHold.display,
+          },
+          clientSecret: newPaymentIntent.client_secret,
+          paymentIntentId: newPaymentIntent.id,
+        };
+      }
+
+      await db.checkoutSession.update({
+        where: {
+          id: checkoutSession.id,
+        },
+        data: {
+          paymentType: paymentType,
+        },
+      });
+
+      try {
+        const updatedPaymentIntent = await stripe.paymentIntents.update(
+          checkoutSession.paymentIntentId,
+          {
+            amount: amountDue,
+          },
+        );
+
+        return {
+          totalUpfront: {
+            stripe: cartTotal.stripe,
+            display: cartTotal.display,
+          },
+          reservationHold: {
+            stripe: reservationHold.stripe,
+            display: reservationHold.display,
+          },
+          clientSecret: updatedPaymentIntent.client_secret,
+          paymentIntentId: updatedPaymentIntent.id,
+        };
+      } catch (error) {
+        const newPaymentIntent = await createNewPaymentIntent(amountDue);
+
+        await db.checkoutSession.update({
+          where: {
+            id: checkoutSession.id,
+          },
+          data: {
+            paymentIntentId: newPaymentIntent.id,
+            paymentType: paymentType,
+          },
+        });
+
+        return {
+          totalUpfront: {
+            stripe: cartTotal.stripe,
+            display: cartTotal.display,
+          },
+          reservationHold: {
+            stripe: reservationHold.stripe,
+            display: reservationHold.display,
+          },
+          clientSecret: newPaymentIntent.client_secret,
+          paymentIntentId: newPaymentIntent.id,
+        };
+      }
+    },
+  ),
+  createBooking: privateProcedure.input(
+    CheckoutFormValidator,
+  ).mutation(
+    async ({ ctx: { db, userSession }, input }) => {
+      const cookieStore = cookies();
+      const cartToken = cookieStore.get("cart")?.value;
+      if (!cartToken) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You do not have any items in your cart.",
+        });
+      }
+
+      const checkoutSessionToken = cookieStore.get("checkout")?.value;
+      const checkoutSessionId = verifyCheckoutJwt(checkoutSessionToken ?? "");
+      const checkoutSession = await db.checkoutSession.findUnique({
+        where: { id: checkoutSessionId ?? "" },
+      });
+      if (!checkoutSession?.paymentIntentId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No paymentIntentId is present on the checkout session.",
+        });
+      }
+
+      const cartItems = extractFromCartJwt(cartToken);
+      if (!cartItems?.length) {
+        await db.checkoutSession.update({
+          where: {
+            id: checkoutSession?.id ?? "",
+          },
+          data: {
+            productIds: [],
+            productJsonCopy: {},
+          },
+        });
+
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You do not have any items in your cart.",
+        });
+      }
+
+      const dbItems = await db.room.findMany({
+        where: {
+          id: {
+            in: cartItems,
+          },
+        },
+      });
+
+      if (
+        !checkoutSession?.bookingdetails_checkIn ||
+        !checkoutSession.bookingdetails_checkOut
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid form details",
+        });
+      }
+
+      const calculatedStayInDays = calculateStayDuration(
+        checkoutSession.bookingdetails_checkIn,
+        checkoutSession.bookingdetails_checkOut,
+      );
+
+      const { baseRoomsPrice, reservationHold, cartTotal } = calculatePrices(
+        dbItems,
+        calculatedStayInDays,
+      );
+
+      const priceToPayOnCheckIn = input.step5.paymentType === "FULL_UPFRONT"
+        ? 0
+        : cartTotal.stripe - reservationHold.stripe;
+
+      // Check if prices match
+      const paymentIntent = await stripe.paymentIntents.retrieve(
+        checkoutSession.paymentIntentId,
+      );
+
+      const amountToPay = checkoutSession.paymentType === "FULL_UPFRONT"
+        ? cartTotal.stripe
+        : reservationHold.stripe;
+      console.log(checkoutSession.paymentType);
+      console.log(amountToPay);
+      console.log(paymentIntent.amount);
+
+      if (paymentIntent.amount !== amountToPay) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cart amount mismatch, please refresh this page.",
+        });
+      }
+
+      // Create the main booking
+      const mainBooking = await db.booking.create({
+        data: {
+          baseRoomsPrice,
+          calculatedStayInDays,
+          paymentType: input.step5.paymentType,
+          bookedCheckIn: input.step3.bookingCheckIn,
+          bookedCheckOut: input.step3.bookingCheckOut,
+          paymentStatus: "PENDING",
+          paymentIntentId: checkoutSession.paymentIntentId,
+          reservationHoldPrice: reservationHold.stripe,
+          priceToPayOnCheckIn,
+          userId: userSession.userId,
+          checkoutSessionId: checkoutSession.id,
+          billingRoomsDataCopy: JSON.stringify(dbItems),
+          billingUserDetailsCopy: JSON.stringify(userSession.user),
+        },
+      });
+
+      await db.checkoutSession.update({
+        where: {
+          id: checkoutSession.id,
+        },
+        data: {
+          createdBookingId: mainBooking.id,
+        },
+      });
+
+      // Create bookings for rooms
+      await db.bookingRoom.createMany({
+        data: dbItems.map((item) => ({
+          roomId: item.id,
+          bookingId: mainBooking.id,
+          calculatedStayInDays,
+          billingRoomCopy: JSON.stringify(item),
+          finalPriceForRoom:
+            calculatePrices([item], calculatedStayInDays).cartTotal.stripe,
+        })),
+      });
+
+      const allRoomBookings = await db.bookingRoom.findMany({
+        where: {
+          bookingId: mainBooking.id,
+        },
+      });
+
+      const guests: {
+        age: number;
+        firstName: string;
+        lastName: string;
+        roomId: string;
+      }[] = [];
+
+      const roomKeys: string[] = Object.keys(input.step3.guestInformation);
+      for (let i = 0; i < roomKeys.length; i++) {
+        const roomKey = roomKeys[i] as string;
+        const roomData = input.step3.guestInformation[roomKey];
+        if (!roomData) continue;
+
+        const peopleKeys = Object.keys(roomData.people);
+
+        for (let j = 0; j < peopleKeys.length; j++) {
+          const personKey = peopleKeys[j] as string;
+          const personDetails = roomData.people[personKey];
+          if (!personDetails) continue;
+
+          if (
+            Object.values(personDetails).every((field) =>
+              !field || field === null || field === undefined
+            )
+          ) {
+            continue;
+          }
+
+          const roomBookingId = allRoomBookings.find((room) =>
+            room.roomId === roomKey
+          )?.id;
+          if (!roomBookingId) continue;
+
+          guests.push({
+            firstName: personDetails.firstName,
+            lastName: personDetails.lastName,
+            age: personDetails.age ?? 0,
+            roomId: roomBookingId,
+          });
+        }
+      }
+
+      if (guests.length > 0) {
+        await db.bookingRoomGuestDetails.createMany({
+          data: guests.map(({ firstName, lastName, age, roomId }) => {
+            return {
+              firstName,
+              lastName,
+              age,
+              bookingRoomId: roomId,
+              bookingUserId: userSession.userId,
+            };
+          }),
+        });
+      }
+
+      return {
+        success: true,
+        mainBooking,
+      };
+    },
+  ),
+  getBookingPaymentStatus: publicProcedure.input(
+    z.object({ bookingId: z.string() }),
+  ).query(async ({ input: { bookingId }, ctx: { db } }) => {
+    const booking = await db.booking.findUnique({
+      where: {
+        id: bookingId,
+      },
+    });
+    if (!booking) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "This booking does not exist.",
+      });
+    }
+
+    return booking.paymentStatus;
   }),
 });

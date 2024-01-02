@@ -1,4 +1,3 @@
-import PostalCodes from "postal-codes-js";
 import { getNames } from "country-list";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
@@ -28,7 +27,7 @@ export const Step2 = ({ form }: Props) => {
         value={form.watch("step2.countryOrRegion")}
         onValueChange={(val) => form.setValue("step2.countryOrRegion", val)}
       >
-        <SelectTrigger>
+        <SelectTrigger className="rounded-t-[15px]">
           <SelectValue placeholder="Country or Region" />
         </SelectTrigger>
         <SelectContent>
@@ -50,6 +49,7 @@ export const Step2 = ({ form }: Props) => {
         {...form.register("step2.postalCode")}
         error={step2?.postalCode?.message}
         label="Postal code"
+        className="rounded-b-[15px]"
       />
     </div>
   );

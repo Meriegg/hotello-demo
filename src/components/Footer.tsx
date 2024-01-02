@@ -47,18 +47,30 @@ export const Footer = ({ theme, className }: Props) => {
               <Link
                 href="/faq"
                 className={cn("hover:underline", {
-                  "text-white": theme === "light",
-                  "text-neutral-900": theme === "dark",
+                  "text-white": theme === "dark",
+                  "text-neutral-900": theme === "light",
                 })}
               >
                 FAQ
               </Link>
               <p className="text-neutral-200">•</p>
-              <Link href="/contact" className="text-white hover:underline">
+              <Link
+                href="/contact"
+                className={cn("hover:underline", {
+                  "text-white": theme === "dark",
+                  "text-neutral-900": theme === "light",
+                })}
+              >
                 Contact
               </Link>
               <p className="text-neutral-200">•</p>
-              <Link href="/legal" className="text-white hover:underline">
+              <Link
+                href="/legal"
+                className={cn("hover:underline", {
+                  "text-white": theme === "dark",
+                  "text-neutral-900": theme === "light",
+                })}
+              >
                 Legal
               </Link>
             </div>

@@ -4,6 +4,7 @@ import { createCartJwt, extractFromCartJwt } from "~/server/utils/cart-jwt";
 import { cookies } from "next/headers";
 import { TRPCError } from "@trpc/server";
 import { createCookieVerification } from "~/server/utils/cookies";
+import { calculatePrices } from "~/server/utils/calculate-prices";
 
 export const cartRouter = createTRPCRouter({
   addToCart: publicProcedure.input(z.object({ productId: z.string() }))
@@ -60,7 +61,7 @@ export const cartRouter = createTRPCRouter({
 
     const products = await db.room.findMany({
       where: { id: { in: productIds } },
-      include: { category: true }
+      include: { category: true },
     });
     if (!products.length) {
       throw new TRPCError({
@@ -108,24 +109,11 @@ export const cartRouter = createTRPCRouter({
       });
     }
 
-    const prices: number[] = [];
-
-    products.forEach((room) => {
-      prices.push(
-        !!room.discountPercentage && !!room.discountedPrice
-          ? parseFloat(room.discountedPrice.toString())
-          : parseFloat(room.price.toString()),
-      );
-    });
-
-    const total = prices.reduce(
-      (accumulator, currentValue) => accumulator + currentValue,
-      0,
-    );
+    const { baseRoomsPrice } = calculatePrices(products, 0);
 
     return {
       products,
-      total,
+      total: baseRoomsPrice / 100,
     };
   }),
   removeItem: publicProcedure.input(z.object({ productId: z.string() }))

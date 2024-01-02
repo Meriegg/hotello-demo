@@ -1,21 +1,31 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Loader } from "~/components/ui/loader";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 import { useToast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 
 interface Props {
   userId: string;
   verifySeshId?: string | null;
+  disableChangeEmail?: boolean;
 }
 
-export const VerifyCodeForm = ({ userId, verifySeshId }: Props) => {
+export const VerifyCodeForm = (
+  { userId, verifySeshId, disableChangeEmail = false }: Props,
+) => {
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +35,8 @@ export const VerifyCodeForm = ({ userId, verifySeshId }: Props) => {
       setError(error.message);
     },
     onSuccess: (data) => {
+      const redirect = searchParams.get("redirect");
+
       if (data.cookieVerificationToken) {
         fetch("/api/setcookie", {
           method: "POST",
@@ -39,21 +51,37 @@ export const VerifyCodeForm = ({ userId, verifySeshId }: Props) => {
             },
           }),
         })
-          .then(() => {
-            router.push("/account");
-          })
-          .catch(() => {
-            toast({
-              variant: "destructive",
-              title: "An error happened",
-              description:
-                "An error happened while logging you in, please try again and check your internet connection.",
-            });
+          .then((res) => {
+            if (res.status === 500) {
+              toast({
+                variant: "destructive",
+                title: "An error happened",
+                description:
+                  "An error happened while logging you in, please try again and check your internet connection.",
+              });
+              return;
+            }
+
+            router.push(redirect ?? "/account");
           });
         return;
       }
 
-      router.push("/account");
+      router.push(redirect ?? "/account");
+    },
+  });
+
+  const changeEmailMutation = api.account.changeEmail.useMutation({
+    onSuccess: () => {
+      router.push("/account/login");
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "An error happened",
+        description: error?.message ??
+          "Cannot change email, please try again later",
+      });
     },
   });
 
@@ -141,9 +169,24 @@ export const VerifyCodeForm = ({ userId, verifySeshId }: Props) => {
         </Button>
       </div>
       <div className="flex w-full items-center justify-between">
-        <button className="text-xs text-neutral-900 hover:underline">
-          Change email
-        </button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <button
+                disabled={changeEmailMutation.isLoading || disableChangeEmail}
+                onClick={() => changeEmailMutation.mutate()}
+                className="text-xs text-neutral-900 hover:underline disabled:opacity-70"
+              >
+                Change email
+              </button>
+            </TooltipTrigger>
+            {disableChangeEmail && (
+              <TooltipContent>
+                You can't change your email on signup.
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
         <button
           disabled={isResendDisabled || resendCodeMutation.isLoading}
           onClick={() => resendCodeMutation.mutate()}

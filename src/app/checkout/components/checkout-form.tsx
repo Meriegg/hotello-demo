@@ -18,12 +18,13 @@ import { Step1 } from "./checkout-steps/step-1";
 import { ArrowRight } from "lucide-react";
 import { StepRenderer } from "./step-renderer";
 import { Step2 } from "./checkout-steps/step-2";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Step3 } from "./checkout-steps/step3/index";
 import type { Room } from "@prisma/client";
 import { Step4 } from "./checkout-steps/step-4";
 import { useToast } from "~/hooks/use-toast";
 import Link from "next/link";
+import { Step5 } from "./checkout-steps/step5/step-5";
 
 export type StepType = {
   slug: string;
@@ -42,6 +43,7 @@ interface Props {
 
 export const Checkoutform = ({ items }: Props) => {
   const { toast } = useToast();
+  const [debugMode, setDebugMode] = useState(false);
   const [cookieError, setCookieError] = useState(false);
   const [usedDbData, setUsedDbData] = useState(false);
   const [showUseDbData, setShowUseDbData] = useState(false);
@@ -51,6 +53,19 @@ export const Checkoutform = ({ items }: Props) => {
     },
     retry: 0,
   });
+
+  const debugModeListenerCallback = (event: KeyboardEvent) => {
+    if (event.shiftKey && event.key === "I") {
+      setDebugMode((prev) => !prev);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", debugModeListenerCallback);
+
+    return () =>
+      document.removeEventListener("keydown", debugModeListenerCallback);
+  }, []);
 
   const [didLoadData, setDidLoadData] = useState(false);
   const [parentRef] = useAutoAnimate();
@@ -81,6 +96,9 @@ export const Checkoutform = ({ items }: Props) => {
         guestInformation: {},
         allRoomsAvailable: false,
       },
+      step5: {
+        paymentType: "FULL_UPFRONT",
+      },
     },
   });
 
@@ -99,15 +117,17 @@ export const Checkoutform = ({ items }: Props) => {
               maxAge: 60 * 60 * 24 * 7,
             },
           }),
-        }).catch(() => {
-          toast({
-            variant: "destructive",
-            title: "An error happened",
-            description:
-              "An error happened while trying to persist your session.",
-          });
+        }).then((res) => {
+          if (res.status === 500) {
+            toast({
+              variant: "destructive",
+              title: "An error happened",
+              description:
+                "An error happened while trying to persist your session.",
+            });
 
-          setCookieError(true);
+            setCookieError(true);
+          }
         });
       }
 
@@ -136,6 +156,10 @@ export const Checkoutform = ({ items }: Props) => {
         bookingCheckOut: checkoutSesh.bookingdetails_checkOut!,
         bookingCheckIn: checkoutSesh.bookingdetails_checkIn!,
         allRoomsAvailable: true,
+      });
+
+      form.setValue("step5", {
+        paymentType: checkoutSesh.paymentType,
       });
 
       type GuestInformationType = z.infer<
@@ -283,6 +307,13 @@ export const Checkoutform = ({ items }: Props) => {
       step: "step 5",
       stepNum: 4,
       slug: "Final payment",
+      form: (
+        <Step5
+          existingBookingId={checkoutSession.data?.checkoutSession
+            .createdBookingId ?? null}
+          form={form}
+        />
+      ),
     },
   };
 
@@ -362,21 +393,27 @@ export const Checkoutform = ({ items }: Props) => {
                       setShowUseDbData(false);
                       setUsedDbData(true);
                       if (authSession?.data) {
+                        form.setValue(
+                          "step1.phoneNumCountry",
+                          authSession.data.user.phoneNumCountry,
+                        );
+
                         form.setValue("step1", {
                           firstName: authSession.data.user.firstName,
                           lastName: authSession.data.user.lastName,
                           email: authSession.data.user.email,
                           age: authSession.data.user.age,
                           phoneNumber: authSession.data.user.phoneNum,
-                          phoneNumCountry:
-                            authSession.data.user.phoneNumCountry,
                         });
 
                         form.setValue("step2", {
-                          address: authSession.data.user.billingAddress,
-                          countryOrRegion: authSession.data.user.billingRegion,
-                          cityOrTown: authSession.data.user.billingCityTown,
-                          postalCode: authSession.data.user.billingPostalCode,
+                          address: authSession.data.user.billingAddress ?? "",
+                          countryOrRegion:
+                            authSession.data.user.billingRegion ?? "",
+                          cityOrTown: authSession.data.user.billingCityTown ??
+                            "",
+                          postalCode: authSession.data.user.billingPostalCode ??
+                            "",
                         });
                       }
                     }}
@@ -397,6 +434,25 @@ export const Checkoutform = ({ items }: Props) => {
             )}
           </>
         )}
+
+      {debugMode && (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-neutral-700">Debug data</p>
+          <hr className="border-neutral-100" />
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-neutral-700">Checkout session id</p>
+            <p className="text-base text-red-400 font-bold">
+              {checkoutSession.data?.checkoutSession.id ?? "-"}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-neutral-700">Payment intent id</p>
+            <p className="text-base text-red-400 font-bold">
+              {checkoutSession.data?.checkoutSession.paymentIntentId ?? "-"}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

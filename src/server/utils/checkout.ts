@@ -22,7 +22,7 @@ export const getStepStrData = (step: CheckoutStep) => {
   }
 };
 
-export const StepsInOrderArray: CheckoutStep[] = [
+export const StepsInOrderArray = [
   "PERSONAL_DETAILS",
   "BILLING_DETAILS",
   "BOOKING_DETAILS",

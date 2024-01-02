@@ -41,9 +41,7 @@ export const CheckoutItems = ({ items }: Props) => {
     },
     onSettled: () => {
       apiUtils.cart.invalidate().catch((e) => console.error(e));
-      apiUtils.checkout.getCheckoutSession
-        .invalidate()
-        .catch((e) => console.error(e));
+      apiUtils.checkout.invalidate().catch((e) => console.error(e));
     },
     retry: 0,
   });

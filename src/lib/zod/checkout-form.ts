@@ -29,7 +29,7 @@ export const CheckoutStep1Validator = z.object({
           return { message: "Really?" };
 
         default:
-          return { message: "Invalid value" };
+          return { message: issue.message ?? "Invalid value." };
       }
     },
   }).min(18).max(104),
@@ -61,8 +61,16 @@ export const CheckoutStep3Validator = z.object({
   allRoomsAvailable: z.boolean().refine((val) => val === true),
 });
 
+export const CheckoutStep5Validator = z.object({
+  paymentType: z.enum([
+    "FULL_UPFRONT",
+    "RESERVATION_HOLD",
+  ]),
+});
+
 export const CheckoutFormValidator = z.object({
   step1: CheckoutStep1Validator,
   step2: CheckoutStep2Validator,
   step3: CheckoutStep3Validator,
+  step5: CheckoutStep5Validator,
 });

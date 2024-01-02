@@ -136,6 +136,13 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
           <InfoDisplay
             label="Total days"
             value={(() => {
+              if (
+                !formValues.step3.bookingCheckIn ||
+                !formValues.step3.bookingCheckOut
+              ) {
+                return "N/A";
+              }
+
               const stayInDays = calculateStayDuration(
                 formValues.step3.bookingCheckIn,
                 formValues.step3.bookingCheckOut,

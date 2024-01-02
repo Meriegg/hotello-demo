@@ -18,13 +18,16 @@ export const POST = async (request: NextRequest) => {
         httpOnly: z.boolean().optional(),
         maxAge: z.number(),
       }),
-    })
+    });
 
     const reqBody = await request.json() as z.infer<typeof BodyValidator>;
 
     const body = BodyValidator.parse(reqBody);
 
-    const decoded = jwt.verify(body.verificationKey, env.SECRET_KEY) as { exp: number, cookieName: string } | null;
+    const decoded = jwt.verify(body.verificationKey, env.SECRET_KEY) as {
+      exp: number;
+      cookieName: string;
+    } | null;
     if (!decoded?.exp || !decoded?.cookieName) {
       return Response.error();
     }

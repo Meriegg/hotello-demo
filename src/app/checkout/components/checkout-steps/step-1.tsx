@@ -17,11 +17,13 @@ export const Step1 = ({ form }: Props) => {
         <Input
           {...form.register("step1.firstName")}
           containerClassName="w-full"
+          className="rounded-tl-[15px]"
           error={step1?.firstName?.message}
           label="First name"
         />
         <Input
           containerClassName="w-full"
+          className="rounded-tr-[15px]"
           {...form.register("step1.lastName")}
           error={step1?.lastName?.message}
           label="Last name"
@@ -40,6 +42,8 @@ export const Step1 = ({ form }: Props) => {
             (country as any)?.countryCode ?? "",
           );
         }}
+        inputClass="!rounded-[5px]"
+        buttonClass="!rounded-[5px]"
         defaultCountry={form.watch("step1.phoneNumCountry")}
         value={form.watch("step1.phoneNumber")}
         placeholder="Phone number (optional)"
@@ -49,6 +53,7 @@ export const Step1 = ({ form }: Props) => {
         {...form.register("step1.age", {
           valueAsNumber: true,
         })}
+        className="rounded-b-[15px]"
         error={step1?.age?.message}
         label="Age"
         pattern="[0-9]"

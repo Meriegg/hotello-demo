@@ -46,7 +46,7 @@ const Page = async (
 
   return (
     <div
-      className="mx-auto flex flex-col gap-2 mt-12"
+      className="mx-auto flex flex-col gap-2 pt-12"
       style={{ width: "min(450px, 100%)" }}
     >
       {verifySesh && (
@@ -62,7 +62,11 @@ const Page = async (
         <span className="font-bold text-neutral-900">{user.email}</span>
       </p>
 
-      <VerifyCodeForm userId={user.id} verifySeshId={verifySesh} />
+      <VerifyCodeForm
+        disableChangeEmail={user.isNewUser}
+        userId={user.id}
+        verifySeshId={verifySesh}
+      />
     </div>
   );
 };
