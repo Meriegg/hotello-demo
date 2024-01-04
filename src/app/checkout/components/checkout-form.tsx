@@ -330,6 +330,7 @@ export const Checkoutform = ({ items }: Props) => {
   return (
     <div
       ref={parentRef}
+      id="CHECKOUT_FORM_MAIN_CONTAINER"
       className="mx-auto mb-8 flex w-full flex-1 flex-col gap-4 border-[1px] border-neutral-100 p-4 lg:mx-0 lg:max-w-[500px]"
     >
       {cookieError

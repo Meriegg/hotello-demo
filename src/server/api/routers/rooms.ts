@@ -3,6 +3,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { FilterDataValidator, FilterValidator } from "~/lib/zod/filter";
 import { z } from "zod";
 import type { Room, RoomCategory } from "@prisma/client";
+import { checkRoomsAvailability } from "~/server/utils/check-rooms-availability";
 
 export const roomsRouter = createTRPCRouter({
   getRooms: publicProcedure.input(z.object({
@@ -158,75 +159,11 @@ export const roomsRouter = createTRPCRouter({
   )
     .mutation(
       async (
-        { ctx: { db }, input: { roomIds, checkOutDate, checkInDate } },
+        { input: { roomIds, checkOutDate, checkInDate } },
       ) => {
-        const rooms = await db.room.findMany({
-          where: {
-            id: {
-              in: roomIds,
-            },
-            NOT: {
-              bookings: {
-                some: {
-                  booking: {
-                    OR: [
-                      {
-                        bookedCheckIn: {
-                          lte: checkOutDate,
-                        },
-                        bookedCheckOut: {
-                          gte: checkOutDate,
-                        },
-                      },
-                      {
-                        bookedCheckIn: {
-                          lte: checkInDate,
-                        },
-                        bookedCheckOut: {
-                          gte: checkInDate,
-                        },
-                      },
-                      {
-                        bookedCheckIn: {
-                          gte: checkInDate,
-                          lte: checkOutDate,
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          },
-          include: {
-            bookings: {
-              include: {
-                booking: {
-                  select: {
-                    bookedCheckOut: true,
-                    bookedCheckIn: true,
-                  },
-                },
-              },
-            },
-          },
-        });
+        const data = await checkRoomsAvailability(roomIds, checkInDate, checkOutDate);
 
-        const areAllAvailable = rooms.length === roomIds.length;
-
-        const unavailableRooms = areAllAvailable
-          ? null
-          : await db.room.findMany({
-            where: {
-              id: {
-                in: roomIds.filter((id) =>
-                  rooms.findIndex((room) => room.id === id) === -1
-                ),
-              },
-            },
-          });
-
-        return { available: areAllAvailable, unavailableRooms };
+        return data;
       },
     ),
 });

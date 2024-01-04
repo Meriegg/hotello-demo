@@ -7,13 +7,12 @@ const Page = async () => {
   return (
     <div className="w-full">
       <p className="text-2xl font-bold text-neutral-900">Your bookings</p>
-      <div className="flex items-start flex-wrap gap-4 mt-4 w-full">
-        {bookings.map((booking, i) => (
-          <BookingDisplay
-            booking={booking}
-            key={i}
-          />
-        ))}
+      <div className="mt-4 flex w-full flex-wrap items-start gap-1">
+        {bookings
+          .sort((a, b) => b.createdOn.getTime() - a.createdOn.getTime())
+          .map((booking, i) => (
+            <BookingDisplay booking={booking} key={i} />
+          ))}
       </div>
     </div>
   );

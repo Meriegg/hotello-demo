@@ -11,14 +11,15 @@ import { createCookieVerification } from "~/server/utils/cookies";
 import { z } from "zod";
 import {
   CheckoutFormValidator,
-  CheckoutStep1Validator,
-  CheckoutStep2Validator,
-  CheckoutStep3Validator,
+  type CheckoutStep1Validator,
+  type CheckoutStep2Validator,
+  type CheckoutStep3Validator,
   CheckoutStep5Validator,
 } from "~/lib/zod/checkout-form";
 import { getStepStrData, StepsInOrderArray } from "~/server/utils/checkout";
 import { calculateStayDuration } from "~/server/utils/calculate-stay-duration";
 import { calculatePrices } from "~/server/utils/calculate-prices";
+import { checkRoomsAvailability } from "~/server/utils/check-rooms-availability";
 
 const createNewPaymentIntent = async (amount: number) => {
   return await stripe.paymentIntents.create({
@@ -477,6 +478,14 @@ export const checkoutRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message: "You do not have any items in your cart.",
         });
+      }
+
+      const { available } = await checkRoomsAvailability(cartItems, input.step3.bookingCheckIn, input.step3.bookingCheckOut);
+      if (!available) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Not all rooms are available for the selected check-in/check-out."
+        })
       }
 
       const dbItems = await db.room.findMany({

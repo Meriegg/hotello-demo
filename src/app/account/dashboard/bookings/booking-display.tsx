@@ -30,10 +30,10 @@ import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 
 type BookingType = Booking & {
-  rooms: BookingRoom & {
+  rooms: (BookingRoom & {
     guestDetails: BookingRoomGuestDetails[];
     room: Room;
-  }[];
+  })[];
   totalPaid: number;
 };
 
@@ -41,7 +41,6 @@ const CancelBookingButton = ({ booking }: { booking: BookingType }) => {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
 
-  const apiUtils = api.useUtils();
   const cancelBooking = api.account.cancelBooking.useMutation({
     onSuccess: () => {
       setShowModal(false);
@@ -52,13 +51,15 @@ const CancelBookingButton = ({ booking }: { booking: BookingType }) => {
   return (
     <Dialog onOpenChange={(val) => setShowModal(val)} open={showModal}>
       <DialogTrigger
-        disabled={booking.paymentStatus === "PENDING" ||
-          cancelBooking.isLoading}
+        disabled={
+          booking.paymentStatus === "PENDING" || cancelBooking.isLoading
+        }
       >
         <button
-          disabled={booking.paymentStatus === "PENDING" ||
-            cancelBooking.isLoading}
-          className="text-sm text-red-400 underline font-normal transition-all duration-300 active:ring-2 ring-red-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1"
+          disabled={
+            booking.paymentStatus === "PENDING" || cancelBooking.isLoading
+          }
+          className="flex items-center gap-1 text-sm font-normal text-red-400 underline ring-red-200 transition-all duration-300 active:ring-2 disabled:cursor-not-allowed disabled:opacity-70"
         >
           Cancel booking
         </button>
@@ -71,18 +72,19 @@ const CancelBookingButton = ({ booking }: { booking: BookingType }) => {
             : "Your payment will not be refunded!"}
         </DialogDescription>
 
-        <div className="flex items-center gap-2 w-full">
+        <div className="flex w-full items-center gap-2">
           <DialogClose className="w-full">
-            <Button className="rounded-md w-full active:ring-2 bg-neutral-50 text-neutral-900 transition-all duration-300 ring-neutral-100">
+            <Button className="w-full rounded-md bg-neutral-50 text-neutral-900 ring-neutral-100 transition-all duration-300 active:ring-2">
               Don&apos;t cancel
             </Button>
           </DialogClose>
           <Button
-            className="rounded-md w-full active:ring-2 transition-all duration-300 ring-red-200 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full rounded-md ring-red-200 transition-all duration-300 active:ring-2 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={cancelBooking.isLoading}
             onClick={() => cancelBooking.mutate({ bookingId: booking.id })}
           >
-            Cancel booking {cancelBooking.isLoading && (
+            Cancel booking{" "}
+            {cancelBooking.isLoading && (
               <Loader
                 label={null}
                 labelClassName="w-fit p-0"
@@ -135,101 +137,91 @@ export const BookingDisplay = ({ booking }: Props) => {
               {new Intl.DateTimeFormat().format(booking.createdOn)}
             </p>
 
-            {booking.canceled
-              ? (
-                <p className="rounded-[4px] p-1 text-xs font-bold tracking-normal bg-neutral-50 text-neutral-700">
-                  CANCELED
-                </p>
-              )
-              : (
-                <p
-                  className={cn(
-                    "rounded-[4px] p-1 text-xs font-bold tracking-normal",
-                    {
-                      "bg-green-200 text-green-900":
-                        booking.paymentStatus === "PAID",
-                      "bg-red-200 text-red-900":
-                        booking.paymentStatus === "FAILED",
-                      "bg-neutral-50 text-neutral-700":
-                        booking.paymentStatus === "PENDING",
-                    },
-                  )}
-                >
-                  {getPaymentStatusDisplay()}
-                </p>
-              )}
+            {booking.canceled ? (
+              <p className="rounded-[4px] bg-neutral-50 p-1 text-xs font-bold tracking-normal text-neutral-700">
+                CANCELED
+              </p>
+            ) : (
+              <p
+                className={cn(
+                  "rounded-[4px] p-1 text-xs font-bold tracking-normal",
+                  {
+                    "bg-green-200 text-green-900":
+                      booking.paymentStatus === "PAID",
+                    "bg-red-200 text-red-900":
+                      booking.paymentStatus === "FAILED",
+                    "bg-neutral-50 text-neutral-700":
+                      booking.paymentStatus === "PENDING",
+                  },
+                )}
+              >
+                {getPaymentStatusDisplay()}
+              </p>
+            )}
           </div>
         </div>
         <hr className="my-2 border-neutral-100" />
 
         <div className="flex items-start gap-4">
-          {booking.customerCheckIn
-            ? (
-              <div className="p-2 rounded-[8px] bg-neutral-50">
-                <p className="text-xs text-neutral-700">You checked in on</p>
-                <p className="text-sm text-red-400 font-bold flex items-center gap-2">
-                  {new Intl.DateTimeFormat().format(booking.customerCheckIn)}
-                  {" "}
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <InfoIcon className="w-3 h-3 text-neutral-700" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm text-neutral-700">
-                        {booking.customerCheckIn.toISOString()}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </p>
-              </div>
-            )
-            : (
-              <div>
-                <p className="text-xs text-neutral-700">Check in</p>
-                <p className="text-sm text-red-400 font-bold">
-                  {new Intl.DateTimeFormat().format(booking.bookedCheckIn)}
-                  {" "}
-                </p>
-              </div>
-            )}
+          {booking.customerCheckIn ? (
+            <div className="rounded-[8px] bg-neutral-50 p-2">
+              <p className="text-xs text-neutral-700">You checked in on</p>
+              <p className="flex items-center gap-2 text-sm font-bold text-red-400">
+                {new Intl.DateTimeFormat().format(booking.customerCheckIn)}{" "}
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-3 w-3 text-neutral-700" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm text-neutral-700">
+                      {booking.customerCheckIn.toISOString()}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-xs text-neutral-700">Check in</p>
+              <p className="text-sm font-bold text-red-400">
+                {new Intl.DateTimeFormat().format(booking.bookedCheckIn)}{" "}
+              </p>
+            </div>
+          )}
 
-          {booking.customerCheckOut
-            ? (
-              <div className="p-2 rounded-[8px] bg-neutral-50">
-                <p className="text-xs text-neutral-700">You checked out on</p>
-                <p className="text-sm text-red-400 font-bold flex items-center gap-2">
-                  {new Intl.DateTimeFormat().format(booking.customerCheckOut)}
-                  {" "}
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <InfoIcon className="w-3 h-3 text-neutral-700" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm text-neutral-700">
-                        {booking.customerCheckOut.toISOString()}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </p>
-              </div>
-            )
-            : (
-              <div>
-                <p className="text-xs text-neutral-700">Check out</p>
-                <p className="text-sm text-red-400 font-bold">
-                  {new Intl.DateTimeFormat().format(booking.bookedCheckOut)}
-                  {" "}
-                </p>
-              </div>
-            )}
+          {booking.customerCheckOut ? (
+            <div className="rounded-[8px] bg-neutral-50 p-2">
+              <p className="text-xs text-neutral-700">You checked out on</p>
+              <p className="flex items-center gap-2 text-sm font-bold text-red-400">
+                {new Intl.DateTimeFormat().format(booking.customerCheckOut)}{" "}
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-3 w-3 text-neutral-700" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm text-neutral-700">
+                      {booking.customerCheckOut.toISOString()}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-xs text-neutral-700">Check out</p>
+              <p className="text-sm font-bold text-red-400">
+                {new Intl.DateTimeFormat().format(booking.bookedCheckOut)}{" "}
+              </p>
+            </div>
+          )}
 
           <div
             className={cn(
-              !!booking.customerCheckOut && "p-2 rounded-[8px] bg-neutral-50",
+              !!booking.customerCheckOut && "rounded-[8px] bg-neutral-50 p-2",
             )}
           >
             <p className="text-xs text-neutral-700">Total stay</p>
-            <p className="text-sm text-red-400 font-bold">
+            <p className="text-sm font-bold text-red-400">
               {booking.calculatedStayInDays}{" "}
               {booking.calculatedStayInDays > 1 ? "days" : "day"}
             </p>
@@ -238,12 +230,12 @@ export const BookingDisplay = ({ booking }: Props) => {
 
         {showBillingDetails && (
           <>
-            <hr className="border-neutral-100 my-2" />
+            <hr className="my-2 border-neutral-100" />
 
-            <div className="flex items-start gap-4 flex-wrap w-full">
+            <div className="flex w-full flex-wrap items-start gap-4">
               <div>
                 <p className="text-xs text-neutral-700">Full name</p>
-                <p className="text-sm text-red-400 font-bold">
+                <p className="text-sm font-bold text-red-400">
                   {booking.personalDetailsFirstName}{" "}
                   {booking.personalDetailsLastName}
                 </p>
@@ -251,23 +243,23 @@ export const BookingDisplay = ({ booking }: Props) => {
 
               <div>
                 <p className="text-xs text-neutral-700">Age</p>
-                <p className="text-sm text-red-400 font-bold">
+                <p className="text-sm font-bold text-red-400">
                   {booking.personalDetailsAge}
                 </p>
               </div>
 
               <div>
                 <p className="text-xs text-neutral-700">Email</p>
-                <p className="text-sm text-red-400 font-bold">
+                <p className="text-sm font-bold text-red-400">
                   {booking.personalDetailsEmail}
                 </p>
               </div>
 
               <div>
                 <p className="text-xs text-neutral-700">Phone number</p>
-                <p className="text-sm text-red-400 font-bold">
-                  {(!!booking.personalDetailsPhoneNum &&
-                      !!booking.personalDetailsPhoneNumCountry)
+                <p className="text-sm font-bold text-red-400">
+                  {!!booking.personalDetailsPhoneNum &&
+                  !!booking.personalDetailsPhoneNumCountry
                     ? `(${booking.personalDetailsPhoneNumCountry}) ${booking.personalDetailsPhoneNum}`
                     : "-"}
                 </p>
@@ -275,47 +267,45 @@ export const BookingDisplay = ({ booking }: Props) => {
 
               <div>
                 <p className="text-xs text-neutral-700">Country or Region</p>
-                <p className="text-sm text-red-400 font-bold">
+                <p className="text-sm font-bold text-red-400">
                   {booking.billingDetailsCountryOrRegion}
                 </p>
               </div>
 
               <div>
                 <p className="text-xs text-neutral-700">City or Town</p>
-                <p className="text-sm text-red-400 font-bold">
+                <p className="text-sm font-bold text-red-400">
                   {booking.billingDetailsCityOrTown}
                 </p>
               </div>
 
               <div>
                 <p className="text-xs text-neutral-700">Address</p>
-                <p className="text-sm text-red-400 font-bold">
+                <p className="text-sm font-bold text-red-400">
                   {booking.billingDetailsAddress}
                 </p>
               </div>
 
               <div>
                 <p className="text-xs text-neutral-700">Postal Code</p>
-                <p className="text-sm text-red-400 font-bold">
+                <p className="text-sm font-bold text-red-400">
                   {booking.billingDetailsPostalCode}
                 </p>
               </div>
             </div>
 
-            <hr className="border-neutral-100 my-2" />
+            <hr className="my-2 border-neutral-100" />
           </>
         )}
 
-        <p className="text-xs text-neutral-700 mt-2">Rooms</p>
-        <ul className="list-disc text-red-400 text-sm font-bold pl-8 flex flex-col gap-1 mt-1">
+        <p className="mt-2 text-xs text-neutral-700">Rooms</p>
+        <ul className="mt-1 flex list-disc flex-col gap-1 pl-8 text-sm font-bold text-red-400">
           {booking.rooms.map((room, i) => (
-            <li
-              key={i}
-            >
+            <li key={i}>
               <div className="flex flex-col gap-1" ref={roomContainerRef}>
-                <div className="flex items-center justify-between gap-4 w-full">
+                <div className="flex w-full items-center justify-between gap-4">
                   {room.room.name}{" "}
-                  <span className="text-neutral-700 font-normal">
+                  <span className="font-normal text-neutral-700">
                     ${room.room.price / 100}
                     <span className="text-xs">/night</span>
                   </span>
@@ -324,19 +314,19 @@ export const BookingDisplay = ({ booking }: Props) => {
                 {showGuests && (
                   <>
                     {!room.guestDetails.length && (
-                      <p className="text-neutral-700 font-normal my-1 text-sm">
+                      <p className="my-1 text-sm font-normal text-neutral-700">
                         No guests specified
                       </p>
                     )}
 
                     {!!room.guestDetails.length && (
-                      <div className="flex items-center flex-wrap gap-2 my-1">
+                      <div className="my-1 flex flex-wrap items-center gap-2">
                         {room.guestDetails.map((guest, i) => (
                           <div
                             key={i}
                             className="flex items-start gap-1 font-normal text-neutral-700"
                           >
-                            <p className="text-xs text-neutral-700 italic">
+                            <p className="text-xs italic text-neutral-700">
                               #{i + 1}
                             </p>
                             <div>
@@ -356,94 +346,88 @@ export const BookingDisplay = ({ booking }: Props) => {
           ))}
         </ul>
 
-        <hr className="border-neutral-100 my-2" />
+        <hr className="my-2 border-neutral-100" />
 
-        {booking.customerCheckOut
-          ? (
-            <div className="mx-1 p-2 rounded-md bg-neutral-50">
-              <div className="w-full flex items-start justify-between">
-                <p className="text-xs text-neutral-700 font-normal">
-                  Amount paid
-                </p>
-                <p className="text-sm text-neutral-900 font-bold">
-                  ${(booking.baseRoomsPrice * booking.calculatedStayInDays) /
-                    100}
-                </p>
-              </div>
-              <p className="text-sm text-neutral-900 font-bold mt-1 text-right w-full">
-                {booking.otherServicesPrice
-                  ? `+ Other services ($${booking.otherServicesPrice / 100})`
-                  : "+ No other services ($0)"}
+        {booking.customerCheckOut ? (
+          <div className="mx-1 rounded-md bg-neutral-50 p-2">
+            <div className="flex w-full items-start justify-between">
+              <p className="text-xs font-normal text-neutral-700">
+                Amount paid
               </p>
-              <hr className="border-neutral-100 my-2" />
-              <div className="w-full flex items-center justify-between">
-                <p className="text-xs text-neutral-700 font-normal">
-                  total:
-                </p>
-
-                <p className="text-sm text-red-400 font-bold mt-1 text-right w-full">
-                  ${((booking.baseRoomsPrice * booking.calculatedStayInDays) +
-                    (booking?.otherServicesPrice ?? 0)) / 100}
-                </p>
-              </div>
-            </div>
-          )
-          : (
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <p className="text-neutral-700 font-normal text-xs">
-                  Subtotal:
-                </p>
-                <p className="text-neutral-900 font-bold text-sm">
-                  ${booking.baseRoomsPrice / 100}
-                </p>
-              </div>
-              <p className="w-full text-right font-bold text-neutral-900 text-sm">
-                x {booking.calculatedStayInDays}{" "}
-                {booking.calculatedStayInDays > 1 ? "days" : "day"}
+              <p className="text-sm font-bold text-neutral-900">
+                ${(booking.baseRoomsPrice * booking.calculatedStayInDays) / 100}
               </p>
-
-              <div className="flex items-center justify-between">
-                <p className="text-neutral-700 font-normal text-xs">
-                  Total:
-                </p>
-                <p className="text-neutral-900 font-bold text-sm">
-                  ${(booking.baseRoomsPrice * booking.calculatedStayInDays) /
-                    100}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <p className="text-neutral-700 font-normal text-xs">
-                  Amount paid (<span className="font-bold italic text-red-400">
-                    {booking.paymentType === "RESERVATION_HOLD"
-                      ? "Reservation hold"
-                      : "Fully paid"}
-                  </span>):
-                </p>
-                <p className="text-neutral-900 font-bold text-sm">
-                  ${booking.totalPaid / 100}
-                </p>
-              </div>
             </div>
-          )}
+            <p className="mt-1 w-full text-right text-sm font-bold text-neutral-900">
+              {booking.otherServicesPrice
+                ? `+ Other services ($${booking.otherServicesPrice / 100})`
+                : "+ No other services ($0)"}
+            </p>
+            <hr className="my-2 border-neutral-100" />
+            <div className="flex w-full items-center justify-between">
+              <p className="text-xs font-normal text-neutral-700">total:</p>
+
+              <p className="mt-1 w-full text-right text-sm font-bold text-red-400">
+                $
+                {(booking.baseRoomsPrice * booking.calculatedStayInDays +
+                  (booking?.otherServicesPrice ?? 0)) /
+                  100}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-normal text-neutral-700">Subtotal:</p>
+              <p className="text-sm font-bold text-neutral-900">
+                ${booking.baseRoomsPrice / 100}
+              </p>
+            </div>
+            <p className="w-full text-right text-sm font-bold text-neutral-900">
+              x {booking.calculatedStayInDays}{" "}
+              {booking.calculatedStayInDays > 1 ? "days" : "day"}
+            </p>
+
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-normal text-neutral-700">Total:</p>
+              <p className="text-sm font-bold text-neutral-900">
+                ${(booking.baseRoomsPrice * booking.calculatedStayInDays) / 100}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-normal text-neutral-700">
+                Amount paid (
+                <span className="font-bold italic text-red-400">
+                  {booking.paymentType === "RESERVATION_HOLD"
+                    ? "Reservation hold"
+                    : "Fully paid"}
+                </span>
+                ):
+              </p>
+              <p className="text-sm font-bold text-neutral-900">
+                ${booking.totalPaid / 100}
+              </p>
+            </div>
+          </div>
+        )}
 
         {!booking.customerCheckOut && (
           <>
             <hr className="billingRoomsDataCopyborder-neutral-100 my-2" />
 
             <div className="flex items-center justify-between">
-              <p className="text-neutral-700 font-normal text-xs">
+              <p className="text-xs font-normal text-neutral-700">
                 Amount to pay on check in
               </p>
-              <p className="text-red-400 font-bold text-sm">
+              <p className="text-sm font-bold text-red-400">
                 ${booking.priceToPayOnCheckIn / 100}
               </p>
             </div>
           </>
         )}
 
-        <hr className="border-neutral-100 my-2" />
+        <hr className="my-2 border-neutral-100" />
 
         {!booking.canceled && (
           <div className="flex items-center gap-2">
@@ -451,22 +435,22 @@ export const BookingDisplay = ({ booking }: Props) => {
               <>
                 <CancelBookingButton booking={booking} />
 
-                <div className="w-[1px] h-[14px] bg-neutral-100" />
+                <div className="h-[14px] w-[1px] bg-neutral-100" />
               </>
             )}
 
             <button
               onClick={() => setShowGuests((prev) => !prev)}
-              className="text-sm text-red-400 underline font-normal transition-all duration-300 active:ring-2 ring-red-200"
+              className="text-sm font-normal text-red-400 underline ring-red-200 transition-all duration-300 active:ring-2"
             >
               {showGuests ? "Hide guests" : "Show guests"}
             </button>
 
-            <div className="w-[1px] h-[14px] bg-neutral-100" />
+            <div className="h-[14px] w-[1px] bg-neutral-100" />
 
             <button
               onClick={() => setShowBillingDetails((prev) => !prev)}
-              className="text-sm text-red-400 underline font-normal transition-all duration-300 active:ring-2 ring-red-200"
+              className="text-sm font-normal text-red-400 underline ring-red-200 transition-all duration-300 active:ring-2"
             >
               {showBillingDetails
                 ? "Hide billing details"
@@ -477,8 +461,8 @@ export const BookingDisplay = ({ booking }: Props) => {
 
         {booking.customerCheckOut && (
           <>
-            <hr className="border-neutral-100 my-2" />
-            <p className="text-neutral-900 text-center font-bold w-full text-sm">
+            <hr className="my-2 border-neutral-100" />
+            <p className="w-full text-center text-sm font-bold text-neutral-900">
               We hope you had a good time!
             </p>
           </>
@@ -486,8 +470,8 @@ export const BookingDisplay = ({ booking }: Props) => {
 
         {booking.paymentStatus === "FAILED" && (
           <>
-            <hr className="border-neutral-100 my-2" />
-            <p className="text-neutral-900 text-center font-bold w-full text-sm">
+            <hr className="my-2 border-neutral-100" />
+            <p className="w-full text-center text-sm font-bold text-neutral-900">
               Please go to your checkout page and try again, or create another
               booking.
             </p>
@@ -496,24 +480,23 @@ export const BookingDisplay = ({ booking }: Props) => {
 
         {booking.paymentStatus === "PAID" && !booking.canceled && (
           <>
-            <hr className="border-neutral-100 my-2" />
-            <p className="text-neutral-900 text-center font-bold w-full text-sm">
+            <hr className="my-2 border-neutral-100" />
+            <p className="w-full text-center text-sm font-bold text-neutral-900">
               We&apos;ll be waiting for you!
             </p>
           </>
         )}
 
         {booking.canceled && (
-          <div className="text-center w-auto flex flex-col gap-2 items-center">
-            <p className="text-neutral-900 text-center font-bold w-full text-sm">
+          <div className="flex w-auto flex-col items-center gap-2 text-center">
+            <p className="w-full text-center text-sm font-bold text-neutral-900">
               This booking was canceled.
             </p>
 
             {booking.stripeRefundId && (
               <p className="text-xs text-neutral-700">
-                A refund was issued to you (id:{" "}
-                {booking.stripeRefundId}), please contact support for more
-                details!
+                A refund was issued to you (id: {booking.stripeRefundId}),
+                please contact support for more details!
               </p>
             )}
           </div>

@@ -34,7 +34,7 @@ const Page = () => {
         ])
           .then(() => {
             router.push(
-              `/account/bookings/${(params?.bookingId as string) ?? "NO_ID"}`,
+              "/account/dashboard/bookings",
             );
           })
           .catch((e) => console.error(e));

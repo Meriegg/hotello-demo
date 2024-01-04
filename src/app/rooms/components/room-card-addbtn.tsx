@@ -15,6 +15,7 @@ interface Props {
 export const RoomCardAddBtn = ({ productId }: Props) => {
   const { toast } = useToast();
   const [parentRef] = useAutoAnimate<HTMLDivElement>();
+  const [isLoading, setIsLoading] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
 
   const apiUtils = api.useUtils();
@@ -40,6 +41,7 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
   });
   const addToCart = api.cart.addToCart.useMutation({
     onSuccess: (data) => {
+      setIsLoading(true);
       fetch("/api/setcookie", {
         method: "POST",
         body: JSON.stringify({
@@ -54,6 +56,7 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
         }),
       })
         .then((res) => {
+          setIsLoading(false);
           if (res.status === 500) {
             toast({
               variant: "destructive",
@@ -64,10 +67,16 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
 
           apiUtils.cart.invalidate().catch((e) => console.error(e));
         })
-        .catch((e) => console.error(e));
+        .catch((e) => {
+          console.error(e);
+          setIsLoading(false);
+        });
     },
     retry: 0,
   });
+
+  const buttonLoading = addToCart.isLoading || productsInCart.isLoading ||
+    isLoading;
 
   return (
     <div ref={parentRef} className="w-full flex-1">
@@ -76,9 +85,9 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
           onClick={() => addToCart.mutate({ productId })}
           className="flex w-full items-center gap-2 font-bold"
           size="sm"
-          disabled={addToCart.isLoading || productsInCart.isLoading}
+          disabled={buttonLoading}
         >
-          {addToCart.isLoading && (
+          {buttonLoading && (
             <Loader
               loaderClassName="text-white p-0"
               containerClassName="p-0 w-fit"

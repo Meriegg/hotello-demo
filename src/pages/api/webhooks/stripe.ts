@@ -64,7 +64,7 @@ const routeHandler = async (req: NextApiRequest, res: NextApiResponse) => {
         (booking.baseRoomsPrice * booking.calculatedStayInDays) -
         event.data.object.amount;
 
-      const updatedBooking = await db.booking.update({
+      await db.booking.update({
         where: {
           id: booking.id,
         },

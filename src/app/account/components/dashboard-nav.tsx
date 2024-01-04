@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ListIcon, UserIcon, UsersIcon } from "lucide-react";
+import { ListIcon, UserIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "~/lib/utils";
 import { LogoutBtn } from "./logout-btn";
@@ -19,11 +19,6 @@ export const DashboardNav = () => {
       text: "Bookings",
       icon: <ListIcon className="text-inherit w-3 h-3" />,
       href: "/account/dashboard/bookings",
-    },
-    {
-      text: "Past Guests",
-      icon: <UsersIcon className="text-inherit w-3 h-3" />,
-      href: "/account/dashboard/pastGuests",
     },
   ];
 

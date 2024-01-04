@@ -19,6 +19,7 @@ import { Loader } from "~/components/ui/loader";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 interface Props {
   clientSecret: string;
@@ -190,7 +191,7 @@ export const PaymentForm = ({
       {(isLoading || message || isError) && (
         <>
           {createPortal(
-            <div className="absolute inset-0 z-20 w-full bg-black/80 p-6">
+            <div className="absolute top-0 left-0 h-full w-full z-20 bg-black/80 p-6">
               <div className="flex items-start gap-2">
                 {loadingSteps.map((step, i) => (
                   <div key={i} className="flex w-full flex-col gap-2">
@@ -284,7 +285,8 @@ export const PaymentForm = ({
                 )}
               </div>
             </div>,
-            document.getElementById("LOADING_OVERLAY_PORTAL") ?? document.body,
+            document.getElementById("CHECKOUT_FORM_MAIN_CONTAINER") ??
+              document.body,
           )}
         </>
       )}
