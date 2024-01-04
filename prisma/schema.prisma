@@ -136,6 +136,18 @@ model Booking {
   baseRoomsPrice       Int
   reservationHoldPrice Int
 
+  personalDetailsFirstName       String
+  personalDetailsLastName        String
+  personalDetailsPhoneNum        String?
+  personalDetailsPhoneNumCountry String?
+  personalDetailsEmail           String
+  personalDetailsAge             Int
+
+  billingDetailsCountryOrRegion String
+  billingDetailsAddress         String
+  billingDetailsCityOrTown      String
+  billingDetailsPostalCode      String
+
   customerCheckIn    DateTime?
   customerCheckOut   DateTime?
   otherServicesPrice Int?      @default(0)
@@ -148,6 +160,7 @@ model Booking {
   paymentType     PaymentType
   paymentStatus   PaymentStatus
   paymentIntentId String        @unique
+  stripeRefundId  String?
 
   createdOn DateTime @default(now())
 
@@ -155,6 +168,8 @@ model Booking {
   billingRoomsDataCopy   Json?
   checkoutSession        CheckoutSession? @relation(fields: [checkoutSessionId], references: [id])
   checkoutSessionId      String?          @unique
+
+  canceled Boolean @default(false)
 }
 
 model BookingRoom {

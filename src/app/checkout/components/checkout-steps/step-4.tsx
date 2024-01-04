@@ -45,8 +45,7 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
               goToStep.mutate({
                 step: "PERSONAL_DETAILS",
                 sessionId: checkoutSessionId,
-              })
-            }
+              })}
             disabled={goToStep.isLoading}
             className="italic text-red-400 underline disabled:cursor-not-allowed disabled:opacity-70"
           >
@@ -61,11 +60,9 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
           <InfoDisplay label="Age" value={formValues.step1.age?.toString()} />
           <InfoDisplay
             label="Phone number"
-            value={
-              formValues.step1.phoneNumber
-                ? `(${formValues.step1.phoneNumCountry}) ${formValues.step1.phoneNumber}`
-                : null
-            }
+            value={formValues.step1.phoneNumber
+              ? `(${formValues.step1.phoneNumCountry}) ${formValues.step1.phoneNumber}`
+              : null}
           />
           <InfoDisplay label="Email" value={formValues.step1.email} />
         </div>
@@ -79,8 +76,7 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
               goToStep.mutate({
                 step: "BILLING_DETAILS",
                 sessionId: checkoutSessionId,
-              })
-            }
+              })}
             disabled={goToStep.isLoading}
             className="italic text-red-400 underline disabled:cursor-not-allowed disabled:opacity-70"
           >
@@ -109,8 +105,7 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
               goToStep.mutate({
                 step: "BOOKING_DETAILS",
                 sessionId: checkoutSessionId,
-              })
-            }
+              })}
             disabled={goToStep.isLoading}
             className="italic text-red-400 underline disabled:cursor-not-allowed disabled:opacity-70"
           >
@@ -190,7 +185,8 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
                       </p>
                       <div className="flex flex-col gap-1">
                         <p className="text-xs font-bold text-neutral-900">
-                          {data?.firstName ?? "-"}{" "}
+                          {/* eslint-disable-next-line */}
+                          {data?.firstName || "-"}{" "}
                           {data?.lastName ?? (!data?.firstName ? "" : "-")}
                         </p>
                         <p className="text-xs text-neutral-900">

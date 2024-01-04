@@ -25,6 +25,7 @@ import {
 } from "~/server/utils/email-change-jwt";
 import { EmailChangeEmail } from "~/components/emails/email-change";
 import { resend } from "~/lib/resend";
+import { stripe } from "~/lib/stripe";
 
 export const accountsRouter = createTRPCRouter({
   getCurrentSession: privateProcedure.query(
@@ -43,11 +44,13 @@ export const accountsRouter = createTRPCRouter({
     if (block) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: `You are being rate limited${timeDiffInSeconds
-          ? `, please wait ${timeDiffInSeconds} ${timeDiffInSeconds > 1 ? "seconds" : "second"
-          } and try again.`
-          : "."
-          }`,
+        message: `You are being rate limited${
+          timeDiffInSeconds
+            ? `, please wait ${timeDiffInSeconds} ${
+              timeDiffInSeconds > 1 ? "seconds" : "second"
+            } and try again.`
+            : "."
+        }`,
       });
     }
 
@@ -93,11 +96,13 @@ export const accountsRouter = createTRPCRouter({
       if (block) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: `You are being rate limited${timeDiffInSeconds
-            ? `, please wait ${timeDiffInSeconds} ${timeDiffInSeconds > 1 ? "seconds" : "second"
-            } and try again.`
-            : "."
-            }`,
+          message: `You are being rate limited${
+            timeDiffInSeconds
+              ? `, please wait ${timeDiffInSeconds} ${
+                timeDiffInSeconds > 1 ? "seconds" : "second"
+              } and try again.`
+              : "."
+          }`,
         });
       }
 
@@ -321,11 +326,13 @@ export const accountsRouter = createTRPCRouter({
       if (block) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: `You are being rate limited${timeDiffInSeconds
-            ? `, please wait ${timeDiffInSeconds} ${timeDiffInSeconds > 1 ? "seconds" : "second"
-            } and try again.`
-            : "."
-            }`,
+          message: `You are being rate limited${
+            timeDiffInSeconds
+              ? `, please wait ${timeDiffInSeconds} ${
+                timeDiffInSeconds > 1 ? "seconds" : "second"
+              } and try again.`
+              : "."
+          }`,
         });
       }
 
@@ -513,7 +520,7 @@ export const accountsRouter = createTRPCRouter({
   ),
   getUserBookings: privateProcedure.query(
     async ({ ctx: { db, userSession } }) => {
-      return await db.booking.findMany({
+      const bookings = await db.booking.findMany({
         where: {
           userId: userSession.userId,
         },
@@ -521,10 +528,73 @@ export const accountsRouter = createTRPCRouter({
           rooms: {
             include: {
               guestDetails: true,
+              room: true,
             },
           },
         },
       });
+
+      const finalBookings = [];
+
+      for (const booking of bookings) {
+        const paymentIntentId = await stripe.paymentIntents.retrieve(
+          booking.paymentIntentId,
+        );
+
+        finalBookings.push({ ...booking, totalPaid: paymentIntentId.amount });
+      }
+
+      return finalBookings;
     },
   ),
+  cancelBooking: privateProcedure.input(z.object({ bookingId: z.string() }))
+    .mutation(async ({ ctx: { db, userSession }, input: { bookingId } }) => {
+      const booking = await db.booking.findUnique({
+        where: {
+          id: bookingId,
+        },
+      });
+      if (!booking) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Booking does not exist.",
+        });
+      }
+
+      if (
+        booking.paymentType === "FULL_UPFRONT"
+      ) {
+        const refund = await stripe.refunds.create({
+          payment_intent: booking.paymentIntentId,
+        });
+
+        await db.booking.update({
+          where: {
+            id: booking.id,
+          },
+          data: {
+            stripeRefundId: refund.id,
+            canceled: true,
+          },
+        });
+
+        return {
+          success: true,
+          refunded: true,
+        };
+      }
+
+      await db.booking.update({
+        where: {
+          id: booking.id,
+        },
+        data: {
+          canceled: true,
+        },
+      });
+
+      return {
+        success: true,
+      };
+    }),
 });

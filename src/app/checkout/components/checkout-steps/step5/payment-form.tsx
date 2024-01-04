@@ -86,9 +86,11 @@ export const PaymentForm = ({
         payment_method: {
           card: cardElement,
           billing_details: {
-            name: `${form.getValues("step1.firstName")} ${form.getValues(
-              "step1.lastName",
-            )}`,
+            name: `${form.getValues("step1.firstName")} ${
+              form.getValues(
+                "step1.lastName",
+              )
+            }`,
             email: form.getValues("step1.email"),
             address: {
               city: form.getValues("step2.cityOrTown"),
@@ -120,6 +122,7 @@ export const PaymentForm = ({
       }
 
       setMessage("Redirecting, please wait.");
+      setActiveLoadingStep(null);
       setLoading(false);
 
       router.push(`/paymentStatus/${bookingId}`);
@@ -183,7 +186,8 @@ export const PaymentForm = ({
           document.body,
       )}
 
-      {(isLoading ?? message ?? isError) && (
+      {/* eslint-disable-next-line */}
+      {(isLoading || message || isError) && (
         <>
           {createPortal(
             <div className="absolute inset-0 z-20 w-full bg-black/80 p-6">
@@ -195,7 +199,8 @@ export const PaymentForm = ({
                         "h-[4px] w-full rounded-full shadow-sm",
                         activeLoadingStep === i ? "bg-white" : "bg-white/30",
                       )}
-                    ></div>
+                    >
+                    </div>
                     <p
                       className={cn(
                         "flex w-full items-center justify-center gap-2 text-center text-sm",
@@ -221,8 +226,7 @@ export const PaymentForm = ({
                           isError ? "text-red-400" : "text-white/70",
                         )}
                       >
-                        {message}{" "}
-                        {isError && (
+                        {message} {isError && (
                           <button
                             className="font-normal text-white underline"
                             onClick={() => {
@@ -230,6 +234,13 @@ export const PaymentForm = ({
                               setIsError(false);
                               setMessage(null);
                               setActiveLoadingStep(null);
+                              form.setValue(
+                                "step5.paymentType",
+                                form.getValues("step5.paymentType") ===
+                                    "RESERVATION_HOLD"
+                                  ? "FULL_UPFRONT"
+                                  : "RESERVATION_HOLD",
+                              );
                             }}
                           >
                             Try again?
@@ -243,28 +254,34 @@ export const PaymentForm = ({
                 {(activeLoadingStep === null ||
                   activeLoadingStep > loadingSteps.length - 1) &&
                   message && (
-                    <p
-                      className={cn(
-                        "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-center text-base font-bold",
-                        isError ? "text-red-400/70" : "text-white",
-                      )}
-                    >
-                      {message}{" "}
-                      {isError && (
-                        <button
-                          className="font-normal text-white underline"
-                          onClick={() => {
-                            setLoading(false);
-                            setIsError(false);
-                            setMessage(null);
-                            setActiveLoadingStep(null);
-                          }}
-                        >
-                          Try again?
-                        </button>
-                      )}
-                    </p>
-                  )}
+                  <p
+                    className={cn(
+                      "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-center text-base font-bold",
+                      isError ? "text-red-400/70" : "text-white",
+                    )}
+                  >
+                    {message} {isError && (
+                      <button
+                        className="font-normal text-white underline"
+                        onClick={() => {
+                          setLoading(false);
+                          setIsError(false);
+                          setMessage(null);
+                          setActiveLoadingStep(null);
+                          form.setValue(
+                            "step5.paymentType",
+                            form.getValues("step5.paymentType") ===
+                                "RESERVATION_HOLD"
+                              ? "FULL_UPFRONT"
+                              : "RESERVATION_HOLD",
+                          );
+                        }}
+                      >
+                        Try again?
+                      </button>
+                    )}
+                  </p>
+                )}
               </div>
             </div>,
             document.getElementById("LOADING_OVERLAY_PORTAL") ?? document.body,

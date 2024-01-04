@@ -36,7 +36,6 @@ const routeHandler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // eslint-disable-next-line
   } catch (err: any) {
-
     // eslint-disable-next-line
     console.log(`⚠️  Webhook signature verification failed.`, err?.message);
     return res.status(401).end().json({
@@ -50,12 +49,28 @@ const routeHandler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   switch (event.type) {
     case "payment_intent.succeeded":
-      await db.booking.update({
+      const booking = await db.booking.findUnique({
         where: {
           paymentIntentId: event.data.object.id,
         },
+      });
+      if (!booking) {
+        return res.status(404).end().json({
+          message: "Could not find booking.",
+        });
+      }
+
+      const amountToPay =
+        (booking.baseRoomsPrice * booking.calculatedStayInDays) -
+        event.data.object.amount;
+
+      const updatedBooking = await db.booking.update({
+        where: {
+          id: booking.id,
+        },
         data: {
           paymentStatus: "PAID",
+          priceToPayOnCheckIn: amountToPay,
         },
       });
       break;

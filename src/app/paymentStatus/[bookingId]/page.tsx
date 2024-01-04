@@ -13,7 +13,7 @@ const Page = () => {
       bookingId: (params?.bookingId as string) ?? "",
     },
     {
-      retry: 500,
+      refetchInterval: 500,
       cacheTime: 0,
       onSuccess: (status) => {
         if (status !== "PAID") return;

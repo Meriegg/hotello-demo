@@ -247,6 +247,17 @@ export const checkoutRouter = createTRPCRouter({
         where: { id: checkoutSessionId ?? "" },
       });
 
+      if (checkoutSession?.createdBookingId) {
+        await db.booking.update({
+          where: {
+            id: checkoutSession.createdBookingId,
+          },
+          data: {
+            paymentType,
+          },
+        });
+      }
+
       const cartItems = extractFromCartJwt(cartToken);
       if (!cartItems?.length) {
         await db.checkoutSession.update({
@@ -352,6 +363,15 @@ export const checkoutRouter = createTRPCRouter({
           },
         );
 
+        const booking = await db.booking.findUnique({
+          where: {
+            id: checkoutSession.createdBookingId ?? "",
+          },
+        });
+        if (booking?.paymentStatus === "FAILED") {
+          throw new Error("Payment failed.");
+        }
+
         return {
           totalUpfront: {
             stripe: cartTotal.stripe,
@@ -385,6 +405,7 @@ export const checkoutRouter = createTRPCRouter({
             data: {
               paymentIntentId: newPaymentIntent.id,
               paymentType,
+              paymentStatus: "PENDING",
             },
           });
         }
@@ -427,6 +448,17 @@ export const checkoutRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message: "No paymentIntentId is present on the checkout session.",
         });
+      }
+
+      const existingBooking = await db.booking.findUnique({
+        where: { id: checkoutSession?.createdBookingId ?? "" },
+      });
+
+      if (existingBooking) {
+        return {
+          success: true,
+          mainBooking: existingBooking,
+        };
       }
 
       const cartItems = extractFromCartJwt(cartToken);
@@ -487,9 +519,6 @@ export const checkoutRouter = createTRPCRouter({
       const amountToPay = checkoutSession.paymentType === "FULL_UPFRONT"
         ? cartTotal.stripe
         : reservationHold.stripe;
-      console.log(checkoutSession.paymentType);
-      console.log(amountToPay);
-      console.log(paymentIntent.amount);
 
       if (paymentIntent.amount !== amountToPay) {
         throw new TRPCError({
@@ -514,6 +543,16 @@ export const checkoutRouter = createTRPCRouter({
           checkoutSessionId: checkoutSession.id,
           billingRoomsDataCopy: JSON.stringify(dbItems),
           billingUserDetailsCopy: JSON.stringify(userSession.user),
+          personalDetailsPhoneNum: input.step1.phoneNumber,
+          personalDetailsAge: input.step1.age,
+          personalDetailsEmail: input.step1.email,
+          personalDetailsLastName: input.step1.lastName,
+          personalDetailsFirstName: input.step1.firstName,
+          personalDetailsPhoneNumCountry: input.step1.phoneNumCountry,
+          billingDetailsCountryOrRegion: input.step2.countryOrRegion,
+          billingDetailsAddress: input.step2.address,
+          billingDetailsCityOrTown: input.step2.cityOrTown,
+          billingDetailsPostalCode: input.step2.postalCode,
         },
       });
 
