@@ -29,11 +29,11 @@ export const LogoutBtn = ({ className }: Props) => {
         ? (
           <Loader
             containerClassName="p-0 w-fit"
-            loaderClassName="p-0 w-fit text-white"
+            loaderClassName="p-0 w-fit text-inherit"
             label={null}
           />
         )
-        : <LogOutIcon className="w-4 h-4" />}
+        : <LogOutIcon className="w-4 h-4 text-inherit" />}
     </Button>
   );
 };

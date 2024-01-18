@@ -1,6 +1,6 @@
 import { ChangeAccountDetails } from "../components/change-account-details";
 import { SecurityOptions } from "../components/security-options";
-import { getSession } from "../utils/get-session";
+import { getSession } from "../../utils/get-page-session";
 
 const Page = async () => {
   const currentSession = await getSession();

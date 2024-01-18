@@ -82,8 +82,8 @@ export const VerifyCodeForm = ({
       toast({
         variant: "destructive",
         title: "An error happened",
-        description:
-          error?.message ?? "Cannot change email, please try again later",
+        description: error?.message ??
+          "Cannot change email, please try again later",
       });
     },
   });
@@ -176,7 +176,8 @@ export const VerifyCodeForm = ({
           <Tooltip>
             <TooltipTrigger>
               <button
-                disabled={changeEmailMutation.isLoading || disableChangeEmail}
+                disabled={changeEmailMutation.isLoading || disableChangeEmail ||
+                  !!verifySeshId}
                 onClick={() => changeEmailMutation.mutate()}
                 className="text-xs text-neutral-900 hover:underline disabled:opacity-70"
               >
@@ -197,8 +198,8 @@ export const VerifyCodeForm = ({
         >
           {isResendDisabled && resendCountdown
             ? `Wait ${resendCountdown} ${
-                resendCountdown > 1 ? "seconds" : "second"
-              }`
+              resendCountdown > 1 ? "seconds" : "second"
+            }`
             : "Resend code"}
         </button>
       </div>

@@ -7,8 +7,8 @@ It includes a full booking system, authentication with roles and an admin panel.
 
     - Email authentication with verification codes
     - Role based authentication
-    - Full admin dashboard
     - Stripe payments integration (with webhooks)
     - Multi-step server-side checkout form
     - Mike Oxlong, the very friendly guide which will help you navigate the website and explain every interesting feature.
+    - Full admin dashboard with real-time analytics
     - And more!

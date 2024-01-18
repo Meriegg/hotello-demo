@@ -57,6 +57,13 @@ enum UserRole {
   ADMIN
 }
 
+enum AdminAccessLevel {
+  LEVEL_0 // Read Only
+  LEVEL_1 // Booking Management
+  LEVEL_2 // Room management, Restaurant Management, Support
+  LEVEL_3 // (Owner) Account Management
+}
+
 model User {
   id              String   @id @default(cuid())
   firstName       String
@@ -80,6 +87,7 @@ model User {
   aiConversations    AiHelpResponse[]          @relation("AiConversations")
   pastGuests         BookingRoomGuestDetails[] @relation("PastGuests")
   role               UserRole                  @default(USER)
+  adminAccessLevel   AdminAccessLevel          @default(LEVEL_0)
   bookings           Booking[]                 @relation("userBookings")
 }
 

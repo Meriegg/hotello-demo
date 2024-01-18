@@ -22,6 +22,7 @@ import Link from "next/link";
 import { Checkbox } from "~/components/ui/checkbox";
 import { useState } from "react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { cn } from "~/lib/utils";
 
 const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
@@ -221,12 +222,6 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
       </div>
 
       <div className="w-full" id="COMPLETE_BOOKING_BUTTON_PORTAL"></div>
-      <div
-        className="w-full relative top-0 left-0 h-full overflow-visible"
-        id="LOADING_OVERLAY_PORTAL"
-        ref={containerRef}
-      >
-      </div>
     </TooltipProvider>
   );
 };

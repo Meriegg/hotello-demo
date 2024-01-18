@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { db } from "../db";
 import { sendVerificationEmail } from "./auth/send-verification-email";
 import verifySignedString from "./crypto/verify-signed-string";
+import { createCookieVerification } from "./cookies";
+import { createEmailVerificationJwt } from "./auth/verification-jwt";
 
 export const getUserSession = async (headers: Headers) => {
   const cookieStore = cookies();
@@ -43,10 +45,18 @@ export const getUserSession = async (headers: Headers) => {
   }
 
   if (dbSession.requiresVerificaiton) {
+    const cookieVerificationToken = createCookieVerification(
+      "email-verification-token",
+    );
+    const emailVerificationToken = createEmailVerificationJwt(
+      dbSession.user.id,
+    );
+
     return {
       error: true,
       code: "FORBIDDEN",
-      message: `${dbSession.id}:${dbSession.userId}`,
+      message:
+        `${dbSession.id}:${dbSession.userId}:${cookieVerificationToken}:${emailVerificationToken}`,
     };
   }
 
