@@ -25,16 +25,16 @@ export const RoomsFilter = () => {
       {isError && <p>Error</p>}
       {data && !isLoading && !isError && (
         <>
-          <p className="text-sm text-neutral-900">
-            By Date
-          </p>
+          <p className="text-sm text-neutral-900">By Date</p>
           <CheckInOutDatePicker
-            initialData={!!(checkInDate && checkOutDate)
-              ? {
-                checkIn: checkInDate,
-                checkOut: checkOutDate,
-              }
-              : null}
+            initialData={
+              checkInDate && checkOutDate
+                ? {
+                    checkIn: checkInDate,
+                    checkOut: checkOutDate,
+                  }
+                : null
+            }
             onChange={(checkIn, checkOut, reset) => {
               setDates(checkIn ?? null, checkOut ?? null);
               setResetDates(reset ?? null);
@@ -48,9 +48,9 @@ export const RoomsFilter = () => {
           {data.priceRanges.map(({ range, slug }, i) => (
             <FilterCheckbox
               key={i}
-              checked={selectedPrices.findIndex((pRange) =>
-                pRange === range
-              ) !== -1}
+              checked={
+                selectedPrices.findIndex((pRange) => pRange === range) !== -1
+              }
               onCheckedChange={(checked) => {
                 if (checked) {
                   setPriceRange([...selectedPrices, range]);

@@ -57,8 +57,9 @@ const Page = () => {
           }
 
           const redirect = searchParams?.get("redirect");
+          const redirectParam = redirect ? `?redirect=${redirect}` : "";
           router.push(
-            `${data.redirectTo}${redirect ? `?redirect=${redirect}` : ""}`,
+            `${data.redirectTo}${redirectParam}`,
           );
         })
         .catch((e) => console.error(e));

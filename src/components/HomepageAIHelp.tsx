@@ -70,7 +70,7 @@ const AiResponseDisplay = ({
       <MessageDisplay
         label={!dbChosenRoom ? "Our AI" : null}
         message={aiMessage}
-        className={!!dbChosenRoom ? "rounded-b-md" : ""}
+        className={dbChosenRoom ? "rounded-b-md" : ""}
       />
       {!!dbChosenRoom && (
         <MessageDisplay
@@ -80,6 +80,7 @@ const AiResponseDisplay = ({
               <img
                 src={dbChosenRoom.images[0]}
                 className="max-w-[150px] rounded-xl"
+                alt="Chosen Room image"
               />
               <div className="flex flex-col gap-4 py-1">
                 <p className="text-left text-xs text-white">

@@ -19,7 +19,6 @@ import { Loader } from "~/components/ui/loader";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 interface Props {
   clientSecret: string;
@@ -44,7 +43,7 @@ export const PaymentForm = ({
   );
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const createBooking = api.checkout.createBooking.useMutation();
 
@@ -61,7 +60,7 @@ export const PaymentForm = ({
     if (!privacyCheck || !reservationCheck || !stripe || !elements) return;
 
     try {
-      setLoading(true);
+      setIsLoading(true);
       let bookingId: string | null = existingBookingId;
 
       if (!existingBookingId) {
@@ -87,11 +86,9 @@ export const PaymentForm = ({
         payment_method: {
           card: cardElement,
           billing_details: {
-            name: `${form.getValues("step1.firstName")} ${
-              form.getValues(
-                "step1.lastName",
-              )
-            }`,
+            name: `${form.getValues("step1.firstName")} ${form.getValues(
+              "step1.lastName",
+            )}`,
             email: form.getValues("step1.email"),
             address: {
               city: form.getValues("step2.cityOrTown"),
@@ -124,13 +121,13 @@ export const PaymentForm = ({
 
       setMessage("Redirecting, please wait.");
       setActiveLoadingStep(null);
-      setLoading(false);
+      setIsLoading(false);
 
       router.push(`/paymentStatus/${bookingId}`);
 
       // eslint-disable-next-line
     } catch (error: any) {
-      setLoading(false);
+      setIsLoading(false);
       setIsError(true);
 
       // eslint-disable-next-line
@@ -174,15 +171,13 @@ export const PaymentForm = ({
       </div>
 
       {createPortal(
-        <>
-          <Button
-            onClick={() => completeBooking()}
-            disabled={!privacyCheck || !reservationCheck}
-            className="mt-2 flex w-full items-center gap-2"
-          >
-            Complete booking <CheckIcon className="h-4 w-4 text-white" />
-          </Button>
-        </>,
+        <Button
+          onClick={() => completeBooking()}
+          disabled={!privacyCheck || !reservationCheck}
+          className="mt-2 flex w-full items-center gap-2"
+        >
+          Complete booking <CheckIcon className="h-4 w-4 text-white" />
+        </Button>,
         document.getElementById("COMPLETE_BOOKING_BUTTON_PORTAL") ??
           document.body,
       )}
@@ -191,17 +186,16 @@ export const PaymentForm = ({
       {(isLoading || message || isError) && (
         <>
           {createPortal(
-            <div className="absolute top-0 left-0 h-full w-full z-20 bg-black/80 p-6">
+            <div className="absolute left-0 top-0 z-20 h-full w-full bg-black/80 p-6">
               <div className="flex items-start gap-2">
                 {loadingSteps.map((step, i) => (
-                  <div key={i} className="flex w-full flex-col gap-2">
+                  <div key={step.label} className="flex w-full flex-col gap-2">
                     <div
                       className={cn(
                         "h-[4px] w-full rounded-full shadow-sm",
                         activeLoadingStep === i ? "bg-white" : "bg-white/30",
                       )}
-                    >
-                    </div>
+                    ></div>
                     <p
                       className={cn(
                         "flex w-full items-center justify-center gap-2 text-center text-sm",
@@ -227,18 +221,19 @@ export const PaymentForm = ({
                           isError ? "text-red-400" : "text-white/70",
                         )}
                       >
-                        {message} {isError && (
+                        {message}{" "}
+                        {isError && (
                           <button
                             className="font-normal text-white underline"
                             onClick={() => {
-                              setLoading(false);
+                              setIsLoading(false);
                               setIsError(false);
                               setMessage(null);
                               setActiveLoadingStep(null);
                               form.setValue(
                                 "step5.paymentType",
                                 form.getValues("step5.paymentType") ===
-                                    "RESERVATION_HOLD"
+                                  "RESERVATION_HOLD"
                                   ? "FULL_UPFRONT"
                                   : "RESERVATION_HOLD",
                               );
@@ -255,34 +250,35 @@ export const PaymentForm = ({
                 {(activeLoadingStep === null ||
                   activeLoadingStep > loadingSteps.length - 1) &&
                   message && (
-                  <p
-                    className={cn(
-                      "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-center text-base font-bold",
-                      isError ? "text-red-400/70" : "text-white",
-                    )}
-                  >
-                    {message} {isError && (
-                      <button
-                        className="font-normal text-white underline"
-                        onClick={() => {
-                          setLoading(false);
-                          setIsError(false);
-                          setMessage(null);
-                          setActiveLoadingStep(null);
-                          form.setValue(
-                            "step5.paymentType",
-                            form.getValues("step5.paymentType") ===
+                    <p
+                      className={cn(
+                        "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-center text-base font-bold",
+                        isError ? "text-red-400/70" : "text-white",
+                      )}
+                    >
+                      {message}{" "}
+                      {isError && (
+                        <button
+                          className="font-normal text-white underline"
+                          onClick={() => {
+                            setIsLoading(false);
+                            setIsError(false);
+                            setMessage(null);
+                            setActiveLoadingStep(null);
+                            form.setValue(
+                              "step5.paymentType",
+                              form.getValues("step5.paymentType") ===
                                 "RESERVATION_HOLD"
-                              ? "FULL_UPFRONT"
-                              : "RESERVATION_HOLD",
-                          );
-                        }}
-                      >
-                        Try again?
-                      </button>
-                    )}
-                  </p>
-                )}
+                                ? "FULL_UPFRONT"
+                                : "RESERVATION_HOLD",
+                            );
+                          }}
+                        >
+                          Try again?
+                        </button>
+                      )}
+                    </p>
+                  )}
               </div>
             </div>,
             document.getElementById("CHECKOUT_FORM_MAIN_CONTAINER") ??

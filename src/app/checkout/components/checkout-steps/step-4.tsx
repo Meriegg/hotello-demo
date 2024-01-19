@@ -140,9 +140,8 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
                 formValues.step3.bookingCheckOut,
               );
 
-              return `${stayInDays} ${
-                stayInDays > 1 ? "Days" : "Day"
-              }` as const;
+              return `${stayInDays} ${stayInDays > 1 ? "Days" : "Day"
+                }` as const;
             })()}
           />
         </div>
@@ -151,7 +150,7 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
       <div className="flex flex-col gap-3">
         <p className="text-xs text-neutral-700">Room details</p>
         <div className="-mt-4 flex w-full flex-col divide-y divide-neutral-100">
-          {Object.keys(formValues.step3.guestInformation).map((key, i) => {
+          {Object.keys(formValues.step3.guestInformation).map((key) => {
             const roomValues = items.find((item) => item.id === key);
             const values = formValues.step3.guestInformation[key];
             const peopleArray = Object.keys(values?.people ?? {}).map(
@@ -161,7 +160,7 @@ export const Step4 = ({ form, items, checkoutSessionId }: Props) => {
             if (!roomValues) return null;
 
             return (
-              <div key={i} className="flex w-full flex-col gap-4 py-4">
+              <div key={key} className="flex w-full flex-col gap-4 py-4">
                 <div className="flex w-full items-center justify-between">
                   <div className="flex flex-col gap-1">
                     <p className="max-w-[300px] text-sm font-bold text-neutral-900">

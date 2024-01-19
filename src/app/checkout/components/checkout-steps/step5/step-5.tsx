@@ -21,8 +21,6 @@ import { PaymentForm } from "./payment-form";
 import Link from "next/link";
 import { Checkbox } from "~/components/ui/checkbox";
 import { useState } from "react";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { cn } from "~/lib/utils";
 
 const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
@@ -34,7 +32,6 @@ interface Props {
 }
 
 export const Step5 = ({ form, existingBookingId }: Props) => {
-  const [containerRef] = useAutoAnimate();
   const [privacyCheck, setPrivacyCheck] = useState(false);
   const [reservationCheck, setReservationCheck] = useState(false);
 
@@ -101,31 +98,29 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
         <p className="text-italic text-sm font-normal text-neutral-700">
           Amount due now
         </p>
-        {form.watch("step5.paymentType") === "FULL_UPFRONT"
-          ? (
-            <p className="text-lg font-bold text-red-400">
-              ${paymentFormData.data.totalUpfront.display.toFixed(2)}{" "}
-              <span className="text-italic text-xs font-normal tracking-normal">
-                Fully refundable
-              </span>
-            </p>
-          )
-          : (
-            <p className="text-lg font-bold text-red-400">
-              ${paymentFormData.data.reservationHold.display.toFixed(2)}{" "}
-              <span className="text-italic text-xs font-normal tracking-normal">
-                non-refundable reservation hold{" "}
-                <Tooltip>
-                  <TooltipTrigger>
-                    <HelpCircleIcon className="ml-1 h-3 w-3 text-neutral-700" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    This amount will be deducted from your total.
-                  </TooltipContent>
-                </Tooltip>
-              </span>
-            </p>
-          )}
+        {form.watch("step5.paymentType") === "FULL_UPFRONT" ? (
+          <p className="text-lg font-bold text-red-400">
+            ${paymentFormData.data.totalUpfront.display.toFixed(2)}{" "}
+            <span className="text-italic text-xs font-normal tracking-normal">
+              Fully refundable
+            </span>
+          </p>
+        ) : (
+          <p className="text-lg font-bold text-red-400">
+            ${paymentFormData.data.reservationHold.display.toFixed(2)}{" "}
+            <span className="text-italic text-xs font-normal tracking-normal">
+              non-refundable reservation hold{" "}
+              <Tooltip>
+                <TooltipTrigger>
+                  <HelpCircleIcon className="ml-1 h-3 w-3 text-neutral-700" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  This amount will be deducted from your total.
+                </TooltipContent>
+              </Tooltip>
+            </span>
+          </p>
+        )}
 
         <RadioGroup
           onValueChange={(val) => {
@@ -155,8 +150,7 @@ export const Step5 = ({ form, existingBookingId }: Props) => {
             <div className="flex items-start gap-2">
               <RadioGroupItem
                 value={"RESERVATION_HOLD" as FormData["step5"]["paymentType"]}
-                checked={form.watch("step5.paymentType") ===
-                  "RESERVATION_HOLD"}
+                checked={form.watch("step5.paymentType") === "RESERVATION_HOLD"}
                 id="rd2"
               />
               <Label htmlFor="rd1" className="text-neutral-900">

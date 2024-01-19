@@ -3,32 +3,27 @@ import { HomepageAIHelp } from "~/components/HomepageAIHelp";
 
 export default function Home() {
   return (
-    <>
-      <div
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(/homepage-background-image.jpg)",
-          backgroundSize: "cover",
-        }}
-        className="min-h-[calc(100vh+250px)] relative"
-      >
-        <div className="flex justify-center -mt-24 text-center">
-          <div className="flex flex-col gap-0 items-center justify-center mt-44 text-center">
-            <p className="text-neutral-200 text-xs md:text-sm tracking-[10px] text-center">
-              A LUXURY EXPERIENCE
-            </p>
-            <h1 className="text-white text-4xl md:text-5xl text-center w-full max-w-[600px] tracking-wider leading-tight">
-              The best rated hotel in the whole country.
-            </h1>
-            <HomepageAIHelp />
-          </div>
+    <div
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(/homepage-background-image.jpg)",
+        backgroundSize: "cover",
+      }}
+      className="relative min-h-[calc(100vh+250px)]"
+    >
+      <div className="-mt-24 flex justify-center text-center">
+        <div className="mt-44 flex flex-col items-center justify-center gap-0 text-center">
+          <p className="text-center text-xs tracking-[10px] text-neutral-200 md:text-sm">
+            A LUXURY EXPERIENCE
+          </p>
+          <h1 className="w-full max-w-[600px] text-center text-4xl leading-tight tracking-wider text-white md:text-5xl">
+            The best rated hotel in the whole country.
+          </h1>
+          <HomepageAIHelp />
         </div>
-
-        <Footer
-          theme="dark"
-          className="absolute bottom-0"
-        />
       </div>
-    </>
+
+      <Footer theme="dark" className="absolute bottom-0" />
+    </div>
   );
 }

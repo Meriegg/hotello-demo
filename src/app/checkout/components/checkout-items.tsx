@@ -62,7 +62,7 @@ export const CheckoutItems = ({ items }: Props) => {
       </thead>
       <tbody>
         {items.map((room, i) => (
-          <tr key={i}>
+          <tr key={room.id}>
             <td className="hidden lg:table-cell">
               <img
                 className="hidden max-w-[70px] rounded-md lg:block"

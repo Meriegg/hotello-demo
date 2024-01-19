@@ -26,7 +26,7 @@ const GIFormDisplay = ({
   ageValue: string | number;
   index: number;
 }) => {
-  const [isEditing, setEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(true);
 
   return (
     <div
@@ -43,7 +43,7 @@ const GIFormDisplay = ({
             <p className="text-neutral-900">Age {ageValue || "(No age)"}</p>
             <button
               className="italic text-red-400 hover:underline"
-              onClick={() => setEditing(true)}
+              onClick={() => setIsEditing(true)}
             >
               Edit
             </button>
@@ -75,7 +75,7 @@ const GIFormDisplay = ({
               className="flex-1"
               onChange={ageChange}
             />
-            <Button className="flex-1" onClick={() => setEditing(false)}>
+            <Button className="flex-1" onClick={() => setIsEditing(false)}>
               Enter
             </Button>
           </div>
@@ -93,7 +93,7 @@ const GuestInformationFormItem = ({
   form: UseFormReturn<z.infer<typeof CheckoutFormValidator>>;
 }) => {
   const [parentRef] = useAutoAnimate();
-  const [isFormOpen, setFormOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const people = form.watch("step3.guestInformation")[item.id]?.people;
 
   if (!people) {
@@ -136,7 +136,7 @@ const GuestInformationFormItem = ({
           {Object.keys(people).map((key, i) => (
             <GIFormDisplay
               index={i}
-              key={i}
+              key={key}
               ageChange={(e) =>
                 handleObjChange("age", parseInt(e.target.value), key)
               }
@@ -155,7 +155,7 @@ const GuestInformationFormItem = ({
       ) : null}
 
       <button
-        onClick={() => setFormOpen(!isFormOpen)}
+        onClick={() => setIsFormOpen(!isFormOpen)}
         className="absolute bottom-2 right-0 flex h-[30px] w-[30px] items-center justify-center rounded-md bg-neutral-50"
       >
         <ChevronDown

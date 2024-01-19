@@ -16,7 +16,7 @@ interface Props {
 
 export const MobileMenu = ({ theme, pathname, links }: Props) => {
   const parent = useRef<HTMLDivElement>(null);
-  const [isOpen, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     document.body.style.overflowY = isOpen ? "hidden" : "unset";
@@ -27,7 +27,7 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
   return (
     <>
       <button
-        onClick={() => setOpen(!isOpen)}
+        onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex h-[30px] w-[30px] flex-col items-start justify-center gap-2 md:hidden",
           isOpen && "-gap-2",
@@ -42,8 +42,7 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
               "border-neutral-900 bg-neutral-900": theme === "light",
             },
           )}
-        >
-        </div>
+        ></div>
         <div
           className={cn(
             "transform border-[1px] transition-all duration-300",
@@ -53,13 +52,10 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
               "border-neutral-900 bg-neutral-900": theme === "light",
             },
           )}
-        >
-        </div>
+        ></div>
       </button>
 
-      <Portal
-        targetNode={document.body}
-      >
+      <Portal targetNode={document.body}>
         <nav
           className={cn(
             "fixed left-0 top-0 z-20 flex h-full w-full transform pl-8 transition-all duration-300 md:hidden",
@@ -73,15 +69,15 @@ export const MobileMenu = ({ theme, pathname, links }: Props) => {
           )}
         >
           <div
-            className="flex flex-col w-full items-start justify-center gap-8"
+            className="flex w-full flex-col items-start justify-center gap-8"
             ref={parent}
           >
             {isOpen && (
               <>
-                {links.map((link, idx) => (
+                {links.map((link) => (
                   <Link
-                    onClick={() => setOpen(false)}
-                    key={idx}
+                    onClick={() => setIsOpen(false)}
+                    key={link.href}
                     href={link.href}
                     className={cn(
                       "transtion-all text-2xl font-normal tracking-wide duration-300 hover:underline",

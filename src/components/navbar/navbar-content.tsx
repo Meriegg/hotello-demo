@@ -94,7 +94,7 @@ export const NavbarContent = ({ pathname, topScroll }: Props) => {
           )}
         >
           {navLinks.map((link, idx) => (
-            <Fragment key={idx}>
+            <Fragment key={link.href}>
               <Link
                 className={cn(
                   "transtion-all duration-300 hover:underline",

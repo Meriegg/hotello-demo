@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { useToast } from "~/hooks/use-toast";
+import { formatPlural } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 interface Props {
@@ -89,7 +90,7 @@ export const VerifyCodeForm = ({
   });
 
   const beginCountdown = () => {
-    setResendDisabled(true);
+    setIsResendDisabled(true);
 
     const countdownInterval = setInterval(() => {
       setResendCountdown((prev) => (prev ?? 30) - 1);
@@ -100,7 +101,7 @@ export const VerifyCodeForm = ({
 
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [resendCountdown, setResendCountdown] = useState<number | null>(null);
-  const [isResendDisabled, setResendDisabled] = useState(false);
+  const [isResendDisabled, setIsResendDisabled] = useState(false);
   const resendCodeMutation = api.account.resendVerificationCode.useMutation({
     onError: (error) => {
       toast({
@@ -121,7 +122,7 @@ export const VerifyCodeForm = ({
 
   useEffect(() => {
     if (resendCountdown === 0 && countdownIntervalRef.current) {
-      setResendDisabled(false);
+      setIsResendDisabled(false);
       setResendCountdown(null);
       clearInterval(countdownIntervalRef.current);
     }
@@ -132,7 +133,7 @@ export const VerifyCodeForm = ({
       .string()
       .min(6)
       .max(6)
-      .regex(/[0-9]/g)
+      .regex(/\d/g)
       .safeParse(code);
     if (!success) {
       setError("Invalid code.");
@@ -197,9 +198,7 @@ export const VerifyCodeForm = ({
           className="text-xs text-neutral-900 hover:underline disabled:opacity-70"
         >
           {isResendDisabled && resendCountdown
-            ? `Wait ${resendCountdown} ${
-              resendCountdown > 1 ? "seconds" : "second"
-            }`
+            ? `Wait ${resendCountdown} ${formatPlural(resendCountdown > 1, "second", "seconds")}`
             : "Resend code"}
         </button>
       </div>

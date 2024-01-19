@@ -29,7 +29,7 @@ export const DashboardNav = () => {
     <div className="flex flex-row md:flex-col md:max-w-[160px] gap-2 w-full flex-wrap">
       {routes.map((route, i) => (
         <Link
-          key={i}
+          key={route.href}
           href={route.href}
           className={cn(
             "text-neutral-700 justify-center flex items-center gap-2 text-sm w-full py-4 hover:text-neutral-900 hover:bg-neutral-50 transition-all duration-300 border-[1px] md:border-l-0 border-neutral-100 md:rounded-r-[8px] md:rounded-l-[0px] rounded-[8px]",

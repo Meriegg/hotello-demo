@@ -8,7 +8,7 @@ import { cn } from "~/lib/utils";
 
 export const MobileFilter = () => {
   const parentRef = useRef<HTMLDivElement>(null);
-  const [isOpen, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     parentRef?.current && autoAnimate(parentRef.current);
@@ -35,7 +35,7 @@ export const MobileFilter = () => {
           "absolute right-0 rotate-0 transform p-4 text-neutral-900 transition-all duration-300",
           isOpen ? "top-full -translate-y-full -rotate-180" : "top-0",
         )}
-        onClick={() => setOpen(!isOpen)}
+        onClick={() => setIsOpen(!isOpen)}
       >
         <ChevronDown className="h-5 w-5" />
       </button>

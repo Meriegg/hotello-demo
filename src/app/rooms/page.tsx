@@ -12,6 +12,11 @@ import { useEffect, useRef } from "react";
 import { Ghost } from "lucide-react";
 import autoAnimate from "@formkit/auto-animate";
 import { FilterChips } from "~/components/FilterChips";
+import type { Room, RoomCategory } from "@prisma/client";
+
+type RoomWithCategory = Room & {
+  category: RoomCategory;
+};
 
 const Page = () => {
   const parent = useRef<HTMLDivElement>(null);
@@ -64,8 +69,8 @@ const Page = () => {
         {isLoading && <Loader />}
         {!isLoading && rooms?.rooms?.length > 0 && (
           <div className="mx-auto flex w-full max-w-[800px] flex-col gap-24 px-4 py-8">
-            {rooms.roomsCategories.map((category, i) => (
-              <div className="flex flex-col gap-6" key={i}>
+            {rooms.roomsCategories.map((category) => (
+              <div className="flex flex-col gap-6" key={category}>
                 <div className="flex w-full items-center justify-between">
                   <p className="flex items-center gap-2 text-base text-neutral-700 md:text-2xl">
                     <span className="text-[6px] md:text-[10px]">&#9679;</span>{" "}
@@ -73,13 +78,15 @@ const Page = () => {
                   </p>
                 </div>
                 <div className="flex w-full flex-wrap justify-evenly gap-8 lg:justify-between">
-                  {rooms.roomsByCategory[category]?.map((room, i) => (
-                    <RoomCard
-                      room={room}
-                      category={room.category.name}
-                      key={i}
-                    />
-                  ))}
+                  {rooms.roomsByCategory[category]?.map(
+                    (room: RoomWithCategory) => (
+                      <RoomCard
+                        room={room}
+                        category={room.category.name}
+                        key={room.id}
+                      />
+                    ),
+                  )}
                 </div>
               </div>
             ))}

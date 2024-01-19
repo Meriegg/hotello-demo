@@ -63,10 +63,10 @@ export const AdminNavbar = () => {
         )}
 
         <div className="flex items-center gap-2 flex-wrap">
-          {routes.map((route, i) => (
+          {routes.map((route) => (
             <Link
               href={route.href}
-              key={i}
+              key={route.href}
               className={cn(
                 "text-sm px-4 py-2 hover:bg-neutral-50 hover:text-neutral-900 text-neutral-700 transition-all duration-300 rounded-[4px]",
                 route.href === pathname && "bg-neutral-50 text-neutral-900",

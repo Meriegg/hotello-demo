@@ -5,7 +5,7 @@ import Link from "next/link";
 import { cn } from "~/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
-type PathData = string | { defaultText: string; portalValueID: string };
+type PathData = string | { defaultText: string; portalValueID?: string; skipLink?: boolean; };
 
 const Path = (
   { path, showBehindSlash, href }: {
@@ -33,7 +33,7 @@ const Path = (
         <p
           className={cn(
             "text-neutral-900 pointer-events-none",
-            typeof path === "object" && "text-red-400",
+            (typeof path === "object" && !path.skipLink) && "text-red-400",
           )}
         >
           {typeof path === "string" ? path : path.defaultText}
@@ -50,17 +50,21 @@ const Path = (
     </>
   );
 
-  const renderLink = () => (
-    <Link
-      href={href!}
-      className={cn(
-        "text-neutral-900 pointer-events-none hover:underline hover:text-red-400",
-        typeof path === "object" && "text-red-400",
-      )}
-    >
-      {typeof path === "string" ? path : path.defaultText}
-    </Link>
-  );
+  const renderLink = () => {
+    if (typeof path === 'object' && path.skipLink) return renderPathContent();
+
+    return (
+      <Link
+        href={href!}
+        className={cn(
+          "text-neutral-900 hover:underline hover:text-red-400",
+          (typeof path === "object" && !path.skipLink) && "text-red-400",
+        )}
+      >
+        {typeof path === "string" ? path : path.defaultText}
+      </Link>
+    )
+  };
 
   return (
     <>
@@ -83,6 +87,8 @@ export const PathDisplay = () => {
   const replaceMap: { [key: string]: PathData } = {
     "admin": "Hotello admin panel",
     "bookings": "Bookings",
+    "rooms": "Rooms",
+    "edit": { defaultText: "Edit Room", skipLink: true },
     "new-room": {
       defaultText: "New room",
       portalValueID: "PORTAL_PATH_DISPLAY_NEW_ROOM_VAL",
@@ -102,7 +108,7 @@ export const PathDisplay = () => {
               : null}
             showBehindSlash={i > 0}
             path={replaceMap[pathData] ?? pathData}
-            key={i}
+            key={pathData}
           />
         ))}
       </div>

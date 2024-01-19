@@ -99,9 +99,12 @@ export const Footer = ({ theme, className }: Props) => {
           </div>
           <div className="flex flex-col items-start gap-2">
             <img
-              src={theme === "light"
-                ? "/trustpilot_mini_light.svg"
-                : "/trustpilot_mini_dark.svg"}
+              src={
+                theme === "light"
+                  ? "/trustpilot_mini_light.svg"
+                  : "/trustpilot_mini_dark.svg"
+              }
+              alt="TrustPilot Demo Evaluation"
             />
             <p
               className={cn("flex items-center gap-1 text-xs font-bold", {

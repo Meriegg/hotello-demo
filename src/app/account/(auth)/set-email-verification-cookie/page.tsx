@@ -1,7 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Loader } from "~/components/ui/loader";
 import { useToast } from "~/hooks/use-toast";
 

@@ -21,7 +21,7 @@ export const roomsRouter = createTRPCRouter({
       // eslint-disable-next-line
       let whereFilter: Record<any, any> = {};
 
-      if (input?.filters?.priceRange?.length ?? 0 > 0) {
+      if (input?.filters?.priceRange?.length && input?.filters?.priceRange?.length > 0) {
         whereFilter = {
           OR: [
             {

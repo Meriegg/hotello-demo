@@ -119,8 +119,8 @@ export const ChangeAccountDetails = ({ user }: Props) => {
           <SelectValue placeholder="Country or Region" />
         </SelectTrigger>
         <SelectContent>
-          {getNames().map((name, i) => (
-            <SelectItem key={i} value={name}>
+          {getNames().map((name) => (
+            <SelectItem key={name} value={name}>
               {name}
             </SelectItem>
           ))}

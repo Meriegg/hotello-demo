@@ -14,6 +14,10 @@ export const getPriceRange = (price: number) => {
   });
 };
 
+export const formatPlural = (returnPlural: boolean, singular: string, plural: string) => {
+  return returnPlural ? plural : singular;
+}
+
 export const randomNum = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
 };
