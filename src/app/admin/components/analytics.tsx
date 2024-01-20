@@ -130,7 +130,7 @@ export const Analytics = () => {
 
             <Entry
               label="Cancellation rate"
-              value={`${data.cancellationRate.toFixed(2)}%`}
+              value={`${data.cancellationRate}%`}
             />
 
             <Entry
@@ -201,7 +201,7 @@ export const Analytics = () => {
                   </p>
                   <p className="text-xs text-neutral-700">
                     <span className="text-red-400 font-bold text-base">${(parseInt(room.numOfBookings.toString()) * room.roomData.price) / 100}</span> est. revenue
-                  </p>
+                  </p>/
                 </div>
               </div>
             ))}

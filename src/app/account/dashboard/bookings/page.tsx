@@ -1,21 +1,10 @@
-"use client;"
-
 import { api } from "~/trpc/server";
 import { BookingDisplay } from "./booking-display";
-import { useSession } from "~/hooks/use-session";
-import { Loader } from "~/components/ui/loader";
+import { getSession } from "../../../utils/get-page-session";
 
 const Page = async () => {
+  await getSession();
   const bookings = await api.account.getUserBookings.query();
-  const { data: currentSession, ...currentSessionInfo } = useSession();
-
-  if (currentSessionInfo.isLoading) {
-    return <Loader label="Fetching account data" />
-  }
-
-  if (currentSessionInfo.isError || !currentSession) {
-    return <p className="text-neutral-700 text-xs text-center w-full">You are not logged in.</p>
-  }
 
   return (
     <div className="w-full">
