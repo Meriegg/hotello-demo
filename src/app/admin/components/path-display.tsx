@@ -5,15 +5,19 @@ import Link from "next/link";
 import { cn } from "~/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
-type PathData = string | { defaultText: string; portalValueID?: string; skipLink?: boolean; };
+type PathData =
+  | string
+  | { defaultText: string; portalValueID?: string; skipLink?: boolean };
 
-const Path = (
-  { path, showBehindSlash, href }: {
-    path: PathData;
-    showBehindSlash: boolean;
-    href: string | null;
-  },
-) => {
+const Path = ({
+  path,
+  showBehindSlash,
+  href,
+}: {
+  path: PathData;
+  showBehindSlash: boolean;
+  href: string | null;
+}) => {
   const [showCustomVal, setShowCustomVal] = useState(false);
   const customValRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,8 +36,8 @@ const Path = (
       {!showCustomVal && (
         <p
           className={cn(
-            "text-neutral-900 pointer-events-none",
-            (typeof path === "object" && !path.skipLink) && "text-red-400",
+            "pointer-events-none text-neutral-900",
+            typeof path === "object" && !path.skipLink && "text-red-400",
           )}
         >
           {typeof path === "string" ? path : path.defaultText}
@@ -44,32 +48,31 @@ const Path = (
           ref={customValRef}
           id={path.portalValueID}
           className={cn(showCustomVal ? "block" : "hidden")}
-        >
-        </div>
+        ></div>
       )}
     </>
   );
 
   const renderLink = () => {
-    if (typeof path === 'object' && path.skipLink) return renderPathContent();
+    if (typeof path === "object" && path.skipLink) return renderPathContent();
 
     return (
       <Link
         href={href!}
         className={cn(
-          "text-neutral-900 hover:underline hover:text-red-400",
-          (typeof path === "object" && !path.skipLink) && "text-red-400",
+          "text-neutral-900 hover:text-red-400 hover:underline",
+          typeof path === "object" && !path.skipLink && "text-red-400",
         )}
       >
         {typeof path === "string" ? path : path.defaultText}
       </Link>
-    )
+    );
   };
 
   return (
     <>
       {showBehindSlash && (
-        <span className="italic text-neutral-200 pointer-events-none">/</span>
+        <span className="pointer-events-none italic text-neutral-200">/</span>
       )}
       {!href ? renderPathContent() : renderLink()}
     </>
@@ -84,11 +87,11 @@ export const PathDisplay = () => {
 
   const splitPathname = pathname.split("/").filter((pathStr) => !!pathStr);
 
-  const replaceMap: { [key: string]: PathData } = {
-    "admin": "Hotello admin panel",
-    "bookings": "Bookings",
-    "rooms": "Rooms",
-    "edit": { defaultText: "Edit Room", skipLink: true },
+  const replaceMap: Record<string, PathData> = {
+    admin: "Hotello admin panel",
+    bookings: "Bookings",
+    rooms: "Rooms",
+    edit: { defaultText: "Edit Room", skipLink: true },
     "new-room": {
       defaultText: "New room",
       portalValueID: "PORTAL_PATH_DISPLAY_NEW_ROOM_VAL",
@@ -96,16 +99,15 @@ export const PathDisplay = () => {
   };
 
   return (
-    <div className="flex items-center justify-between px-8 py-4 border-[1px] border-t-[0px] border-neutral-100">
-      <div className="flex items-center gap-2 text-xs font-bold">
-        {splitPathname.map((
-          pathData,
-          i,
-        ) => (
+    <div className="flex flex-wrap items-center justify-between gap-4 border-[1px] border-t-[0px] border-neutral-100 px-8 py-4">
+      <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+        {splitPathname.map((pathData, i) => (
           <Path
-            href={i < splitPathname.length - 1
-              ? `/${splitPathname.slice(0, i + 1).join("/")}`
-              : null}
+            href={
+              i < splitPathname.length - 1
+                ? `/${splitPathname.slice(0, i + 1).join("/")}`
+                : null
+            }
             showBehindSlash={i > 0}
             path={replaceMap[pathData] ?? pathData}
             key={pathData}

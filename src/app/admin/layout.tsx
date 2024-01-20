@@ -14,7 +14,9 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
     <MaxWidthContainer>
       <AdminNavbar />
       <PathDisplay />
-      {children}
+      <div className="px-8 py-6 border-[1px] border-t-[0px] border-neutral-100">
+        {children}
+      </div>
     </MaxWidthContainer>
   );
 };

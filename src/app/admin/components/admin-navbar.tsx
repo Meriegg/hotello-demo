@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogoutBtn } from "~/app/account/components/logout-btn";
 import { Loader } from "~/components/ui/loader";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
@@ -35,13 +36,24 @@ export const AdminNavbar = () => {
     },
   ];
 
+  const moreRoutes = [
+    {
+      text: "Restaurant",
+      href: "/admin/restaurant",
+    },
+    {
+      text: "Accounts",
+      href: "/admin/accounts",
+    },
+  ]
+
   if (isError) {
     return null;
   }
 
   return (
     <div className="flex items-center justify-between border-[1px] border-t-[0] border-neutral-100 px-8 py-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {isLoading && (
           <Loader
             label={null}
@@ -75,9 +87,30 @@ export const AdminNavbar = () => {
               {route.text}
             </Link>
           ))}
-          <button className="text-neutral-700 flex items-center gap-2 text-sm px-4 py-2 hover:bg-neutral-50 hover:text-neutral-900 rounded-[4px] transition-all duration-300">
-            More <MenuIcon className="w-3 h-3 text-inherit" />
-          </button>
+
+          <Popover>
+            <PopoverTrigger>
+              <button className="text-neutral-700 flex items-center gap-2 text-sm px-4 py-2 hover:bg-neutral-50 hover:text-neutral-900 rounded-[4px] transition-all duration-300">
+                More <MenuIcon className="w-3 h-3 text-inherit" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent asChild className="p-2" style={{ width: 'min(300px, 100%)' }}>
+              <div className="flex flex-col gap-2 w-full text">
+                {moreRoutes.map((route) => (
+                  <Link
+                    href={route.href}
+                    key={route.href}
+                    className={cn(
+                      "text-sm px-4 w-full py-2 hover:bg-neutral-50 hover:text-neutral-900 text-neutral-700 transition-all duration-300 rounded-[4px] text-center",
+                      route.href === pathname && "bg-neutral-50 text-neutral-900",
+                    )}
+                  >
+                    {route.text}
+                  </Link>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 

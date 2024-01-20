@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { verifyEmailChangeJwt } from "~/server/utils/email-change-jwt";
-import { getSession } from "../../utils/get-session";
+import { getSession } from "~/app/utils/get-page-session";
 import { ChangeEmailForm } from "./form";
 
 const Page = async ({

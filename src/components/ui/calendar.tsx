@@ -35,19 +35,18 @@ function Calendar({
         head_row: "flex",
         head_cell: "text-neutral-700 rounded-md w-9 font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-neutral-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 dark:[&:has([aria-selected])]:bg-neutral-800",
+        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-neutral-50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-md",
         ),
         day_selected:
-          "bg-neutral-900 text-neutral-50 hover:bg-neutral-900 hover:text-neutral-50 focus:bg-neutral-900 focus:text-neutral-50 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-50 dark:hover:text-neutral-900 dark:focus:bg-neutral-50 dark:focus:text-neutral-900",
-        day_today:
-          "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50",
-        day_outside: "text-neutral-500 opacity-50 dark:text-neutral-400",
-        day_disabled: "text-neutral-500 opacity-50 dark:text-neutral-400",
+          "!bg-neutral-900 !text-neutral-50 hover:bg-neutral-900 hover:text-neutral-50 focus:bg-neutral-900 focus:text-neutral-50",
+        day_today: "bg-neutral-100 text-neutral-900",
+        day_outside: "text-neutral-500 opacity-50",
+        day_disabled: "text-neutral-500 opacity-50",
         day_range_middle:
-          "aria-selected:bg-neutral-100 aria-selected:text-neutral-900 dark:aria-selected:bg-neutral-800 dark:aria-selected:text-neutral-50",
+          "aria-selected:!bg-neutral-50 aria-selected:!text-neutral-900",
         day_hidden: "invisible",
         ...classNames,
       }}
