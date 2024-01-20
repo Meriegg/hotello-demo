@@ -5,7 +5,7 @@ import { SecurityOptions } from "../components/security-options";
 import { useSession } from "~/hooks/use-session";
 import { Loader } from "~/components/ui/loader";
 
-const Page = async () => {
+const Page = () => {
   const { data: currentSession, ...currentSessionInfo } = useSession();
 
   if (currentSessionInfo.isLoading) {

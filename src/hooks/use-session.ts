@@ -5,7 +5,7 @@ interface Props {
   enforceAdmin?: boolean;
 }
 
-export const useSession = (props: Props) => {
+export const useSession = (props?: Props) => {
   const router = useRouter();
 
   const data = api.account.getCurrentSession.useQuery(undefined, {
