@@ -4,7 +4,7 @@ import { api } from "~/trpc/server";
 export const getSession = async () => {
   const currentSession = await api.account.getCurrentSession
     .query()
-    .catch(async (error: { message?: string; data?: { code?: string } }) => {
+    .catch((error: { message?: string; data?: { code?: string } }) => {
       if (error?.data?.code === "FORBIDDEN") {
         const sessionId = error?.message?.split(":")[0];
         const userId = error?.message?.split(":")[1];

@@ -381,56 +381,56 @@ export const Checkoutform = ({ items }: Props) => {
             )}
             {showUseDbData &&
               checkoutSession.data?.checkoutSession.step ===
-                "PERSONAL_DETAILS" &&
+              "PERSONAL_DETAILS" &&
               !usedDbData && (
-              <div className="flex flex-col gap-2">
-                <hr className="w-full border-neutral-100" />
-                <p className="text-sm text-neutral-700">
-                  Use your current account data? <br />{" "}
-                  <span className="text-xs">
-                    Your phone number won't be included
-                  </span>
-                </p>
-                <div className="flex items-center gap-2 text-sm text-red-400">
-                  <button
-                    className="underline"
-                    onClick={() => {
-                      setShowUseDbData(false);
-                      setUsedDbData(true);
-                      if (authSession?.data) {
-                        form.setValue("step1", {
-                          firstName: authSession.data.user.firstName,
-                          lastName: authSession.data.user.lastName,
-                          email: authSession.data.user.email,
-                          age: authSession.data.user.age,
-                        });
+                <div className="flex flex-col gap-2">
+                  <hr className="w-full border-neutral-100" />
+                  <p className="text-sm text-neutral-700">
+                    Use your current account data? <br />{" "}
+                    <span className="text-xs">
+                      Your phone number won&apos;t be included
+                    </span>
+                  </p>
+                  <div className="flex items-center gap-2 text-sm text-red-400">
+                    <button
+                      className="underline"
+                      onClick={() => {
+                        setShowUseDbData(false);
+                        setUsedDbData(true);
+                        if (authSession?.data) {
+                          form.setValue("step1", {
+                            firstName: authSession.data.user.firstName,
+                            lastName: authSession.data.user.lastName,
+                            email: authSession.data.user.email,
+                            age: authSession.data.user.age,
+                          });
 
-                        form.setValue("step2", {
-                          address: authSession.data.user.billingAddress ?? "",
-                          countryOrRegion:
-                            authSession.data.user.billingRegion ?? "",
-                          cityOrTown: authSession.data.user.billingCityTown ??
-                            "",
-                          postalCode: authSession.data.user.billingPostalCode ??
-                            "",
-                        });
-                      }
-                    }}
-                  >
-                    Yes
-                  </button>
-                  <button
-                    onClick={() => {
-                      setUsedDbData(true);
-                      setShowUseDbData(false);
-                    }}
-                    className="underline"
-                  >
-                    No
-                  </button>
+                          form.setValue("step2", {
+                            address: authSession.data.user.billingAddress ?? "",
+                            countryOrRegion:
+                              authSession.data.user.billingRegion ?? "",
+                            cityOrTown: authSession.data.user.billingCityTown ??
+                              "",
+                            postalCode: authSession.data.user.billingPostalCode ??
+                              "",
+                          });
+                        }
+                      }}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUsedDbData(true);
+                        setShowUseDbData(false);
+                      }}
+                      className="underline"
+                    >
+                      No
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </>
         )}
 
