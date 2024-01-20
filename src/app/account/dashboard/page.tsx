@@ -1,9 +1,20 @@
+"use client";
+
 import { ChangeAccountDetails } from "../components/change-account-details";
 import { SecurityOptions } from "../components/security-options";
-import { getSession } from "../../utils/get-page-session";
+import { useSession } from "~/hooks/use-session";
+import { Loader } from "~/components/ui/loader";
 
 const Page = async () => {
-  const currentSession = await getSession();
+  const { data: currentSession, ...currentSessionInfo } = useSession();
+
+  if (currentSessionInfo.isLoading) {
+    return <Loader label="Fetching account data" />
+  }
+
+  if (currentSessionInfo.isError || !currentSession) {
+    return <p className="text-neutral-700 text-xs text-center w-full">You are not logged in.</p>
+  }
 
   return (
     <div>
