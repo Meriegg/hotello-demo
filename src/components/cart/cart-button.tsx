@@ -6,11 +6,11 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ArrowRight, ShoppingCart, XIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
-import { Portal } from "../Portal";
 
 import { usePathname, useRouter } from "next/navigation";
 import { useClickOutside } from "~/hooks/use-click-outside";
 import { cn } from "~/lib/utils";
+import { CartButtonPortal } from "./cart-button-portal";
 
 export const CartButton = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -32,22 +32,8 @@ export const CartButton = () => {
 
   return (
     <>
-      <Portal targetNode={document.body}>
-        <div
-          className={cn(
-            "fixed inset-0 z-20 transform bg-black/80 duration-300",
-            {
-              "opacity-100": isCartOpen,
-              "scale-0 opacity-0": !isCartOpen,
-            },
-          )}
-          style={{
-            transition: `transform 0s ease ${
-              !isCartOpen ? ".3s" : "0s"
-            }, opacity .3s ease`,
-          }}
-        ></div>
-      </Portal>
+      <CartButtonPortal isCartOpen={isCartOpen} />
+
       <div
         ref={cartRef}
         className={cn(

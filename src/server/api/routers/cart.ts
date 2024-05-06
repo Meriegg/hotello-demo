@@ -7,8 +7,28 @@ import { createCookieVerification } from "~/server/utils/cookies";
 import { calculatePrices } from "~/server/utils/calculate-prices";
 
 export const cartRouter = createTRPCRouter({
-  addToCart: publicProcedure.input(z.object({ productId: z.string() }))
-    .mutation(({ input: { productId } }) => {
+  addToCart: publicProcedure
+    .input(z.object({ productId: z.string() }))
+    .mutation(async ({ ctx: { db }, input: { productId } }) => {
+      const dbItem = await db.room.findUnique({
+        where: {
+          id: productId,
+        },
+      });
+      if (!dbItem) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "This product does not exist.",
+        });
+      }
+
+      if (dbItem.isUnavailable) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This item is not available.",
+        });
+      }
+
       const cookieVerificationToken = createCookieVerification("cart");
 
       const cookieStore = cookies();
@@ -116,7 +136,8 @@ export const cartRouter = createTRPCRouter({
       total: baseRoomsPrice / 100,
     };
   }),
-  removeItem: publicProcedure.input(z.object({ productId: z.string() }))
+  removeItem: publicProcedure
+    .input(z.object({ productId: z.string() }))
     .mutation(({ input: { productId } }) => {
       const cookieStore = cookies();
       const cartCookie = cookieStore.get("cart")?.value;

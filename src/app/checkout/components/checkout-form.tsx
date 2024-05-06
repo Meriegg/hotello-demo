@@ -25,6 +25,7 @@ import { Step4 } from "./checkout-steps/step-4";
 import { useToast } from "~/hooks/use-toast";
 import Link from "next/link";
 import { Step5 } from "./checkout-steps/step5/step-5";
+import { env } from "~/env.mjs";
 
 export type StepType = {
   slug: string;
@@ -112,7 +113,7 @@ export const Checkoutform = ({ items }: Props) => {
             value: data.newCheckoutJwt,
             verificationKey: data.cookieVerificationKey,
             args: {
-              secure: false,
+              secure: process.env.NODE_ENV === "production" ? true : false,
               httpOnly: true,
               maxAge: 60 * 60 * 24 * 7,
             },
@@ -174,16 +175,17 @@ export const Checkoutform = ({ items }: Props) => {
         };
 
         for (let i = 0; i < item.accommodates; i++) {
-          const dbData = checkoutSesh.bookingdetails_guestInformation as
-            | GuestInformationType
-            | null;
+          const dbData =
+            checkoutSesh.bookingdetails_guestInformation as GuestInformationType | null;
           const existingData = !!dbData ? dbData[item.id]?.people[i] : null;
 
-          obj[item.id]!.people[i] = existingData ? { ...existingData } : {
-            firstName: "",
-            lastName: "",
-            age: null,
-          };
+          obj[item.id]!.people[i] = existingData
+            ? { ...existingData }
+            : {
+                firstName: "",
+                lastName: "",
+                age: null,
+              };
         }
       });
       form.setValue("step3.guestInformation", obj);
@@ -311,8 +313,9 @@ export const Checkoutform = ({ items }: Props) => {
       slug: "Final payment",
       form: (
         <Step5
-          existingBookingId={checkoutSession.data?.checkoutSession
-            .createdBookingId ?? null}
+          existingBookingId={
+            checkoutSession.data?.checkoutSession.createdBookingId ?? null
+          }
           form={form}
         />
       ),
@@ -333,106 +336,102 @@ export const Checkoutform = ({ items }: Props) => {
       id="CHECKOUT_FORM_MAIN_CONTAINER"
       className="mx-auto mb-8 flex w-full flex-1 flex-col gap-4 border-[1px] border-neutral-100 p-4 lg:mx-0 lg:max-w-[500px]"
     >
-      {cookieError
-        ? (
-          <>
-            <p className="text-center text-lg font-bold text-red-400">Error</p>
-            <p className="text-center text-sm text-neutral-700">
-              This checkout session will not be persisted, meaning that if you
-              refresh this page the data you entered will be lost.{" "}
-              <Link
-                href="/legal/other/checkout-cookie-error"
-                className="text-red-400 hover:underline"
-              >
-                More info
-              </Link>
-            </p>
-            <p className="text-center text-sm text-neutral-700">
-              Please check your internet connection and refresh this page before
-              continuing without persistent sessions
-            </p>
-            <p className="text-center text-sm text-neutral-700">
-              Please save this sequence in case you need to contact support:
-              {" "}
-              <span className="font-bold text-red-400 underline">
-                {checkoutSession?.data?.checkoutSession?.id}
-              </span>
-            </p>
-            <button
-              onClick={() => setCookieError(false)}
-              className="rounded-md bg-neutral-50 px-2 py-2 text-center text-sm text-neutral-900 hover:bg-neutral-100"
+      {cookieError ? (
+        <>
+          <p className="text-center text-lg font-bold text-red-400">Error</p>
+          <p className="text-center text-sm text-neutral-700">
+            This checkout session will not be persisted, meaning that if you
+            refresh this page the data you entered will be lost.{" "}
+            <Link
+              href="/legal/other/checkout-cookie-error"
+              className="text-red-400 hover:underline"
             >
-              Agree with the terms above and continue
-            </button>
-          </>
-        )
-        : (
-          <>
-            {checkoutSession.isLoading && <Loader label="Fetching data" />}
-            {!checkoutSession.isLoading && checkoutSession.data && (
-              <StepRenderer
-                currentSession={stepNums[
-                  checkoutSession.data.checkoutSession.step
-                ] ?? null}
-                loadingNextStep={nextStepMutation.isLoading}
-                nextStep={nextStep}
-                form={form}
-              />
-            )}
-            {showUseDbData &&
-              checkoutSession.data?.checkoutSession.step ===
-              "PERSONAL_DETAILS" &&
-              !usedDbData && (
-                <div className="flex flex-col gap-2">
-                  <hr className="w-full border-neutral-100" />
-                  <p className="text-sm text-neutral-700">
-                    Use your current account data? <br />{" "}
-                    <span className="text-xs">
-                      Your phone number won&apos;t be included
-                    </span>
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-red-400">
-                    <button
-                      className="underline"
-                      onClick={() => {
-                        setShowUseDbData(false);
-                        setUsedDbData(true);
-                        if (authSession?.data) {
-                          form.setValue("step1", {
-                            firstName: authSession.data.user.firstName,
-                            lastName: authSession.data.user.lastName,
-                            email: authSession.data.user.email,
-                            age: authSession.data.user.age,
-                          });
+              More info
+            </Link>
+          </p>
+          <p className="text-center text-sm text-neutral-700">
+            Please check your internet connection and refresh this page before
+            continuing without persistent sessions
+          </p>
+          <p className="text-center text-sm text-neutral-700">
+            Please save this sequence in case you need to contact support:{" "}
+            <span className="font-bold text-red-400 underline">
+              {checkoutSession?.data?.checkoutSession?.id}
+            </span>
+          </p>
+          <button
+            onClick={() => setCookieError(false)}
+            className="rounded-md bg-neutral-50 px-2 py-2 text-center text-sm text-neutral-900 hover:bg-neutral-100"
+          >
+            Agree with the terms above and continue
+          </button>
+        </>
+      ) : (
+        <>
+          {checkoutSession.isLoading && <Loader label="Fetching data" />}
+          {!checkoutSession.isLoading && checkoutSession.data && (
+            <StepRenderer
+              currentSession={
+                stepNums[checkoutSession.data.checkoutSession.step] ?? null
+              }
+              loadingNextStep={nextStepMutation.isLoading}
+              nextStep={nextStep}
+              form={form}
+            />
+          )}
+          {showUseDbData &&
+            checkoutSession.data?.checkoutSession.step === "PERSONAL_DETAILS" &&
+            !usedDbData && (
+              <div className="flex flex-col gap-2">
+                <hr className="w-full border-neutral-100" />
+                <p className="text-sm text-neutral-700">
+                  Use your current account data? <br />{" "}
+                  <span className="text-xs">
+                    Your phone number won&apos;t be included
+                  </span>
+                </p>
+                <div className="flex items-center gap-2 text-sm text-red-400">
+                  <button
+                    className="underline"
+                    onClick={() => {
+                      setShowUseDbData(false);
+                      setUsedDbData(true);
+                      if (authSession?.data) {
+                        form.setValue("step1", {
+                          firstName: authSession.data.user.firstName,
+                          lastName: authSession.data.user.lastName,
+                          email: authSession.data.user.email,
+                          age: authSession.data.user.age,
+                        });
 
-                          form.setValue("step2", {
-                            address: authSession.data.user.billingAddress ?? "",
-                            countryOrRegion:
-                              authSession.data.user.billingRegion ?? "",
-                            cityOrTown: authSession.data.user.billingCityTown ??
-                              "",
-                            postalCode: authSession.data.user.billingPostalCode ??
-                              "",
-                          });
-                        }
-                      }}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      onClick={() => {
-                        setUsedDbData(true);
-                        setShowUseDbData(false);
-                      }}
-                      className="underline"
-                    >
-                      No
-                    </button>
-                  </div>
+                        form.setValue("step2", {
+                          address: authSession.data.user.billingAddress ?? "",
+                          countryOrRegion:
+                            authSession.data.user.billingRegion ?? "",
+                          cityOrTown:
+                            authSession.data.user.billingCityTown ?? "",
+                          postalCode:
+                            authSession.data.user.billingPostalCode ?? "",
+                        });
+                      }
+                    }}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUsedDbData(true);
+                      setShowUseDbData(false);
+                    }}
+                    className="underline"
+                  >
+                    No
+                  </button>
                 </div>
-              )}
-          </>
-        )}
+              </div>
+            )}
+        </>
+      )}
 
       {debugMode && (
         <div className="flex flex-col gap-2">
@@ -451,7 +450,9 @@ export const Checkoutform = ({ items }: Props) => {
             </p>
           </div>
 
-          <pre className="text-xs text-neutral-700">{JSON.stringify(form.watch(), null, 2)}</pre>
+          <pre className="text-xs text-neutral-700">
+            {JSON.stringify(form.watch(), null, 2)}
+          </pre>
         </div>
       )}
     </div>

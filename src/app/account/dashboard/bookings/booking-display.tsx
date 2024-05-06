@@ -17,7 +17,7 @@ import type {
   Room,
 } from "@prisma/client";
 import { InfoIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader } from "~/components/ui/loader";
 import {
   Tooltip,
@@ -51,12 +51,15 @@ const CancelBookingButton = ({ booking }: { booking: BookingType }) => {
   return (
     <Dialog onOpenChange={(val) => setShowModal(val)} open={showModal}>
       <DialogTrigger
-        disabled={booking.paymentStatus === "PENDING" ||
-          cancelBooking.isLoading}
+        disabled={
+          booking.paymentStatus === "PENDING" || cancelBooking.isLoading
+        }
+        asChild
       >
         <button
-          disabled={booking.paymentStatus === "PENDING" ||
-            cancelBooking.isLoading}
+          disabled={
+            booking.paymentStatus === "PENDING" || cancelBooking.isLoading
+          }
           className="flex items-center gap-1 text-sm font-normal text-red-400 underline ring-red-200 transition-all duration-300 active:ring-2 disabled:cursor-not-allowed disabled:opacity-70"
         >
           Cancel booking
@@ -71,7 +74,7 @@ const CancelBookingButton = ({ booking }: { booking: BookingType }) => {
         </DialogDescription>
 
         <div className="flex w-full items-center gap-2">
-          <DialogClose className="w-full">
+          <DialogClose className="w-full" asChild>
             <Button className="w-full rounded-md bg-neutral-50 text-neutral-900 ring-neutral-100 transition-all duration-300 active:ring-2">
               Don&apos;t cancel
             </Button>
@@ -81,7 +84,8 @@ const CancelBookingButton = ({ booking }: { booking: BookingType }) => {
             disabled={cancelBooking.isLoading}
             onClick={() => cancelBooking.mutate({ bookingId: booking.id })}
           >
-            Cancel booking {cancelBooking.isLoading && (
+            Cancel booking{" "}
+            {cancelBooking.isLoading && (
               <Loader
                 label={null}
                 labelClassName="w-fit p-0"
@@ -96,13 +100,11 @@ const CancelBookingButton = ({ booking }: { booking: BookingType }) => {
   );
 };
 
-
-
 interface Props {
   booking: BookingType;
 }
 
-const BookingStatusDisplay = ({ booking }: Props) => {
+export const BookingStatusDisplay = ({ booking }: Props) => {
   const getPaymentStatusDisplay = () => {
     switch (booking.paymentStatus) {
       case "PAID":
@@ -117,29 +119,28 @@ const BookingStatusDisplay = ({ booking }: Props) => {
   };
 
   if (booking.canceled) {
-    return <p className="rounded-[4px] bg-neutral-50 p-1 text-xs font-bold tracking-normal text-neutral-700">
-      CANCELED
-    </p>
+    return (
+      <p className="w-fit rounded-[4px] bg-neutral-50 p-1 text-xs font-bold tracking-normal text-neutral-700">
+        CANCELED
+      </p>
+    );
   }
 
   return (
     <p
       className={cn(
-        "rounded-[4px] p-1 text-xs font-bold tracking-normal",
+        "w-fit rounded-[4px] p-1 text-xs font-bold tracking-normal",
         {
-          "bg-green-200 text-green-900":
-            booking.paymentStatus === "PAID",
-          "bg-red-200 text-red-900":
-            booking.paymentStatus === "FAILED",
-          "bg-neutral-50 text-neutral-700":
-            booking.paymentStatus === "PENDING",
+          "bg-green-200 text-green-900": booking.paymentStatus === "PAID",
+          "bg-red-200 text-red-900": booking.paymentStatus === "FAILED",
+          "bg-neutral-50 text-neutral-700": booking.paymentStatus === "PENDING",
         },
       )}
     >
       {getPaymentStatusDisplay()}
     </p>
-  )
-}
+  );
+};
 
 const BookingMainDataDisplay = ({ booking }: Props) => {
   const checkInDisplay = () => {
@@ -148,8 +149,7 @@ const BookingMainDataDisplay = ({ booking }: Props) => {
         <div className="rounded-[8px] bg-neutral-50 p-2">
           <p className="text-xs text-neutral-700">You checked in on</p>
           <p className="flex items-center gap-2 text-sm font-bold text-red-400">
-            {new Intl.DateTimeFormat().format(booking.customerCheckIn)}
-            {" "}
+            {new Intl.DateTimeFormat().format(booking.customerCheckIn)}{" "}
             <Tooltip>
               <TooltipTrigger>
                 <InfoIcon className="h-3 w-3 text-neutral-700" />
@@ -162,20 +162,18 @@ const BookingMainDataDisplay = ({ booking }: Props) => {
             </Tooltip>
           </p>
         </div>
-
-      )
+      );
     }
 
     return (
       <div>
         <p className="text-xs text-neutral-700">Check in</p>
         <p className="text-sm font-bold text-red-400">
-          {new Intl.DateTimeFormat().format(booking.bookedCheckIn)}
-          {" "}
+          {new Intl.DateTimeFormat().format(booking.bookedCheckIn)}{" "}
         </p>
-      </div >
-    )
-  }
+      </div>
+    );
+  };
 
   const checkOutDisplay = () => {
     if (booking.customerCheckOut) {
@@ -183,8 +181,7 @@ const BookingMainDataDisplay = ({ booking }: Props) => {
         <div className="rounded-[8px] bg-neutral-50 p-2">
           <p className="text-xs text-neutral-700">You checked out on</p>
           <p className="flex items-center gap-2 text-sm font-bold text-red-400">
-            {new Intl.DateTimeFormat().format(booking.customerCheckOut)}
-            {" "}
+            {new Intl.DateTimeFormat().format(booking.customerCheckOut)}{" "}
             <Tooltip>
               <TooltipTrigger>
                 <InfoIcon className="h-3 w-3 text-neutral-700" />
@@ -197,19 +194,18 @@ const BookingMainDataDisplay = ({ booking }: Props) => {
             </Tooltip>
           </p>
         </div>
-      )
+      );
     }
 
     return (
       <div>
         <p className="text-xs text-neutral-700">Check out</p>
         <p className="text-sm font-bold text-red-400">
-          {new Intl.DateTimeFormat().format(booking.bookedCheckOut)}
-          {" "}
+          {new Intl.DateTimeFormat().format(booking.bookedCheckOut)}{" "}
         </p>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="flex items-start gap-4">
@@ -228,22 +224,25 @@ const BookingMainDataDisplay = ({ booking }: Props) => {
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-const BookingBillingDetailsDisplay = ({ booking, showBillingDetails }: Props & { showBillingDetails: boolean }) => {
+export const BookingBillingDetailsDisplay = ({
+  booking,
+  showBillingDetails,
+  hideSeparators = false,
+}: Props & { showBillingDetails: boolean; hideSeparators?: boolean }) => {
   if (!showBillingDetails) return null;
 
   return (
     <>
-      <hr className="my-2 border-neutral-100" />
+      {!hideSeparators && <hr className="my-2 border-neutral-100" />}
 
       <div className="flex w-full flex-wrap items-start gap-4">
         <div>
           <p className="text-xs text-neutral-700">Full name</p>
           <p className="text-sm font-bold text-red-400">
-            {booking.personalDetailsFirstName}{" "}
-            {booking.personalDetailsLastName}
+            {booking.personalDetailsFirstName} {booking.personalDetailsLastName}
           </p>
         </div>
 
@@ -265,7 +264,7 @@ const BookingBillingDetailsDisplay = ({ booking, showBillingDetails }: Props & {
           <p className="text-xs text-neutral-700">Phone number</p>
           <p className="text-sm font-bold text-red-400">
             {!!booking.personalDetailsPhoneNum &&
-              !!booking.personalDetailsPhoneNumCountry
+            !!booking.personalDetailsPhoneNumCountry
               ? `(${booking.personalDetailsPhoneNumCountry}) ${booking.personalDetailsPhoneNum}`
               : "-"}
           </p>
@@ -300,18 +299,26 @@ const BookingBillingDetailsDisplay = ({ booking, showBillingDetails }: Props & {
         </div>
       </div>
 
-      <hr className="my-2 border-neutral-100" />
+      {!hideSeparators && <hr className="my-2 border-neutral-100" />}
     </>
-  )
-}
+  );
+};
 
-const BookingRoomGuestsDisplay = ({ guests, showGuests }: { guests: BookingRoomGuestDetails[], showGuests: boolean; }) => {
+export const BookingRoomGuestsDisplay = ({
+  guests,
+  showGuests,
+}: {
+  guests: BookingRoomGuestDetails[];
+  showGuests: boolean;
+}) => {
   if (!showGuests) return null;
 
   if (!guests.length) {
-    return <p className="my-1 text-sm font-normal text-neutral-700">
-      No guests specified
-    </p>
+    return (
+      <p className="my-1 text-sm font-normal text-neutral-700">
+        No guests specified
+      </p>
+    );
   }
 
   return (
@@ -321,9 +328,7 @@ const BookingRoomGuestsDisplay = ({ guests, showGuests }: { guests: BookingRoomG
           key={guest.id}
           className="flex items-start gap-1 font-normal text-neutral-700"
         >
-          <p className="text-xs italic text-neutral-700">
-            #{i + 1}
-          </p>
+          <p className="text-xs italic text-neutral-700">#{i + 1}</p>
           <div>
             <p className="text-neutral-900">
               {guest.firstName} {guest.lastName}
@@ -333,20 +338,17 @@ const BookingRoomGuestsDisplay = ({ guests, showGuests }: { guests: BookingRoomG
         </div>
       ))}
     </div>
-  )
-}
+  );
+};
 
-const BookingPriceDataDisplay = ({ booking }: Props) => {
+export const BookingPriceDataDisplay = ({ booking }: Props) => {
   if (booking.customerCheckOut) {
     return (
       <div className="mx-1 rounded-md bg-neutral-50 p-2">
         <div className="flex w-full items-start justify-between">
-          <p className="text-xs font-normal text-neutral-700">
-            Amount paid
-          </p>
+          <p className="text-xs font-normal text-neutral-700">Amount paid</p>
           <p className="text-sm font-bold text-neutral-900">
-            ${(booking.baseRoomsPrice * booking.calculatedStayInDays) /
-              100}
+            ${(booking.baseRoomsPrice * booking.calculatedStayInDays) / 100}
           </p>
         </div>
         <p className="mt-1 w-full text-right text-sm font-bold text-neutral-900">
@@ -366,16 +368,14 @@ const BookingPriceDataDisplay = ({ booking }: Props) => {
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <>
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-normal text-neutral-700">
-            Subtotal:
-          </p>
+          <p className="text-xs font-normal text-neutral-700">Subtotal:</p>
           <p className="text-sm font-bold text-neutral-900">
             ${booking.baseRoomsPrice / 100}
           </p>
@@ -388,14 +388,19 @@ const BookingPriceDataDisplay = ({ booking }: Props) => {
         <div className="flex items-center justify-between">
           <p className="text-xs font-normal text-neutral-700">Total:</p>
           <p className="text-sm font-bold text-neutral-900">
-            ${(booking.baseRoomsPrice * booking.calculatedStayInDays) /
-              100}
+            ${(booking.baseRoomsPrice * booking.calculatedStayInDays) / 100}
           </p>
         </div>
 
         <div className="flex items-center justify-between">
           <p className="text-xs font-normal text-neutral-700">
-            Amount paid (<span className="font-bold italic text-red-400">{booking.paymentType === "RESERVATION_HOLD" ? "Reservation hold" : "Fully paid"}</span>):
+            Amount paid (
+            <span className="font-bold italic text-red-400">
+              {booking.paymentType === "RESERVATION_HOLD"
+                ? "Reservation hold"
+                : "Fully paid"}
+            </span>
+            ):
           </p>
           <p className="text-sm font-bold text-neutral-900">
             ${booking.totalPaid / 100}
@@ -418,14 +423,23 @@ const BookingPriceDataDisplay = ({ booking }: Props) => {
         </>
       )}
     </>
-  )
-}
+  );
+};
 
 export const BookingDisplay = ({ booking }: Props) => {
   const [containerRef] = useAutoAnimate();
   const [roomContainerRef] = useAutoAnimate();
   const [showGuests, setShowGuests] = useState(false);
   const [showBillingDetails, setShowBillingDetails] = useState(false);
+
+  const [showContent, setShowContent] = useState(false);
+
+  useEffect(() => {
+    setShowContent(true);
+  }, []);
+
+  // Solve hydration errors
+  if (!showContent) return null;
 
   return (
     <TooltipProvider>
@@ -434,7 +448,7 @@ export const BookingDisplay = ({ booking }: Props) => {
         className="border-[1px] border-neutral-100 p-4"
         style={{ width: "min(500px, 100%)" }}
       >
-        <div className="flex items-center justify-between flex-wrap">
+        <div className="flex flex-wrap items-center justify-between">
           <p className="text-xs font-bold text-neutral-700">{booking.id}</p>
 
           <div className="flex items-center gap-2">
@@ -449,7 +463,10 @@ export const BookingDisplay = ({ booking }: Props) => {
 
         <BookingMainDataDisplay booking={booking} />
 
-        <BookingBillingDetailsDisplay booking={booking} showBillingDetails={showBillingDetails} />
+        <BookingBillingDetailsDisplay
+          booking={booking}
+          showBillingDetails={showBillingDetails}
+        />
 
         <p className="mt-2 text-xs text-neutral-700">Rooms</p>
         <ul className="mt-1 flex list-disc flex-col gap-1 pl-8 text-sm font-bold text-red-400">
@@ -457,14 +474,17 @@ export const BookingDisplay = ({ booking }: Props) => {
             <li key={room.id}>
               <div className="flex flex-col gap-1" ref={roomContainerRef}>
                 <div className="flex w-full items-center justify-between gap-4">
-                  {room.room.name}{" "}
+                  <p>{room.room.name}</p>{" "}
                   <span className="font-normal text-neutral-700">
                     ${room.room.price / 100}
                     <span className="text-xs">/night</span>
                   </span>
                 </div>
 
-                <BookingRoomGuestsDisplay showGuests={showGuests} guests={room.guestDetails} />
+                <BookingRoomGuestsDisplay
+                  showGuests={showGuests}
+                  guests={room.guestDetails}
+                />
               </div>
             </li>
           ))}
@@ -506,7 +526,8 @@ export const BookingDisplay = ({ booking }: Props) => {
           </div>
         )}
 
-        {booking.customerCheckOut && (
+        {(booking.fulfillmentStatus === "CUSTOMER_CHECKED_OUT_ON_TIME" ||
+          booking.fulfillmentStatus === "CUSTOMER_CHECKED_OUT_EARLY") && (
           <>
             <hr className="my-2 border-neutral-100" />
             <p className="w-full text-center text-sm font-bold text-neutral-900">
@@ -518,21 +539,24 @@ export const BookingDisplay = ({ booking }: Props) => {
         {booking.paymentStatus === "FAILED" && (
           <>
             <hr className="my-2 border-neutral-100" />
-            <p className="w-full text-center text-sm font-bold text-neutral-900">
-              Please go to your checkout page and try again, or create another
-              booking.
-            </p>
+            <div className="flex flex-col gap-2">
+              <p className="w-full text-center text-sm font-bold text-neutral-900">
+                Your payment failed.
+              </p>
+            </div>
           </>
         )}
 
-        {booking.paymentStatus === "PAID" && !booking.canceled && (
-          <>
-            <hr className="my-2 border-neutral-100" />
-            <p className="w-full text-center text-sm font-bold text-neutral-900">
-              We&apos;ll be waiting for you!
-            </p>
-          </>
-        )}
+        {booking.fulfillmentStatus === "WAITING_FOR_CUSTOMER" &&
+          !booking.canceled &&
+          booking.paymentStatus === "PAID" && (
+            <>
+              <hr className="my-2 border-neutral-100" />
+              <p className="w-full text-center text-sm font-bold text-neutral-900">
+                We&apos;ll be waiting for you!
+              </p>
+            </>
+          )}
 
         {booking.canceled && (
           <div className="flex w-auto flex-col items-center gap-2 text-center">
@@ -542,12 +566,20 @@ export const BookingDisplay = ({ booking }: Props) => {
 
             {booking.stripeRefundId && (
               <p className="text-xs text-neutral-700">
-                A refund was issued to you (id:{" "}
-                {booking.stripeRefundId}), please contact support for more
-                details!
+                A refund was issued to you (id: {booking.stripeRefundId}),
+                please contact support for more details!
               </p>
             )}
           </div>
+        )}
+
+        {booking.fulfillmentStatus === "MISSED" && (
+          <>
+            <hr className="my-2 border-neutral-100" />
+            <p className="w-full text-center text-sm font-bold text-neutral-900">
+              You missed this booking, please contact support for more details.
+            </p>
+          </>
         )}
       </div>
     </TooltipProvider>

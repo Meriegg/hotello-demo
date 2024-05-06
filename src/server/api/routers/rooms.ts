@@ -4,24 +4,23 @@ import { FilterDataValidator, FilterValidator } from "~/lib/zod/filter";
 import { z } from "zod";
 import type { Room, RoomCategory } from "@prisma/client";
 import { checkRoomsAvailability } from "~/server/utils/check-rooms-availability";
+import { TRPCError } from "@trpc/server";
 
 export const roomsRouter = createTRPCRouter({
-  getRooms: publicProcedure.input(z.object({
-    filters: FilterValidator,
-  })).query(
-    async (
-      {
-        ctx: { db },
-        input,
-      },
-    ) => {
+  getRooms: publicProcedure
+    .input(
+      z.object({
+        filters: FilterValidator,
+      }),
+    )
+    .query(async ({ ctx: { db }, input }) => {
       const checkInDate = input.filters.checkInDate;
       const checkOutDate = input.filters.checkOutDate;
 
       // eslint-disable-next-line
       let whereFilter: Record<any, any> = {};
 
-      if (input?.filters?.priceRange?.length && input?.filters?.priceRange?.length > 0) {
+      if (input?.filters?.priceRange?.length ?? 0 > 0) {
         whereFilter = {
           OR: [
             {
@@ -32,7 +31,9 @@ export const roomsRouter = createTRPCRouter({
             {
               price: {
                 gt: input.filters.priceRange?.at(0),
-                lt: input.filters.priceRange?.at(1),
+                lt: !Number.isFinite(input.filters.priceRange?.at(1))
+                  ? 100_000_000
+                  : input.filters.priceRange?.at(1),
               },
             },
           ],
@@ -104,6 +105,7 @@ export const roomsRouter = createTRPCRouter({
         },
         where: {
           ...whereFilter,
+          isUnavailable: false,
         },
       });
 
@@ -126,44 +128,70 @@ export const roomsRouter = createTRPCRouter({
         roomsByCategory,
         roomsCategories: Object.keys(roomsByCategory),
       };
-    },
-  ),
+    }),
   getFilterData: publicProcedure.query(async ({ ctx: { db } }) => {
     const rooms = await db.room.findMany({
       include: {
         category: true,
       },
+      where: {
+        isUnavailable: false,
+      },
     });
 
     const categories = [...new Set(rooms.map((room) => room.category.name))];
 
-    const priceRanges = rooms.map((room) =>
-      getPriceRange(parseFloat(room.price.toString())).filter((range) =>
-        !!range
-      )[0]
-    ).filter((obj, index, self) =>
-      index === self.findIndex((o) => o?.slug === obj?.slug)
-    );
+    const priceRanges = rooms
+      .map(
+        (room) =>
+          getPriceRange(parseFloat(room.price.toString())).filter(
+            (range) => !!range,
+          )[0],
+      )
+      .filter(
+        (obj, index, self) =>
+          index === self.findIndex((o) => o?.slug === obj?.slug),
+      );
 
     return FilterDataValidator.parse({
       categories,
       priceRanges,
     });
   }),
-  checkRoomsAvailability: publicProcedure.input(
-    z.object({
-      roomIds: z.string().array(),
-      checkInDate: z.date(),
-      checkOutDate: z.date(),
-    }),
-  )
-    .mutation(
-      async (
-        { input: { roomIds, checkOutDate, checkInDate } },
-      ) => {
-        const data = await checkRoomsAvailability(roomIds, checkInDate, checkOutDate);
+  checkRoomsAvailability: publicProcedure
+    .input(
+      z.object({
+        roomIds: z.string().array(),
+        checkInDate: z.date(),
+        checkOutDate: z.date(),
+      }),
+    )
+    .mutation(async ({ input: { roomIds, checkOutDate, checkInDate } }) => {
+      const data = await checkRoomsAvailability(
+        roomIds,
+        checkInDate,
+        checkOutDate,
+      );
 
-        return data;
-      },
-    ),
+      return data;
+    }),
+  getRoomCategories: publicProcedure.query(async ({ ctx: { db } }) => {
+    return await db.roomCategory.findMany();
+  }),
+  getRoom: publicProcedure
+    .input(z.object({ roomId: z.string() }))
+    .query(async ({ ctx: { db }, input }) => {
+      const room = await db.room.findUnique({
+        where: { id: input.roomId },
+        include: { category: true },
+      });
+      if (!room) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "This room does not exist.",
+        });
+      }
+
+      return room;
+    }),
 });

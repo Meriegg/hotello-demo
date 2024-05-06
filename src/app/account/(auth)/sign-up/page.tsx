@@ -14,6 +14,7 @@ import { PhoneNumInput } from "~/components/ui/phoneinput";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "~/hooks/use-toast";
 import { useState } from "react";
+import { env } from "~/env.mjs";
 
 const Page = () => {
   const router = useRouter();
@@ -39,7 +40,7 @@ const Page = () => {
           value: data.emailVerificationToken,
           verificationKey: data.cookieVerificationToken,
           args: {
-            secure: false,
+            secure: process.env.NODE_ENV === "production" ? true : false,
             httpOnly: true,
             maxAge: 60 * 30,
           },
@@ -58,9 +59,7 @@ const Page = () => {
 
           const redirect = searchParams?.get("redirect");
           const redirectParam = redirect ? `?redirect=${redirect}` : "";
-          router.push(
-            `${data.redirectTo}${redirectParam}`,
-          );
+          router.push(`${data.redirectTo}${redirectParam}`);
         })
         .catch((e) => console.error(e));
     },

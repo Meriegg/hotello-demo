@@ -5,14 +5,16 @@ import { CheckIcon, ShoppingCartIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Loader } from "~/components/ui/loader";
+import { env } from "~/env.mjs";
 import { useToast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 
 interface Props {
   productId: string;
+  disabled?: boolean;
 }
 
-export const RoomCardAddBtn = ({ productId }: Props) => {
+export const RoomCardAddBtn = ({ productId, disabled }: Props) => {
   const { toast } = useToast();
   const [parentRef] = useAutoAnimate<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +51,7 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
           value: data.cartToken,
           verificationKey: data.cookieVerificationToken,
           args: {
-            secure: false,
+            secure: process.env.NODE_ENV === "production" ? true : false,
             httpOnly: true,
             maxAge: 60 * 60 * 24 * 7,
           },
@@ -75,17 +77,17 @@ export const RoomCardAddBtn = ({ productId }: Props) => {
     retry: 0,
   });
 
-  const buttonLoading = addToCart.isLoading || productsInCart.isLoading ||
-    isLoading;
+  const buttonLoading =
+    addToCart.isLoading || productsInCart.isLoading || isLoading;
 
   return (
     <div ref={parentRef} className="w-full flex-1">
       {!isInCart && (
         <Button
           onClick={() => addToCart.mutate({ productId })}
-          className="flex w-full items-center gap-2 font-bold"
+          className="flex w-full items-center gap-2 font-bold disabled:cursor-not-allowed disabled:opacity-70"
           size="sm"
-          disabled={buttonLoading}
+          disabled={buttonLoading || disabled}
         >
           {buttonLoading && (
             <Loader

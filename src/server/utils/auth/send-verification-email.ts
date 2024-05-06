@@ -3,9 +3,13 @@ import { createEmailVerificationCode } from "../create-email-verification";
 import { resend } from "~/lib/resend";
 import { VerificationCode } from "~/components/emails/verification-code";
 
-export const sendVerificationEmail = async (
-  { userId, createDbCode = true }: { userId: string; createDbCode?: boolean },
-) => {
+export const sendVerificationEmail = async ({
+  userId,
+  createDbCode = true,
+}: {
+  userId: string;
+  createDbCode?: boolean;
+}) => {
   const user = await db.user.findUnique({
     where: {
       id: userId,
@@ -20,14 +24,15 @@ export const sendVerificationEmail = async (
 
   const code = createEmailVerificationCode();
 
-  // eslint-disable-next-line
-  // @ts-ignore
-  const emailData = await resend.emails.send({
-    from: "Acme <onboarding@resend.dev>",
-    to: ["delivered@resend.dev", user.email],
-    subject: "Hotello verification code",
-    react: VerificationCode({ code: code.codeStr }),
-  });
+  const emailData =
+    { data: { id: "TEST_ID" }, error: null } ??
+    (await resend.emails.send({
+      from: "Acme <onboarding@resend.dev>",
+      to: ["delivered@resend.dev"],
+      subject: "Hotello verification code",
+      react: VerificationCode({ code: code.codeStr }),
+      text: `Your hotello verification code is: ${code.codeStr}`,
+    }));
   if (emailData.error) {
     return {
       error: true,

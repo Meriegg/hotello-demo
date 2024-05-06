@@ -5,6 +5,7 @@ import { ZodError } from "zod";
 import { type NextRequest } from "next/server";
 import { getUserSession } from "../utils/get-user-session";
 import type { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc";
+import { getAdminAccessLevel } from "../utils/auth/get-admin-access-level";
 
 interface CreateContextOptions {
   headers: Headers;
@@ -19,9 +20,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   };
 };
 
-export const createTRPCContext = (
-  opts: { req: NextRequest },
-) => {
+export const createTRPCContext = (opts: { req: NextRequest }) => {
   return createInnerTRPCContext({
     headers: opts.req.headers,
     ...opts,
@@ -35,9 +34,8 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError: error.cause instanceof ZodError
-          ? error.cause.flatten()
-          : null,
+        zodError:
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };
   },
@@ -107,8 +105,14 @@ const isAdminL1 = t.middleware(async (opts) => {
       message: "You are not authorized to access this resource.",
     });
   }
+  const accessLevel = getAdminAccessLevel(userSession.user.adminAccessLevel);
+  if (accessLevel === null)
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Invalid access level.",
+    });
 
-  if (parseInt(userSession.user.adminAccessLevel) < 1) {
+  if (accessLevel < 1) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not allowed to  access this resource",
@@ -142,7 +146,14 @@ const isAdminL2 = t.middleware(async (opts) => {
     });
   }
 
-  if (parseInt(userSession.user.adminAccessLevel) < 2) {
+  const accessLevel = getAdminAccessLevel(userSession.user.adminAccessLevel);
+  if (accessLevel === null)
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Invalid access level.",
+    });
+
+  if (accessLevel < 2) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not allowed to  access this resource",
@@ -175,8 +186,14 @@ const isAdminL3 = t.middleware(async (opts) => {
       message: "You are not authorized to access this resource.",
     });
   }
+  const accessLevel = getAdminAccessLevel(userSession.user.adminAccessLevel);
+  if (accessLevel === null)
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Invalid access level.",
+    });
 
-  if (parseInt(userSession.user.adminAccessLevel) < 3) {
+  if (accessLevel < 3) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not allowed to  access this resource",

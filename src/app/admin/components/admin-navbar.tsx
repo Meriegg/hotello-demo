@@ -45,6 +45,10 @@ export const AdminNavbar = () => {
       text: "Accounts",
       href: "/admin/accounts",
     },
+    {
+      text: "Images",
+      href: "/admin/images",
+    },
   ]
 
   if (isError) {
@@ -89,13 +93,13 @@ export const AdminNavbar = () => {
           ))}
 
           <Popover>
-            <PopoverTrigger>
+            <PopoverTrigger asChild>
               <button className="text-neutral-700 flex items-center gap-2 text-sm px-4 py-2 hover:bg-neutral-50 hover:text-neutral-900 rounded-[4px] transition-all duration-300">
                 More <MenuIcon className="w-3 h-3 text-inherit" />
               </button>
             </PopoverTrigger>
             <PopoverContent asChild className="p-2" style={{ width: 'min(300px, 100%)' }}>
-              <div className="flex flex-col gap-2 w-full text">
+              <div className="flex flex-col gap-1 w-full text">
                 {moreRoutes.map((route) => (
                   <Link
                     href={route.href}

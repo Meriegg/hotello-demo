@@ -113,13 +113,14 @@ export const checkoutRouter = createTRPCRouter({
       cookieVerificationKey,
     };
   }),
-  nextStep: publicProcedure.input(
-    z.object({
-      sessionId: z.string(),
-      formData: z.record(z.string(), z.any()),
-    }),
-  ).mutation(
-    async ({ ctx: { db }, input: { sessionId, formData } }) => {
+  nextStep: publicProcedure
+    .input(
+      z.object({
+        sessionId: z.string(),
+        formData: z.record(z.string(), z.any()),
+      }),
+    )
+    .mutation(async ({ ctx: { db }, input: { sessionId, formData } }) => {
       const checkoutSession = await db.checkoutSession.findUnique({
         where: { id: sessionId },
       });
@@ -206,33 +207,33 @@ export const checkoutRouter = createTRPCRouter({
       return {
         updatedSession,
       };
-    },
-  ),
-  goToStep: publicProcedure.input(
-    z.object({
-      sessionId: z.string(),
-      step: z.enum(
-        [
+    }),
+  goToStep: publicProcedure
+    .input(
+      z.object({
+        sessionId: z.string(),
+        step: z.enum([
           "FINAL_PAYMENT",
           "BILLING_DETAILS",
           "BOOKING_DETAILS",
           "PERSONAL_DETAILS",
           "REVIEW_INFORMATION",
-        ],
-      ),
+        ]),
+      }),
+    )
+    .mutation(async ({ ctx: { db }, input: { sessionId, step } }) => {
+      return await db.checkoutSession.update({
+        where: {
+          id: sessionId,
+        },
+        data: {
+          step,
+        },
+      });
     }),
-  ).mutation(async ({ ctx: { db }, input: { sessionId, step } }) => {
-    return await db.checkoutSession.update({
-      where: {
-        id: sessionId,
-      },
-      data: {
-        step,
-      },
-    });
-  }),
-  configurePaymentForm: publicProcedure.input(CheckoutStep5Validator).query(
-    async ({ ctx: { db }, input: { paymentType } }) => {
+  configurePaymentForm: publicProcedure
+    .input(CheckoutStep5Validator)
+    .query(async ({ ctx: { db }, input: { paymentType } }) => {
       const cookieStore = cookies();
       const cartToken = cookieStore.get("cart")?.value;
       if (!cartToken) {
@@ -304,9 +305,10 @@ export const checkoutRouter = createTRPCRouter({
         calculatedStayInDays,
       );
 
-      const amountDue = paymentType === "FULL_UPFRONT"
-        ? cartTotal.stripe
-        : reservationHold.stripe;
+      const amountDue =
+        paymentType === "FULL_UPFRONT"
+          ? cartTotal.stripe
+          : reservationHold.stripe;
 
       if (!checkoutSession.paymentIntentId) {
         const newPaymentIntent = await createNewPaymentIntent(amountDue);
@@ -424,12 +426,20 @@ export const checkoutRouter = createTRPCRouter({
           paymentIntentId: newPaymentIntent.id,
         };
       }
-    },
-  ),
-  createBooking: privateProcedure.input(
-    CheckoutFormValidator,
-  ).mutation(
-    async ({ ctx: { db, userSession }, input }) => {
+    }),
+  createBooking: privateProcedure
+    .input(CheckoutFormValidator)
+    .mutation(async ({ ctx: { db, userSession }, input }) => {
+      if (
+        new Date().getTime() > input.step3.bookingCheckIn.getTime() ||
+        new Date().getTime() > input.step3.bookingCheckOut.getTime()
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You cannot book a room for the past.",
+        });
+      }
+
       const cookieStore = cookies();
       const cartToken = cookieStore.get("cart")?.value;
       if (!cartToken) {
@@ -480,12 +490,17 @@ export const checkoutRouter = createTRPCRouter({
         });
       }
 
-      const { available } = await checkRoomsAvailability(cartItems, input.step3.bookingCheckIn, input.step3.bookingCheckOut);
+      const { available } = await checkRoomsAvailability(
+        cartItems,
+        input.step3.bookingCheckIn,
+        input.step3.bookingCheckOut,
+      );
       if (!available) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Not all rooms are available for the selected check-in/check-out."
-        })
+          message:
+            "Not all rooms are available for the selected check-in/check-out.",
+        });
       }
 
       const dbItems = await db.room.findMany({
@@ -516,18 +531,20 @@ export const checkoutRouter = createTRPCRouter({
         calculatedStayInDays,
       );
 
-      const priceToPayOnCheckIn = input.step5.paymentType === "FULL_UPFRONT"
-        ? 0
-        : cartTotal.stripe - reservationHold.stripe;
+      const priceToPayOnCheckIn =
+        input.step5.paymentType === "FULL_UPFRONT"
+          ? 0
+          : cartTotal.stripe - reservationHold.stripe;
 
       // Check if prices match
       const paymentIntent = await stripe.paymentIntents.retrieve(
         checkoutSession.paymentIntentId,
       );
 
-      const amountToPay = checkoutSession.paymentType === "FULL_UPFRONT"
-        ? cartTotal.stripe
-        : reservationHold.stripe;
+      const amountToPay =
+        checkoutSession.paymentType === "FULL_UPFRONT"
+          ? cartTotal.stripe
+          : reservationHold.stripe;
 
       if (paymentIntent.amount !== amountToPay) {
         throw new TRPCError({
@@ -581,8 +598,8 @@ export const checkoutRouter = createTRPCRouter({
           bookingId: mainBooking.id,
           calculatedStayInDays,
           billingRoomCopy: JSON.stringify(item),
-          finalPriceForRoom:
-            calculatePrices([item], calculatedStayInDays).cartTotal.stripe,
+          finalPriceForRoom: calculatePrices([item], calculatedStayInDays)
+            .cartTotal.stripe,
         })),
       });
 
@@ -611,15 +628,15 @@ export const checkoutRouter = createTRPCRouter({
           if (!personDetails) continue;
 
           if (
-            Object.values(personDetails).every((field) =>
-              !field || field === null || field === undefined
+            Object.values(personDetails).every(
+              (field) => !field || field === null || field === undefined,
             )
           ) {
             continue;
           }
 
-          const roomBookingId = allRoomBookings.find((room) =>
-            room.roomId === roomKey
+          const roomBookingId = allRoomBookings.find(
+            (room) => room.roomId === roomKey,
           )?.id;
           if (!roomBookingId) continue;
 
@@ -650,23 +667,22 @@ export const checkoutRouter = createTRPCRouter({
         success: true,
         mainBooking,
       };
-    },
-  ),
-  getBookingPaymentStatus: publicProcedure.input(
-    z.object({ bookingId: z.string() }),
-  ).query(async ({ input: { bookingId }, ctx: { db } }) => {
-    const booking = await db.booking.findUnique({
-      where: {
-        id: bookingId,
-      },
-    });
-    if (!booking) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "This booking does not exist.",
+    }),
+  getBookingPaymentStatus: publicProcedure
+    .input(z.object({ bookingId: z.string() }))
+    .query(async ({ input: { bookingId }, ctx: { db } }) => {
+      const booking = await db.booking.findUnique({
+        where: {
+          id: bookingId,
+        },
       });
-    }
+      if (!booking) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "This booking does not exist.",
+        });
+      }
 
-    return booking.paymentStatus;
-  }),
+      return booking.paymentStatus;
+    }),
 });

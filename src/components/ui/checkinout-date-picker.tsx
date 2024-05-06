@@ -15,13 +15,11 @@ const DateDisplay = ({
 }) => {
   return (
     <div className="relative flex h-[50px] w-full items-center justify-center border-[1px] border-neutral-100">
-      {selected
-        ? (
-          <p className="text-xs text-neutral-900">
-            {new Intl.DateTimeFormat().format(selected)}
-          </p>
-        )
-        : null}
+      {selected ? (
+        <p className="text-xs text-neutral-900">
+          {new Intl.DateTimeFormat().format(selected)}
+        </p>
+      ) : null}
       <p
         className={cn(
           "absolute flex transform items-center justify-center gap-2 p-1 text-xs text-neutral-700 transition-all duration-300",
@@ -87,7 +85,7 @@ export const CheckInOutDatePicker = ({
   }, [checkInDate, checkOutDate]);
 
   return (
-    <div className="flex flex-col gap-1 w-full items-end">
+    <div className="flex w-full flex-col items-end gap-1">
       <div className={cn("flex w-full flex-wrap", className)}>
         <Popover open={cInOpen} onOpenChange={setCInOpen}>
           <PopoverTrigger className="h-auto flex-1">
@@ -106,9 +104,8 @@ export const CheckInOutDatePicker = ({
               mode="single"
               selected={checkInDate}
               onSelect={(date) => {
-                if (checkOutDate && date && date >= checkOutDate) {
-                  return;
-                }
+                if (checkOutDate && date && date >= checkOutDate) return;
+                if (date && date.getTime() < new Date().getTime()) return;
 
                 setCInOpen(false);
                 setCOutOpen(true);
@@ -135,9 +132,8 @@ export const CheckInOutDatePicker = ({
               mode="single"
               selected={checkOutDate}
               onSelect={(date) => {
-                if (checkInDate && date && date <= checkInDate) {
-                  return;
-                }
+                if (checkInDate && date && date <= checkInDate) return;
+                if (date && date.getTime() < new Date().getTime()) return;
 
                 setCOutOpen(false);
                 setCheckOutDate(date);
@@ -151,7 +147,7 @@ export const CheckInOutDatePicker = ({
         <button
           onClick={() => reset()}
           className={cn(
-            "text-xs w-fit underline italic text-netural-700 transition-all duration-300 hover:text-neutral-900",
+            "text-netural-700 w-fit text-xs italic underline transition-all duration-300 hover:text-neutral-900",
             clearButtonClass,
           )}
         >

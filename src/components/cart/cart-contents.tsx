@@ -6,7 +6,7 @@ import { Loader } from "../ui/loader";
 import type { Room } from "@prisma/client";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 const RoomDisplay = ({ room }: { room: Room }) => {
   const apiUtils = api.useUtils();
@@ -19,7 +19,7 @@ const RoomDisplay = ({ room }: { room: Room }) => {
           value: data.newToken,
           verificationKey: data.cookieVerificationToken,
           args: {
-            secure: false,
+            secure: process.env.NODE_ENV === "production" ? true : false,
             httpOnly: true,
             maxAge: 60 * 60 * 24 * 7,
           },
@@ -98,11 +98,12 @@ export const CartContents = ({
             Subtotal:{" "}
             <span className="text-sm font-bold text-red-400">
               {cartTotal.isLoading && (
-                <Loader containerClassName="p-0 w-fit h-fit" label={null} />
+                <Loader2 className="w-3 h-3 text-neutral-700 animate-spin" />
               )}
               {!cartTotal.isLoading &&
                 !cartTotal.isError &&
                 `$${(cartTotal.data.total * stayInNights).toFixed(2)}`}
+              {cartTotal.isError && "Error"}
             </span>
             {!cartTotal.isLoading &&
               !cartTotal.isError &&

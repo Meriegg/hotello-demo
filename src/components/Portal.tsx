@@ -6,13 +6,5 @@ interface Props {
 }
 
 export const Portal = ({ children, targetNode }: Props) => {
-  if (typeof document === "undefined") {
-    return children;
-  }
-
-  return (
-    <>
-      {createPortal(children, targetNode)}
-    </>
-  );
+  return <>{createPortal(children, targetNode)}</>;
 };

@@ -5,6 +5,10 @@
 await import("./src/env.mjs");
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  publicRuntimeConfig: {
+    NODE_ENV: process.env.NODE_ENV,
+  },
+};
 
 export default config;

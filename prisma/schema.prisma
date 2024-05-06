@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum CheckoutStep {
@@ -14,6 +13,16 @@ enum CheckoutStep {
   BOOKING_DETAILS // step 3
   REVIEW_INFORMATION // step 4
   FINAL_PAYMENT // step 5
+}
+
+model UploadedImage {
+  id         String   @id @default(cuid())
+  url        String   @unique
+  filename   String?
+  uploadedOn DateTime @default(now())
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id], name: "UploadedImages")
 }
 
 model CheckoutSession {
@@ -89,6 +98,7 @@ model User {
   role               UserRole                  @default(USER)
   adminAccessLevel   AdminAccessLevel          @default(LEVEL_0)
   bookings           Booking[]                 @relation("userBookings")
+  uploadedImages     UploadedImage[]           @relation("UploadedImages")
 }
 
 model UserSession {
@@ -129,6 +139,27 @@ enum PaymentStatus {
   FAILED
 }
 
+enum BookingFulfillmentStatus {
+  WAITING_FOR_CUSTOMER
+  CUSTOMER_CHECKED_IN_ON_TIME
+  CUSTOMER_CHECKED_IN_LATE
+  CUSTOMER_CHECKED_OUT_ON_TIME
+  CUSTOMER_CHECKED_OUT_EARLY
+  MISSED
+}
+
+model BookingOtherService {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+
+  createdOn DateTime @default(now())
+
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], name: "OtherServices")
+}
+
 model Booking {
   id String @id @default(cuid())
 
@@ -156,9 +187,11 @@ model Booking {
   billingDetailsCityOrTown      String
   billingDetailsPostalCode      String
 
-  customerCheckIn    DateTime?
-  customerCheckOut   DateTime?
-  otherServicesPrice Int?      @default(0)
+  customerCheckIn     DateTime?
+  customerCheckOut    DateTime?
+  otherServicesPrice  Int?                     @default(0)
+  otherServiceEntries BookingOtherService[]    @relation("OtherServices")
+  fulfillmentStatus   BookingFulfillmentStatus @default(WAITING_FOR_CUSTOMER)
 
   // If the user pays in full this will be 0
   // If the user pays a reservation hold, the reservation hold price
@@ -177,7 +210,9 @@ model Booking {
   checkoutSession        CheckoutSession? @relation(fields: [checkoutSessionId], references: [id])
   checkoutSessionId      String?          @unique
 
-  canceled Boolean @default(false)
+  canceled     Boolean   @default(false)
+  canceledOn   DateTime?
+  canceledById String?
 }
 
 model BookingRoom {
@@ -230,6 +265,8 @@ model Room {
   hasSpecialNeeds Boolean
   accommodates    Int
   other           Json?
+
+  isUnavailable Boolean @default(false)
 
   categoryId String
   category   RoomCategory  @relation(fields: [categoryId], references: [id], name: "roomsInCategory")

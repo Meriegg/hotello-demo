@@ -8,6 +8,7 @@ import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Loader } from "~/components/ui/loader";
+import { env } from "~/env.mjs";
 import { useToast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 
@@ -40,7 +41,7 @@ const Page = () => {
           value: data.emailVerificationToken,
           verificationKey: data.cookieVerificationToken,
           args: {
-            secure: false,
+            secure: process.env.NODE_ENV === "production" ? true : false,
             httpOnly: true,
             maxAge: 60 * 30,
           },
@@ -59,10 +60,9 @@ const Page = () => {
 
           const redirect = searchParams?.get("redirect");
           const redirectParam = redirect ? `?redirect=${redirect}` : "";
-          router.push(
-            `${data.redirectTo}${redirectParam}`,
-          );
-        }).catch((e) => console.error(e));
+          router.push(`${data.redirectTo}${redirectParam}`);
+        })
+        .catch((e) => console.error(e));
     },
   });
 
@@ -84,17 +84,17 @@ const Page = () => {
 
   return (
     <div
-      className="w-full flex flex-col items-center pt-12 gap-2 mx-auto px-2"
+      className="mx-auto flex w-full flex-col items-center gap-2 px-2 pt-12"
       style={{ width: "min(450px, 100%)" }}
     >
-      <p className="text-2xl text-neutral-900 text-center">
+      <p className="text-center text-2xl text-neutral-900">
         Log into your account
       </p>
-      <p className="text-neutral-700 text-sm">
+      <p className="text-sm text-neutral-700">
         please enter your email to continue
       </p>
 
-      <div className="flex flex-col gap-2 w-full mt-4">
+      <div className="mt-4 flex w-full flex-col gap-2">
         <Input
           label="Your email"
           disabled={loginMutation.isLoading || isRedirecting}
@@ -104,11 +104,11 @@ const Page = () => {
             setError(null);
             setEmail(e.target.value);
           }}
-          className="w-full disabled:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-70 rounded-t-2xl rounded-b-md"
+          className="w-full rounded-b-md rounded-t-2xl disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:opacity-70"
         />
         <Button
           onClick={() => submit()}
-          className="flex items-center gap-2 bg-neutral-100 rounded-b-2xl rounded-t-md text-neutral-900 hover:bg-neutral-200 active:ring-4 ring-neutral-100 transition-all duration-300 transform font-bold"
+          className="flex transform items-center gap-2 rounded-b-2xl rounded-t-md bg-neutral-100 font-bold text-neutral-900 ring-neutral-100 transition-all duration-300 hover:bg-neutral-200 active:ring-4"
           disabled={loginMutation.isLoading || isRedirecting}
         >
           {(loginMutation.isLoading || isRedirecting) && (
@@ -118,10 +118,10 @@ const Page = () => {
               loaderClassName="p-0 w-fit"
             />
           )}
-          Continue <ArrowRight className="w-4 h-4" />
+          Continue <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
-      <div className="flex items-center w-full justify-between">
+      <div className="flex w-full items-center justify-between">
         <Link
           href="/account/email-issues"
           className="text-xs text-neutral-900 hover:underline"

@@ -1,5 +1,14 @@
 import { z } from "zod";
-import { adminL0Procedure, createTRPCRouter } from "../trpc";
+import {
+  adminL0Procedure,
+  adminL2Procedure,
+  adminL3Procedure,
+  createTRPCRouter,
+} from "../../trpc";
+import { adminBookingActions } from "./booking-actions";
+import { RoomValidationSchema } from "~/lib/zod/admin";
+import { stripe } from "~/lib/stripe";
+import { TRPCError } from "@trpc/server";
 
 export const adminRouter = createTRPCRouter({
   getAnalyticsData: adminL0Procedure
@@ -115,4 +124,97 @@ export const adminRouter = createTRPCRouter({
         },
       };
     }),
+  getUploadedImages: adminL0Procedure.query(async ({ ctx: { db } }) => {
+    return await db.uploadedImage.findMany({
+      include: {
+        uploadedBy: true,
+      },
+    });
+  }),
+  createRoom: adminL3Procedure
+    .input(RoomValidationSchema)
+    .mutation(async ({ ctx: { db }, input }) => {
+      const newRoom = await db.room.create({
+        data: {
+          name: input.name,
+          hasSpecialNeeds: input.hasSpecialNeeds,
+          price: input.price * 100,
+          other: input.otherAttributes,
+          images: input.images,
+          categoryId: input.category,
+          accommodates: input.accommodates,
+        },
+      });
+
+      return newRoom;
+    }),
+  updateRoom: adminL3Procedure
+    .input(RoomValidationSchema.extend({ roomId: z.string() }))
+    .mutation(async ({ ctx: { db }, input }) => {
+      const updatedRoom = await db.room.update({
+        where: {
+          id: input.roomId,
+        },
+        data: {
+          categoryId: input.category,
+          name: input.name,
+          other: input.otherAttributes,
+          price: input.price * 100,
+          images: input.images,
+          updatedOn: new Date(),
+          accommodates: input.accommodates,
+          hasSpecialNeeds: input.hasSpecialNeeds,
+        },
+      });
+
+      return updatedRoom;
+    }),
+  setRoomAvailability: adminL3Procedure
+    .input(z.object({ isUnavailable: z.boolean(), roomId: z.string() }))
+    .mutation(async ({ ctx: { db }, input }) => {
+      const updatedRoom = await db.room.update({
+        where: {
+          id: input.roomId,
+        },
+        data: {
+          isUnavailable: input.isUnavailable,
+        },
+      });
+
+      return updatedRoom;
+    }),
+  getBooking: adminL2Procedure
+    .input(z.object({ bookingId: z.string() }))
+    .query(async ({ ctx: { db }, input: { bookingId } }) => {
+      const booking = await db.booking.findUnique({
+        where: {
+          id: bookingId,
+        },
+        include: {
+          rooms: {
+            include: {
+              guestDetails: true,
+              room: true,
+            },
+          },
+          otherServiceEntries: true,
+        },
+      });
+      if (!booking) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "This booking does not exist.",
+        });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.retrieve(
+        booking.paymentIntentId,
+      );
+
+      return {
+        ...booking,
+        totalPaid: paymentIntent.amount,
+      };
+    }),
+  bookingActions: adminBookingActions,
 });

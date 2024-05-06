@@ -13,15 +13,7 @@ import { api } from "~/trpc/react";
 import { Calendar } from "~/components/ui/calendar";
 import { Skeleton } from "~/components/ui/skeleton";
 
-const Entry = ({
-  value,
-  label,
-  helpTooltip,
-}: {
-  value: string;
-  label: string;
-  helpTooltip?: string;
-}) => {
+const Entry = ({ value, label }: { value: string; label: string }) => {
   return (
     <div className="flex flex-col gap-1 rounded-md bg-neutral-50 p-4">
       <p className="text-sm text-neutral-700">{label}</p>
@@ -52,7 +44,7 @@ export const Analytics = () => {
     <div className="flex w-full flex-col gap-2">
       <div className="flex items-center gap-2">
         <Popover>
-          <PopoverTrigger>
+          <PopoverTrigger asChild>
             <button className="flex items-center gap-2 rounded-md bg-neutral-50 px-4 py-2 text-sm text-neutral-700 transition-all duration-300 hover:bg-neutral-100 hover:text-neutral-900">
               Date picker <CalendarIcon className="h-3 w-3 text-inherit" />
             </button>
@@ -73,8 +65,7 @@ export const Analytics = () => {
             />
           </PopoverContent>
         </Popover>
-
-        <p className="flex w-fit items-center gap-2 rounded-md bg-neutral-50 px-4 py-2 text-sm text-neutral-700">
+        <div className="flex w-fit items-center gap-2 rounded-md bg-neutral-50 px-4 py-2 text-sm text-neutral-700">
           Showing data for{" "}
           {isLoading && (
             <Loader
@@ -90,9 +81,8 @@ export const Analytics = () => {
               {new Intl.DateTimeFormat().format(data.timeInterval.endDate)}
             </span>
           )}
-        </p>
+        </div>{" "}
       </div>
-
       <div className="flex flex-wrap items-start justify-start gap-4">
         {isLoading && (
           <>
@@ -130,7 +120,10 @@ export const Analytics = () => {
 
             <Entry
               label="Cancellation rate"
-              value={`${data.cancellationRate}%`}
+              value={`${(Number.isNaN(data.cancellationRate)
+                ? 0
+                : data.cancellationRate
+              ).toFixed(2)}%`}
             />
 
             <Entry
@@ -144,10 +137,8 @@ export const Analytics = () => {
           </>
         )}
       </div>
-
-      <hr className="border-neutral-100 my-2" />
-
-      <p className="flex items-center gap-2 text-2xl font-bold text-neutral-700">
+      <hr className="my-2 border-neutral-100" />
+      <div className="flex items-center gap-2 text-2xl font-bold text-neutral-700">
         {isLoading && (
           <Loader
             label={null}
@@ -156,24 +147,28 @@ export const Analytics = () => {
             loaderClassName="w-fit p-0"
           />
         )}{" "}
-        Best sellers
-      </p>
-
-      <div className="flex flex-col gap-4 md:flex-row mt-2">
+        <p> Best sellers</p>
+      </div>
+      <div className="mt-2 flex flex-col gap-4 md:flex-row">
         {isLoading && (
           <>
             <Skeleton className="h-[60px] w-full rounded-md" />
             <Skeleton className="h-[60px] w-full rounded-md" />
           </>
         )}
+        {!data?.bestSellers.length && !isLoading && !isError && (
+          <p className="w-full text-center text-sm text-neutral-700">
+            No best sellers yet.
+          </p>
+        )}
         {!isLoading && !isError && (
           <>
             {data.bestSellers.map((room, i) => (
               <div
                 key={room.roomData.id}
-                className="flex w-full items-center gap-4 justify-between"
+                className="flex w-full items-center justify-between gap-4"
               >
-                <div className="flex items-center w-auto gap-2">
+                <div className="flex w-auto items-center gap-2">
                   <img
                     src={room.roomData.images[0]}
                     alt={`Best seller ${i + 1} display image`}
@@ -190,9 +185,11 @@ export const Analytics = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col min-w-fit items-end">
+                <div className="flex min-w-fit flex-col items-end">
                   <p className="text-xs text-neutral-700">
-                    <span className="text-base font-bold text-red-400">{room.numOfBookings}</span>{" "}
+                    <span className="text-base font-bold text-red-400">
+                      {room.numOfBookings}
+                    </span>{" "}
                     {formatPlural(
                       room.numOfBookings !== 1,
                       "booking",
@@ -200,15 +197,20 @@ export const Analytics = () => {
                     )}
                   </p>
                   <p className="text-xs text-neutral-700">
-                    <span className="text-red-400 font-bold text-base">${(parseInt(room.numOfBookings.toString()) * room.roomData.price) / 100}</span> est. revenue
-                  </p>/
+                    <span className="text-base font-bold text-red-400">
+                      $
+                      {(parseInt(room.numOfBookings.toString()) *
+                        room.roomData.price) /
+                        100}
+                    </span>{" "}
+                    est. revenue
+                  </p>
                 </div>
               </div>
             ))}
           </>
         )}
       </div>
-
       {/* <pre>{JSON.stringify(data, null, 2)}</pre> */}
     </div>
   );

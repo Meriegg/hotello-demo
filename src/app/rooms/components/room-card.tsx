@@ -3,13 +3,21 @@ import { ImageCarousel } from "~/components/ui/image-carousel";
 import type { Room } from "@prisma/client";
 import { Fragment } from "react";
 import { RoomCardAddBtn } from "./room-card-addbtn";
+import { cn } from "~/lib/utils";
 
 interface Props {
   room: Room;
   category: string;
+  disabledCartBtn?: boolean;
+  disabledMoreLink?: boolean;
 }
 
-export const RoomCard = ({ room, category }: Props) => {
+export const RoomCard = ({
+  room,
+  category,
+  disabledCartBtn = false,
+  disabledMoreLink = false,
+}: Props) => {
   const otherRoomKeys: string[] = Object.keys(room?.other ?? {});
   const otherVals =
     otherRoomKeys?.length > 0
@@ -70,11 +78,14 @@ export const RoomCard = ({ room, category }: Props) => {
         <div className="flex w-full items-center gap-4">
           <Link
             href={`/rooms/${room.id}`}
-            className="text-xs font-bold text-red-400 hover:underline"
+            className={cn(
+              "text-xs font-bold text-red-400 hover:underline",
+              disabledMoreLink && "pointer-events-none",
+            )}
           >
             More details
           </Link>
-          <RoomCardAddBtn productId={room.id} />
+          <RoomCardAddBtn disabled={disabledCartBtn} productId={room.id} />
         </div>
       </div>
     </div>

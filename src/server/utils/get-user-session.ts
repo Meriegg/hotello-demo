@@ -1,12 +1,13 @@
 import * as argon2 from "argon2";
-import { cookies } from "next/headers";
+import { cookies, headers as getHeaders } from "next/headers";
 import { db } from "../db";
 import { sendVerificationEmail } from "./auth/send-verification-email";
 import verifySignedString from "./crypto/verify-signed-string";
 import { createCookieVerification } from "./cookies";
 import { createEmailVerificationJwt } from "./auth/verification-jwt";
 
-export const getUserSession = async (headers: Headers) => {
+export const getUserSession = async (headersOverride?: Headers) => {
+  const headers = headersOverride ?? getHeaders();
   const cookieStore = cookies();
   const authToken = cookieStore.get("auth-token")?.value;
   if (!authToken) {
@@ -55,15 +56,15 @@ export const getUserSession = async (headers: Headers) => {
     return {
       error: true,
       code: "FORBIDDEN",
-      message:
-        `${dbSession.id}:${dbSession.userId}:${cookieVerificationToken}:${emailVerificationToken}`,
+      message: `${dbSession.id}:${dbSession.userId}:${cookieVerificationToken}:${emailVerificationToken}`,
     };
   }
 
   const userIp = headers.get("x-forwarded-for");
-  const isIpEqual = (userIp && dbSession.currentIPHash)
-    ? await argon2.verify(dbSession.currentIPHash, userIp)
-    : false;
+  const isIpEqual =
+    userIp && dbSession.currentIPHash
+      ? await argon2.verify(dbSession.currentIPHash, userIp)
+      : false;
 
   let currentIpChanges = dbSession.numOfIpChanges;
   if (!isIpEqual) {

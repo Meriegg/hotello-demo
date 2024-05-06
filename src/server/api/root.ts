@@ -1,5 +1,5 @@
 import { accountsRouter } from "./routers/account";
-import { adminRouter } from "./routers/admin";
+import { adminRouter } from "./routers/admin/admin";
 import { aiRouter } from "./routers/ai";
 import { cartRouter } from "./routers/cart";
 import { checkoutRouter } from "./routers/checkout";

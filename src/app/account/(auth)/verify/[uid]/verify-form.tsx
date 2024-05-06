@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { env } from "~/env.mjs";
 import { useToast } from "~/hooks/use-toast";
 import { formatPlural } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -48,7 +49,7 @@ export const VerifyCodeForm = ({
             value: data.authToken,
             verificationKey: data.cookieVerificationToken,
             args: {
-              secure: false,
+              secure: process.env.NODE_ENV === "production" ? true : false,
               httpOnly: true,
               maxAge: 60 * 60 * 6,
             },
@@ -83,8 +84,8 @@ export const VerifyCodeForm = ({
       toast({
         variant: "destructive",
         title: "An error happened",
-        description: error?.message ??
-          "Cannot change email, please try again later",
+        description:
+          error?.message ?? "Cannot change email, please try again later",
       });
     },
   });
@@ -129,12 +130,7 @@ export const VerifyCodeForm = ({
   }, [resendCountdown]);
 
   const submit = () => {
-    const { success } = z
-      .string()
-      .min(6)
-      .max(6)
-      .regex(/\d/g)
-      .safeParse(code);
+    const { success } = z.string().min(6).max(6).regex(/\d/g).safeParse(code);
     if (!success) {
       setError("Invalid code.");
       return;
@@ -175,10 +171,13 @@ export const VerifyCodeForm = ({
       <div className="flex w-full items-center justify-between">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <button
-                disabled={changeEmailMutation.isLoading || disableChangeEmail ||
-                  !!verifySeshId}
+                disabled={
+                  changeEmailMutation.isLoading ||
+                  disableChangeEmail ||
+                  !!verifySeshId
+                }
                 onClick={() => changeEmailMutation.mutate()}
                 className="text-xs text-neutral-900 hover:underline disabled:opacity-70"
               >
@@ -198,7 +197,11 @@ export const VerifyCodeForm = ({
           className="text-xs text-neutral-900 hover:underline disabled:opacity-70"
         >
           {isResendDisabled && resendCountdown
-            ? `Wait ${resendCountdown} ${formatPlural(resendCountdown > 1, "second", "seconds")}`
+            ? `Wait ${resendCountdown} ${formatPlural(
+                resendCountdown > 1,
+                "second",
+                "seconds",
+              )}`
             : "Resend code"}
         </button>
       </div>

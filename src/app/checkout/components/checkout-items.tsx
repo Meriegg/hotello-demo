@@ -3,6 +3,7 @@
 import type { Room, RoomCategory } from "@prisma/client";
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
+import { env } from "~/env.mjs";
 import { useToast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 
@@ -26,7 +27,7 @@ export const CheckoutItems = ({ items }: Props) => {
           value: data.newToken,
           verificationKey: data.cookieVerificationToken,
           args: {
-            secure: false,
+            secure: process.env.NODE_ENV === "production" ? true : false,
             httpOnly: true,
             maxAge: 60 * 60 * 24 * 7,
           },

@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Loader } from "~/components/ui/loader";
+import { env } from "~/env.mjs";
 import { useToast } from "~/hooks/use-toast";
 
 const Page = () => {
@@ -16,7 +17,7 @@ const Page = () => {
       value: searchParams?.get("emailVerificationToken"),
       verificationKey: searchParams?.get("cookieVerificationToken"),
       args: {
-        secure: false,
+        secure: process.env.NODE_ENV === "production" ? true : false,
         httpOnly: true,
         maxAge: 60 * 30,
       },
@@ -36,7 +37,8 @@ const Page = () => {
       }
 
       router.push(searchParams?.get("redirectTo") ?? "/account/dashboard");
-    }).catch((e) => console.error(e));
+    })
+    .catch((e) => console.error(e));
 
   return <Loader label="Just a moment" />;
 };

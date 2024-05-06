@@ -1,40 +1,57 @@
 import { db } from "../db";
 
-export const checkRoomsAvailability = async (roomIds: string[], checkInDate: Date, checkOutDate: Date) => {
-  const rooms = await db.room.findMany({
+export const checkRoomsAvailability = async (
+  roomIds: string[],
+  checkInDate: Date,
+  checkOutDate: Date,
+) => {
+  let rooms = await db.room.findMany({
     where: {
       id: {
         in: roomIds,
       },
-      NOT: {
-        bookings: {
-          some: {
-            booking: {
-              OR: [
-                {
-                  bookedCheckIn: {
-                    lte: checkOutDate,
-                  },
-                  bookedCheckOut: {
-                    gte: checkOutDate,
-                  },
+      isUnavailable: false,
+      AND: [
+        {
+          NOT: {
+            bookings: {
+              some: {
+                booking: {
+                  OR: [
+                    {
+                      bookedCheckIn: {
+                        lte: checkOutDate,
+                      },
+                      bookedCheckOut: {
+                        gte: checkOutDate,
+                      },
+                    },
+                    {
+                      bookedCheckIn: {
+                        lte: checkInDate,
+                      },
+                      bookedCheckOut: {
+                        gte: checkInDate,
+                      },
+                    },
+                    {
+                      bookedCheckIn: {
+                        gte: checkInDate,
+                        lte: checkOutDate,
+                      },
+                    },
+                  ],
                 },
-                {
-                  bookedCheckIn: {
-                    lte: checkInDate,
-                  },
-                  bookedCheckOut: {
-                    gte: checkInDate,
-                  },
-                },
-                {
-                  bookedCheckIn: {
-                    gte: checkInDate,
-                    lte: checkOutDate,
-                  },
-                },
-              ],
+              },
             },
+          },
+        },
+      ],
+      bookings: {
+        some: {
+          booking: {
+            customerCheckOut: null,
+            canceled: false,
           },
         },
       },
@@ -58,14 +75,14 @@ export const checkRoomsAvailability = async (roomIds: string[], checkInDate: Dat
   const unavailableRooms = areAllAvailable
     ? null
     : await db.room.findMany({
-      where: {
-        id: {
-          in: roomIds.filter((id) =>
-            rooms.findIndex((room) => room.id === id) === -1
-          ),
+        where: {
+          id: {
+            in: roomIds.filter(
+              (id) => rooms.findIndex((room) => room.id === id) === -1,
+            ),
+          },
         },
-      },
-    });
+      });
 
   return { available: areAllAvailable, unavailableRooms };
-}
+};
